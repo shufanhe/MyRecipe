@@ -2,6 +2,7 @@ Week 1:
 -----------
 1. Description:
    - Basic structure of the website, have skeleton codes ready. 
+   - Create folders/files: unittests, backend python files, templates, database schema.sql
    - 3 pages ready:
      - homepage: with keyword search 
      - category page: empty page with heading and navbar
@@ -14,10 +15,9 @@ Week 1:
    - Go to Home Page
    
 3. Assignment
-   - Backend: Shufan
-   - Database: David
-   - UnitTests: Khanh
-   - Templates: Diana 
+   - Keyword Search: Shufan, Diana
+   - View Recipe: David
+   - Go to Home Page: Khanh
 
 Week 2:
 -----------
