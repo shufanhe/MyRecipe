@@ -8,7 +8,11 @@ Week 1:
    - 2 pages ready (homepage and category page) 
    - Keyword Search
    - View Recipe
-
+3. Assignment
+   - Backend: Shufan
+   - Database: David
+   - UnitTests: Khanh
+   - Template: Diana 
 
 Week 2:
 -----------
