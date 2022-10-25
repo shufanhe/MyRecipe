@@ -1,37 +1,42 @@
 Week 1:
 -----------
 1. Description:
-   - Need to flesh out the website, have a skeleton codes ready for week 2.
+   - Basic structure of the website, have skeleton codes ready. 
+   - 3 pages ready:
+     - homepage: with keyword search 
+     - category page: empty page with heading and navbar
+     - specific recipe page: empty with heading and navbar
+   - Category page should be reachable via icon on navbar 
    
-2. Task
-   - Organize back-end, front-end, user interface, and Unittests in different folder 
-   - 2 pages ready (homepage and category page) 
-   - Keyword Search
-   - View Recipe
+2. User Stories
+   - Keyword Search (on homepage)
+   - View Recipe (from homepage)
+   - Go to Home Page
+   
 3. Assignment
    - Backend: Shufan
    - Database: David
    - UnitTests: Khanh
-   - Template: Diana 
+   - Templates: Diana 
 
 Week 2:
 -----------
 1. Description:
-   - 
+   - Add on to the functionalities on homepage and category page
+   - Refine the looks of those two pages
    
-2. Task
+2. User Stories
    - Recipe of the day
    - View/Select categories
-   - Go to Home Page
    - Save Recipe
 
 
 Week 3:
 -----------
 1. Description:
-   - 
+   - Implement user accounts and related features
    
-2. Task
+2. User Stories
    - (User Account)
    - Review and rate
    - Admin Deletes
