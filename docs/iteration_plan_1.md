@@ -5,7 +5,7 @@ Week 1:
    
 2. Task
    - Organize back-end, front-end, user interface, and Unittests in different folder 
-   - Page ready (2 pages) 
+   - 2 pages ready (homepage and category page) 
    - Keyword Search
    - View Recipe
 
