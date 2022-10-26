@@ -52,3 +52,20 @@ def close_db(error):
     if hasattr(g, 'sqlite_db'):
         g.sqlite_db.close()
 
+
+@app.route('/')
+def keyword_search():
+    db = get_db()
+    keyword = db.execute('SELECT DISTINCT keyword FROM recipe ORDER BY keyword ASC')
+    keyword = keyword.fetchall()
+    chosen = request.args.get("filter")
+    if ('filter' in request.args) and (chosen != 'all'):
+        cur = db.execute('SELECT id, title, category, content FROM recipe WHERE keyword=? ORDER BY id DESC', [chosen])
+        entries = cur.fetchall()
+    else:
+        cur = db.execute('SELECT id, title, category, content FROM recipe ORDER BY id DESC')
+        entries = cur.fetchall()
+    return render_template('show_entries.html', entries=entries, categories=categories)
+
+    
+
