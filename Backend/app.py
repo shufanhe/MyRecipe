@@ -8,7 +8,7 @@ app = Flask(__name__)
 
 # Load default config and override config from an environment variable
 app.config.update(dict(
-    DATABASE=os.path.join(app.root_path, 'flaskr.db'),
+    DATABASE=os.path.join(app.root_path, '../database/recipe.db'),
     DEBUG=True,
     SECRET_KEY='development key',
 ))
@@ -25,7 +25,7 @@ def connect_db():
 def init_db():
     """Initializes the database."""
     db = get_db()
-    with app.open_resource('schema.sql', mode='r') as f:
+    with app.open_resource('../database/schema.sql', mode='r') as f:
         db.cursor().executescript(f.read())
     db.commit()
 
@@ -65,7 +65,7 @@ def keyword_search():
     else:
         cur = db.execute('SELECT id, title, category, content FROM recipe ORDER BY id DESC')
         entries = cur.fetchall()
-    return render_template('show_entries.html', entries=entries, categories=categories)
+    return render_template('HomePage.html', entries=entries, categories=categories)
 
     
 
