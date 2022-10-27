@@ -54,7 +54,7 @@ def close_db(error):
 
 
 @app.route('/')
-def keyword_search():
+def homepage():
     name = None
     db = get_db()
     return render_template('HomePage.html',name=name)

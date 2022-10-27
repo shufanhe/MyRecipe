@@ -10,8 +10,17 @@
       <div class="p-3 mb-2 bg-light text-dark">
         <div class="text-center">
           <h1 class="blog-header-logo text-dark">MyRecipe</h1>
+
         </div>
       </div>
+      <body class="p-3 m-0 border-0 bd-example bd-example-row">
+        <div class="page">
+            {% for message in get_flashed_messages() %}
+                <div class="flash">{{ message }}</div>
+            {% endfor %}
+            {% block body %}{% endblock %}
+        </div>
+    </body>
 
   </body>
 </html>
