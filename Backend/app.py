@@ -57,7 +57,10 @@ def close_db(error):
 def homepage():
     name = None
     db = get_db()
-    return render_template('HomePage.html',name=name)
+    return render_template('HomePage.html', name=name)
 
     
-
+@app.route('/categories')
+def categories():
+    db = get_db()
+    return render_template('Categories.html')

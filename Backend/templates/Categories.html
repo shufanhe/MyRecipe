@@ -1,1 +1,6 @@
 {% extends "layout.html" %}
+{% block body %}
+<form action="{{ url_for('categories') }}" method="get" id="Categories">
+    <label for="Categories" class="form-label">Categories Page</label>
+</form>
+{% endblock %}
