@@ -1,0 +1,11 @@
+{% extends "layout.html" %}
+{% block body %}
+<form action="{{ url_for ('categories')}}" method="get">
+    <button type="submit" class="btn btn-outline-dark">Categories</button>
+</form>
+<form action="{{ url_for('homepage') }}" method="post" class="add-entry" id="keyword_Search">
+    <label for="keyword_Search" class="form-label">Keyword
+            <input type="text" size="30" name="title" class="form-control">
+    </label>
+</form>
+{% endblock %}
