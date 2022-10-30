@@ -8,4 +8,14 @@
             <input type="text" size="30" name="title" class="form-control">
     </label>
 </form>
+
+
+<div class="card" style="width: 18rem;">
+    <img src="..." class="card-img-top" alt="...">
+    <div class="card-body">
+        <p class="card-text">An example Recipe</p>
+        <a href="{{ url_for ('view_recipe')}}" class="stretched-link" method="get"></a>
+    </div>
+</div>
+
 {% endblock %}

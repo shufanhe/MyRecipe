@@ -64,3 +64,9 @@ def homepage():
 def categories():
     db = get_db()
     return render_template('Categories.html')
+
+
+@app.route('/view_recipe')
+def view_recipe():
+    db = get_db()
+    return render_template('ViewRecipe.html')
