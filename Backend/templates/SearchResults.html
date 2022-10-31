@@ -1,0 +1,20 @@
+{% extends "layout.html" %}
+{% block body %}
+<form action="{{ url_for ('categories')}}" method="get">
+    <button type="submit" class="btn btn-outline-dark">Categories</button>
+</form>
+<form action="{{ url_for('keyword_search') }}" method="post" class="add-entry" id="keyword_Search">
+    <label for="keyword_Search" class="form-label">Keyword
+            <input type="text" size="30" name="keyword_Search" class="form-control">
+    </label>
+</form>
+<ul class="entries" id="entries">
+  {% for bruh in recipe %}
+
+  {% else %}
+      <div>
+        Nothing in here so far
+      </div>
+  {% endfor %}
+  </ul>
+{% endblock %}

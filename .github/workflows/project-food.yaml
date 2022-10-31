@@ -1,0 +1,10 @@
+name: Project-CI Build, Test, and Push
+
+# Controls when the action will run.
+on:
+  push:
+    branches:
+      - 'main'
+
+  pull_request:
+

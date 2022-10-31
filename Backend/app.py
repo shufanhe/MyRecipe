@@ -1,11 +1,10 @@
 import os
 from sqlite3 import dbapi2 as sqlite3
 from flask import Flask, request, g, redirect, url_for, render_template, flash
+from HomePage import HomePage
 
-
-# create our little application :)
 app = Flask(__name__)
-
+app.register_blueprint(HomePage)
 # Load default config and override config from an environment variable
 app.config.update(dict(
     DATABASE=os.path.join(app.root_path, '../database/recipe.db'),
@@ -53,13 +52,6 @@ def close_db(error):
         g.sqlite_db.close()
 
 
-@app.route('/')
-def homepage():
-    name = None
-    db = get_db()
-    return render_template('HomePage.html', name=name)
-
-    
 @app.route('/categories')
 def categories():
     db = get_db()
@@ -70,3 +62,16 @@ def categories():
 def view_recipe():
     db = get_db()
     return render_template('ViewRecipe.html')
+
+
+@app.route('/search', methods=['POST'])
+def keyword_search():
+    db = get_db()
+    search_input = request.form['keyword_Search']
+    cur = db.execute("SELECT * FROM recipe WHERE "
+                     "title LIKE '%test1%' "
+                     "OR category LIKE '%test1%' "
+                     "OR content LIKE '%test1%'".format(test1=search_input))
+    categories = cur.fetchall()
+    return render_template('SearchResults.html')
+
