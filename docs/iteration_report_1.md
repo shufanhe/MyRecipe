@@ -12,11 +12,15 @@ Tasks Assigned
 Completed Work
 ----------------
 1. Shufan:
-   - View recipe, category page (back-end) and redirect to homepage.
+   - View recipe: created example recipe on homepage and redirect to view recipe page
+   - Created category page (back-end redirected form button on homepage)
+   - redirect to homepage from navbar on Category page and view recipe page
 2. Khanh:
-   - Skeleton code, keyword search, dividing large application into smaller pieces.
+   - Skeleton code: created bare files, homepage with title and searchbar
+   - keyword search redirect to search results page
 3. Diana:
-   - Categories front-end, 50% of the homepage front-end.
+   - Categories page front-end: made buttons for all categories 
+   - Homepage front-end: centered keyword search
 
 Still Needs Completion
 ----------------
@@ -28,14 +32,15 @@ Troubles/Issues/Roadblocks
 1. Lost a team member. Therefore, we had to reassign some tasks which was not bad.
 2. Navbar elements that needed to be in the same navigation bar being in different html files. It was hard to style.
 
-Adjustments
+Adjustments to Overall Design
 ----------------
 1. No adjustments.
 
 Helpful Tools & Approaches
 ----------------
-1. Seeing sample code for example, using inspect on other websites.
+1. Seeing sample code as examples, using "inspect" on other websites.
 2. Communication and meeting multiple times throughout the week.
+3. Start early.
 
 Week 2 Plan
 ----------------
@@ -44,14 +49,23 @@ Tasks:
    - View Category
      - Cover for each category (as a card with image and text)
      - Page for each category.
-   - Recipe of the day (make 10 covers and recipe examples).
+   - Recipe of the day 
      - Redirect page to view_recipe.html
-   - Save recipes - Using example recipes, create user account page where saved recipes should go, but we are not implementing actual accounts yet.
-2. Add and show different recipes: how to show different recipes with the same view_recipe file
+     - make 10 covers and recipe examples
+   - Save recipes 
+      - Save buttons example recipes
+      - User account page where saved recipes should go (not implementing actual accounts yet)
+      - saved example recipes should show up in account page
+2. Add recipes (no user account yet) 
+   - Add button on homepage that redirect to add recipe form
+   - posting recipes to database and make them searchable via keyword_serach
+3. Show different recipes with the same view_recipe file
+
 Assigning:
    - Shufan
-     - Implement Recipe of the day + 10 covers and recipes
-     - Add and show different recipes: how to show different recipes with the same view_recipe file
+     - Recipe of the day
+     - Add recipes 
+     - Show different recipes with the same view_recipe file
    - Diana
      - View Category 
      - If time permits, write 10 recipes for testing
