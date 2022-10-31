@@ -16,7 +16,7 @@ Completed Work
 2. Khanh:
    - Skeleton code, keyword search, dividing large application into smaller pieces.
 3. Diana:
-   - Categories front-end, 75% of the homepage front-end.
+   - Categories front-end, 50% of the homepage front-end.
 
 Still Needs Completion
 ----------------
