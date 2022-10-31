@@ -3,10 +3,15 @@
 <form action="{{ url_for ('categories')}}" method="get">
     <button type="submit" class="btn btn-outline-dark">Categories</button>
 </form>
+
 <form action="{{ url_for('homepage') }}" method="post" class="add-entry" id="keyword_Search">
-    <label for="keyword_Search" class="form-label">Keyword
+    <div class="container text-center position-absolute top-50 start-50 translate-middle">
+        <label for="keyword_Search" class="form-label fs-2 text-center">Search For Recipes!
             <input type="text" size="30" name="title" class="form-control">
-    </label>
+        </label>
+    </div>
+
+    <button type="submit" class="btn fs-2 position-absolute bottom-25 end-50">Recipe of the Day!</button>
 </form>
 
 
