@@ -51,6 +51,7 @@ Tasks:
      - Page for each category.
    - Recipe of the day 
      - Redirect page to view_recipe.html
+     - Recipe should change automatically from day to day
      - make 10 covers and recipe examples
    - Save recipes 
       - Save buttons example recipes
