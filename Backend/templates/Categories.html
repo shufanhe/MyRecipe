@@ -1,6 +1,40 @@
 {% extends "layout.html" %}
 {% block body %}
 <form action="{{ url_for('categories') }}" method="get" id="Categories">
-    <label for="Categories" class="form-label">Categories Page</label>
+    <label for="Categories" class="form-label fs-2 align-middle">Recipe Categories</label>
+
+    <div class="container text-center">
+        <div class="row align-items-start">
+            <div class="col-6 col-sm-4 rounded-pill bg-success p-2 text-dark bg-opacity-50">
+               <button type="submit" class="btn fw-bold fs-4">30-min Meals</button>
+            </div>
+            <div class="col-6 col-sm-4 rounded-pill bg-success p-2 text-dark bg-opacity-50">
+               <button type="submit" class="btn fw-bold fs-4">Chinese</button>
+            </div>
+            <div class="col-6 col-sm-4 rounded-pill bg-success p-2 text-dark bg-opacity-50">
+               <button type="submit" class="btn fw-bold fs-4">Mexican</button>
+            </div>
+            <div class="w-100 d-none d-md-block"></div>
+            <div class="col-6 col-sm-4 rounded-pill bg-success p-2 text-dark bg-opacity-50">
+               <button type="submit" class="btn fw-bold fs-4">Soul</button>
+            </div>
+            <div class="col-6 col-sm-4 rounded-pill bg-success p-2 text-dark bg-opacity-50">
+               <button type="submit" class="btn fw-bold fs-4">American</button>
+            </div>
+            <div class="col-6 col-sm-4 rounded-pill bg-success p-2 text-dark bg-opacity-50">
+               <button type="submit" class="btn fw-bold fs-4">Japanese</button>
+            </div>
+            <div class="w-100 d-none d-md-block"></div>
+            <div class="col-6 col-sm-4 rounded-pill bg-success p-2 text-dark bg-opacity-50">
+               <button type="submit" class="btn fw-bold fs-4">Indian</button>
+            </div>
+            <div class="col-6 col-sm-4 rounded-pill bg-success p-2 text-dark bg-opacity-50">
+               <button type="submit" class="btn fw-bold fs-4">Greek</button>
+            </div>
+            <div class="col-6 col-sm-4 rounded-pill bg-success p-2 text-dark bg-opacity-50">
+               <button type="submit" class="btn fw-bold fs-4">French</button>
+            </div>
+        <div>
+    </div>
 </form>
 {% endblock %}
