@@ -70,3 +70,16 @@ def categories():
 def view_recipe():
     db = get_db()
     return render_template('ViewRecipe.html')
+
+
+@app.route('/search', methods=['POST'])
+def keyword_search():
+    db = get_db()
+    search_input = request.form['keyword_Search']
+    cur = db.execute("SELECT * FROM recipe WHERE "
+                     "title LIKE '%test1%' "
+                     "OR category LIKE '%test1%' "
+                     "OR content LIKE '%test1%'".format(test1=search_input))
+    categories = cur.fetchall()
+    return render_template('SearchResults.html')
+
