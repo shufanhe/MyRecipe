@@ -21,7 +21,7 @@ Completed Work
 Still Needs Completion
 ----------------
 1. Diana:
-   -Navbar on Homepage
+   - Navbar on Homepage
 
 Troubles/Issues/Roadblocks
 ----------------
@@ -39,29 +39,42 @@ Helpful Tools & Approaches
 
 Week 2 Plan
 ----------------
+Tasks:
 1. User Stories:
    - View Category
-     - Page for each category so the user can select.
-   - Recipe of the day - will be displayed on homepage based on popularity.
-     - Redirect page to view recipe, we will add 30 recipes to test code.
-   - Save recipes - We will use example recipes written to test this out.
-   - Create Account page - allowing , recipe button for recipe and saved button should go into account.
-
-2. Assignment:
-   - Shuffan
-     - Recipe of the day
-     - Write 10 recipes for testing
+     - Cover for each category (as a card with image and text)
+     - Page for each category.
+   - Recipe of the day (make 10 covers and recipe examples).
+     - Redirect page to view_recipe.html
+   - Save recipes - Using example recipes, create user account page where saved recipes should go, but we are not implementing actual accounts yet.
+2. Add and show different recipes: how to show different recipes with the same view_recipe file
+Assigning:
+   - Shufan
+     - Implement Recipe of the day + 10 covers and recipes
+     - Add and show different recipes: how to show different recipes with the same view_recipe file
    - Diana
-     - View Category
+     - View Category 
      - If time permits, write 10 recipes for testing
    - Khanh
-     - Save recipes and create account page
+     - Save recipes
      - If time permits, write 10 recipes for testing
 
 Week 3 Plan
 ----------------
 1. User Stories:
-   - User Account - 
+   - Create Account
+   - Login Account
    - Review and Rate
-   - Admin Delete
+   - Admin Delete - Admin will check posts are appropriate otherwise delete.
+2. Extra
+   - 10 more recipes and covers for Recipe of the Day and searching purposes
+
+Week 4 Plan
+----------------
+1. User Stories:
+   - Log-in Alert - Notifies user that is not logged in they need an account to review or save recipes.
+   - See Ratings and Review - Creator purposes
+   - Create and Upload Recipe - When having an account.
+2. Extra
+   - 10 more recipes and covers for Recipe of the Day and searching purposes
     
