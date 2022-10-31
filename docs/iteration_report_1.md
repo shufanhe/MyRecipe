@@ -3,7 +3,7 @@
 Tasks Assigned
 ----------------
 1. Shufan:
-   - Empty view recipe, empty category page (back-end) and redirect to homepage.
+   - View recipe, empty category page (back-end) and redirect to homepage.
 2. Khanh:   
    - Skeleton code, keyword search features (back-end) and dividing large application into smaller groups with help of blueprint.
 3. Diana:    
