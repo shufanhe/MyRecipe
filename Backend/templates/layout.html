@@ -12,6 +12,15 @@
           <a class="blog-header-logo text-dark" href="{{ url_for ('HomePage')}}">MyRecipe</a>
         </div>
       </div>
+      <div>
+          {% if g.user %}
+              <span>{{ g.user['username'] }}</span>
+              <a class="blog-header-logo text-dark" href="{{ url_for ('logout')}}">Logout</a>
+          {% else %}
+              <a class="blog-header-logo text-dark" href="{{ url_for ('register')}}">Register</a>
+              <a class="blog-header-logo text-dark" href="{{ url_for ('login')}}">Login</a>
+          {% endif %}
+      </div>
       <body class="p-3 m-0 border-0 bd-example bd-example-row">
         <div class="page">
             {% for message in get_flashed_messages() %}
