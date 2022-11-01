@@ -2,17 +2,16 @@
 
 ## Team members
 - Shufan He - she@iwu.edu; (336)588-5754
-- David Sheelam - dsheelam@iwu.edu; (309)824-5249
 - Diana Moreno Mora - dmorenom@iwu.edu; (312)810-2654
 - Khanh Tran - ktran2@iwu.edu; (309)706-6102
 
 ## Leadership:
 - Week 1: Khanh
 - Week 2: Shufan
-- Week 3: David 
-- Week 4: Diana
-- Week 5: David 
-- Week 6: Shufan
+- Week 3: Diana
+- Week 4: Khanh
+- Week 5: Shufan
+- Week 6: Diana
 - Week 7: Khanh
 
 ## Meeting Schedule
