@@ -95,8 +95,7 @@ def register():
 
         if error is None:
             try:
-                db.execute(
-                    "INSERT INTO user (username, password) VALUES (?, ?)",(username, generate_password_hash(password)),)
+                db.execute("INSERT INTO user (username, password) VALUES (?, ?)",(username, generate_password_hash(password)),)
                 db.commit()
             except db.IntegrityError:
                 error = f"User {username} is already registered."
@@ -142,4 +141,9 @@ def save_recipe():
     db = get_db()
     user = db.execute('SELECT * FROM user WHERE username = ?', (session['user_id'],)).fetchone()
     recipe = db.execute('SELECT * FROM recipe WHERE id = ?', (recipe_id,)).fetchone()
+    db.execute("INSERT INTO save_recipe (username, save_recipe) VALUES (?, ?)", (user['username'], recipe['id']), )
+    db.commit()
+    return render_template('viewRecipe.html')
+
+
 
