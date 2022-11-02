@@ -10,3 +10,8 @@ create table recipe (
   category text not null,
   content text not null
 );
+CREATE TABLE save_recipe (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    username TEXT NOT NULL,
+    save_recipe INT
+)
