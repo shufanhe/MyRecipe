@@ -13,8 +13,7 @@
         </div>
       </div>
       <div>
-          {% if g.user %}
-              <span>{{ g.user['username'] }}</span>
+          {% if session.user_id != None %}
               <a class="blog-header-logo text-dark" href="{{ url_for ('logout')}}">Logout</a>
           {% else %}
               <a class="blog-header-logo text-dark" href="{{ url_for ('register')}}">Register</a>

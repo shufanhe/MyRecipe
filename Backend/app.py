@@ -1,6 +1,7 @@
+import functools
 import os
 from sqlite3 import dbapi2 as sqlite3
-from flask import Flask, flash, g, redirect, render_template, request, session, url_for
+from flask import Flask, flash, g, redirect, render_template, request, session, url_for, abort
 from werkzeug.security import check_password_hash, generate_password_hash
 
 app = Flask(__name__)
@@ -95,9 +96,7 @@ def register():
         if error is None:
             try:
                 db.execute(
-                    "INSERT INTO user (username, password) VALUES (?, ?)",
-                    (username, generate_password_hash(password)),
-                )
+                    "INSERT INTO user (username, password) VALUES (?, ?)",(username, generate_password_hash(password)),)
                 db.commit()
             except db.IntegrityError:
                 error = f"User {username} is already registered."
@@ -115,28 +114,21 @@ def login():
         password = request.form['password']
         db = get_db()
         error = None
-        user = db.execute(
-            'SELECT * FROM user WHERE username = ?', (username,)
-        ).fetchone()
+        user = db.execute('SELECT * FROM user WHERE username = ?', (username,)).fetchone()
 
         if user is None:
             error = 'Incorrect username.'
         elif not check_password_hash(user['password'], password):
             error = 'Incorrect password.'
-
         if error is None:
             session.clear()
             session['user_id'] = user['id']
-            flash('You were logged in')
             return redirect(url_for('HomePage'))
-
         flash(error)
-
     return render_template('login.html')
 
 
 @app.route('/logout')
 def logout():
-    session.pop('logged_in', None)
-    flash('You were logged out')
+    session['user_id'] = None
     return redirect(url_for('HomePage'))
