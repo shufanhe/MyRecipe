@@ -3,7 +3,7 @@ import os
 from sqlite3 import dbapi2 as sqlite3
 from flask import Flask, flash, g, redirect, render_template, request, session, url_for, abort
 from werkzeug.security import check_password_hash, generate_password_hash
-
+from datetime import date
 app = Flask(__name__)
 # Load default config and override config from an environment variable
 app.config.update(dict(
@@ -54,7 +54,10 @@ def close_db(error):
 @app.route('/')
 def HomePage():
     name = None
-    return render_template('HomePage.html')
+    db = get_db()
+    cov = db.execute('SELECT cover FROM calender WHERE date_today=?', [date.today()])
+    cover_today = cov.fetchone()
+    return render_template('HomePage.html', cover=cover_today)
 
 
 @app.route('/categories')
@@ -66,7 +69,15 @@ def categories():
 @app.route('/view_recipe')
 def view_recipe():
     db = get_db()
-    return render_template('ViewRecipe.html')
+    if ('recipe_of_the_day' in request.args):
+        recipe_id_today = db.execute('SELECT recipe_id FROM recipe WHERE date_today=?', [date.today()])
+        recipe_today = db.execute('SELECT title, category, content FROM recipe WHERE id=?', [recipe_id_today])
+        recipe = recipe_today.fetchone()
+    else:
+        post_id = request.args.get('clicked')
+        rec = db.execute('SELECT title, category, content FROM recipe WHERE id=?', [post_id])
+        recipe = rec.fetchone()
+    return render_template('ViewRecipe.html', recipe=recipe)
 
 
 @app.route('/search', methods=['POST'])
