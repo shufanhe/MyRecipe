@@ -86,21 +86,31 @@ def register():
     if request.method == 'POST':
         username = request.form['username']
         password = request.form['password']
+        RetypePassword = request.form['RetypePassword']
+        email = request.form['Email']
         db = get_db()
         error = None
         if not username:
             error = 'Username is required.'
         elif not password:
             error = 'Password is required.'
+        elif not RetypePassword:
+            error = 'Please retype your password.'
+        elif not email:
+            error = 'Email is required.'
 
         if error is None:
-            try:
-                db.execute("INSERT INTO user (username, password) VALUES (?, ?)",(username, generate_password_hash(password)),)
-                db.commit()
-            except db.IntegrityError:
-                error = f"User {username} is already registered."
+            if password != RetypePassword:
+                error = 'Please enter your password correctly.'
             else:
-                return redirect(url_for("login"))
+                try:
+                    db.execute("INSERT INTO user (username, password,email) VALUES (?, ?,?)",
+                               (username, generate_password_hash(password), email),)
+                    db.commit()
+                except db.IntegrityError:
+                    error = f"User {username} is already registered."
+                else:
+                    return redirect(url_for("login"))
         flash(error)
 
     return render_template('register.html')
@@ -113,10 +123,12 @@ def login():
         password = request.form['password']
         db = get_db()
         error = None
-        user = db.execute('SELECT * FROM user WHERE username = ?', (username,)).fetchone()
-
+        if "@" in username:
+            user = db.execute('SELECT * FROM user WHERE email = ?', (username,)).fetchone()
+        else:
+            user = db.execute('SELECT * FROM user WHERE username = ?', (username,)).fetchone()
         if user is None:
-            error = 'Incorrect username.'
+            error = 'Incorrect username or email.'
         elif not check_password_hash(user['password'], password):
             error = 'Incorrect password.'
         if error is None:
@@ -125,6 +137,14 @@ def login():
             return redirect(url_for('HomePage'))
         flash(error)
     return render_template('login.html')
+
+
+@app.route('/resetpassword', methods=['GET', 'POST'])
+def forget_password():
+    if request.method == 'POST':
+        flash('Please check your email for the OTP code')
+        return redirect(url_for('login'))
+    return render_template('forgotPassword.html')
 
 
 @app.route('/logout')
@@ -146,4 +166,8 @@ def save_recipe():
     return render_template('viewRecipe.html')
 
 
-
+@app.route('/user_account')
+def user_account():
+    if session['user_id'] is None:
+        abort(401)
+    return render_template('user_account.html')

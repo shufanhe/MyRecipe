@@ -2,18 +2,20 @@ drop table if exists recipe;
 CREATE TABLE user (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     username TEXT NOT NULL,
-    password TEXT NOT NULL
+    password TEXT NOT NULL,
+    email TEXT NOT NULL
 );
 create table recipe (
-  id integer primary key autoincrement,
-  title text not null,
-  category text not null,
-  content text not null
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  title TEXT NOT NULL,
+  category TEXT NOT NULL,
+  content TEXT NOT NULL
 );
 CREATE TABLE save_recipe (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     username TEXT NOT NULL,
-    save_recipe INT
+    save_recipe INT,
+    recipe_link TEXT NOT NULL
 );
 create table calendar (
     recipe_id integer not null,
