@@ -1,11 +1,11 @@
-drop table if exists recipe;
+drop table if exists recipes;
 CREATE TABLE user (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     username TEXT NOT NULL,
     password TEXT NOT NULL
 );
 
-create table recipe (
+create table recipes (
   id integer primary key autoincrement,
   title text not null,
   category text not null,

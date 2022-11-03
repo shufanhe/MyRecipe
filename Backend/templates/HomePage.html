@@ -4,13 +4,16 @@
     <button type="submit" class="btn btn-outline-dark">Categories</button>
 </form>
 
+<form action="{{ url_for ('create_recipe') }}" method="get" class="create-recipe">
+    <button type="submit" class="btn btn-outline-dark">Add</button>
+</form>
 
 <div class="container">
     <div class="text-center">
       <p>Recipe of the Day!</p>
       <a href="{{ url_for ('view_recipe')}}">
+          <img src={{cover.cover}} class="rounded" alt="..." id="recipe_of_the_day">
 
-          <img src={{cover}} class="rounded" alt="..." id="recipe_of_the_day">
       </a>
     </div>
 
@@ -34,6 +37,7 @@
             <div class="card-body">
                 <p class="card-text">An example Recipe</p>
                 <a href="{{ url_for ('view_recipe')}}" class="stretched-link"></a>
+                <input type="hidden" name="clicked" value="{{ recipe.id }}">
             </div>
         </div>
     </div>
