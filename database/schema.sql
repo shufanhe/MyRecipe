@@ -1,15 +1,18 @@
-drop table if exists recipe;
+drop table if exists recipes;
+drop table if exists user;
+
 CREATE TABLE user (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     username TEXT NOT NULL,
     password TEXT NOT NULL,
     email TEXT NOT NULL
 );
-create table recipe (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
-  title TEXT NOT NULL,
-  category TEXT NOT NULL,
-  content TEXT NOT NULL
+
+create table recipes (
+  id integer primary key autoincrement,
+  title text not null,
+  category text not null,
+  content text not null
 );
 CREATE TABLE save_recipe (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -17,10 +20,11 @@ CREATE TABLE save_recipe (
     save_recipe INT,
     recipe_link TEXT NOT NULL
 );
-create table calendar (
+
+create table if not exists calendar(
     recipe_id integer not null,
     date_today date not null,
     cover varbinary not null,
     PRIMARY KEY(date_today),
-    FOREIGN KEY(recipe_id) REFERENCES recipe(id) ON UPDATE CASCADE ON DELETE RESTRICT
+    FOREIGN KEY(recipe_id) REFERENCES recipes(id) ON UPDATE CASCADE ON DELETE RESTRICT
 );
