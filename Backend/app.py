@@ -101,12 +101,9 @@ def view_recipe():
 def keyword_search():
     db = get_db()
     search_input = request.form['keyword_Search']
-    cur = db.execute("SELECT * FROM recipe WHERE "
-                     "title LIKE '%{search}%' "
-                     "OR category LIKE '%{search}%' "
-                     "OR content LIKE '%{search}%'".format(search=search_input))
+    cur = db.execute('SELECT * FROM recipes WHERE title LIKE ? OR category LIKE ? OR content LIKE ?', (search_input, search_input, search_input))
     search = cur.fetchall()
-    return render_template('SearchResults.html')
+    return render_template('SearchResults.html',recipes = search)
 
 
 @app.route('/register', methods=['GET','POST'])
