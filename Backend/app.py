@@ -101,7 +101,7 @@ def view_recipe():
 def keyword_search():
     db = get_db()
     search_input = request.form['keyword_Search']
-    cur = db.execute("SELECT * FROM recipe WHERE "
+    cur = db.execute("SELECT * FROM recipes WHERE "
                      "title LIKE '%{search}%' "
                      "OR category LIKE '%{search}%' "
                      "OR content LIKE '%{search}%'".format(search=search_input))
