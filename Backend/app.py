@@ -102,10 +102,10 @@ def keyword_search():
     db = get_db()
     search_input = request.form['keyword_Search']
     cur = db.execute("SELECT * FROM recipes WHERE "
-                     "title LIKE '%test1%' "
-                     "OR category LIKE '%test1%' "
-                     "OR content LIKE '%test1%'".format(test1=search_input))
-    categories = cur.fetchall()
+                     "title LIKE '%{search}%' "
+                     "OR category LIKE '%{search}%' "
+                     "OR content LIKE '%{search}%'".format(search=search_input))
+    search = cur.fetchall()
     return render_template('SearchResults.html')
 
 
@@ -114,22 +114,31 @@ def register():
     if request.method == 'POST':
         username = request.form['username']
         password = request.form['password']
+        RetypePassword = request.form['RetypePassword']
+        email = request.form['Email']
         db = get_db()
         error = None
         if not username:
             error = 'Username is required.'
         elif not password:
             error = 'Password is required.'
+        elif not RetypePassword:
+            error = 'Please retype your password.'
+        elif not email:
+            error = 'Email is required.'
 
         if error is None:
-            try:
-                db.execute(
-                    "INSERT INTO user (username, password) VALUES (?, ?)",(username, generate_password_hash(password)),)
-                db.commit()
-            except db.IntegrityError:
-                error = f"User {username} is already registered."
+            if password != RetypePassword:
+                error = 'Please enter your password correctly.'
             else:
-                return redirect(url_for("login"))
+                try:
+                    db.execute("INSERT INTO user (username, password,email) VALUES (?, ?,?)",
+                               (username, generate_password_hash(password), email),)
+                    db.commit()
+                except db.IntegrityError:
+                    error = f"User {username} is already registered."
+                else:
+                    return redirect(url_for("login"))
         flash(error)
 
     return render_template('register.html')
@@ -142,21 +151,51 @@ def login():
         password = request.form['password']
         db = get_db()
         error = None
-        user = db.execute('SELECT * FROM user WHERE username = ?', (username,)).fetchone()
-
+        if "@" in username:
+            user = db.execute('SELECT * FROM user WHERE email = ?', (username,)).fetchone()
+        else:
+            user = db.execute('SELECT * FROM user WHERE username = ?', (username,)).fetchone()
         if user is None:
-            error = 'Incorrect username.'
+            error = 'Incorrect username or email.'
         elif not check_password_hash(user['password'], password):
             error = 'Incorrect password.'
         if error is None:
             session.clear()
-            session['user_id'] = user['id']
+            session['user_id'] = user['username']
             return redirect(url_for('HomePage'))
         flash(error)
     return render_template('login.html')
+
+
+@app.route('/resetpassword', methods=['GET', 'POST'])
+def forget_password():
+    if request.method == 'POST':
+        flash('Please check your email for the OTP code')
+        return redirect(url_for('login'))
+    return render_template('forgotPassword.html')
 
 
 @app.route('/logout')
 def logout():
     session['user_id'] = None
     return redirect(url_for('HomePage'))
+
+
+@app.route('/save')
+def save_recipe():
+    if session['user_id'] is None:
+        abort(401)
+    recipe_id = request.get_json()['recipe_id']
+    db = get_db()
+    user = db.execute('SELECT * FROM user WHERE username = ?', (session['user_id'],)).fetchone()
+    recipe = db.execute('SELECT * FROM recipe WHERE id = ?', (recipe_id,)).fetchone()
+    db.execute("INSERT INTO save_recipe (username, save_recipe) VALUES (?, ?)", (user['username'], recipe['id']), )
+    db.commit()
+    return render_template('viewRecipe.html')
+
+
+@app.route('/user_account')
+def user_account():
+    if session['user_id'] is None:
+        abort(401)
+    return render_template('user_account.html')

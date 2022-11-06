@@ -4,7 +4,8 @@ drop table if exists user;
 CREATE TABLE user (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     username TEXT NOT NULL,
-    password TEXT NOT NULL
+    password TEXT NOT NULL,
+    email TEXT NOT NULL
 );
 
 create table recipes (
@@ -12,6 +13,12 @@ create table recipes (
   title text not null,
   category text not null,
   content text not null
+);
+CREATE TABLE save_recipe (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    username TEXT NOT NULL,
+    save_recipe INT,
+    recipe_link TEXT NOT NULL
 );
 
 create table if not exists calendar(
