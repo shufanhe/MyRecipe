@@ -58,26 +58,18 @@ Week 3 Plan
 ----------------
 Tasks:
 1. Implement User Account with add recipe:
-   - View Category
-     - Cover for each category (as a card with image and text)
-     - Page for each category.
-   - Recipe of the day 
-     - Redirect page to view_recipe.html
-     - Recipe should change automatically from day to day
-     - make 10 covers and recipe examples
-   - Save recipes 
-      - Save buttons example recipes
-      - User account page where saved recipes should go (not implementing actual accounts yet)
-      - saved example recipes should show up in account page
+   - Only user logged in to an account should be able to add recipe
+   - User will get an alert if they try to post without an account
+   - Posted recipes should be saved to user's account page
 2. Edit and delete recipe
-   - Add button on homepage that redirect to add recipe form
-   - posting recipes to database and make them searchable via keyword_serach
-3. Review and Rate Recipe
+3. Review and Like Recipe
+   - buttons attached to each post
+   - review button will open a form on the same page
+   - all users should see reviews and number of likes of a post
 4. Implement Admin accounts and admin delete
 5. Implement User Preference: Allergies and Dietary Restrictions
-    - User prompted to select
-    - Upon registration
-    - From user account
+    - User prompted to select upon registration
+    - Can be updated through user account (create seperate page inside user account for preferences)
 
 Assigning:
    - Shufan
