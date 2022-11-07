@@ -18,7 +18,7 @@ Completed Work
 1. Shufan:
    - Recipe of the day: created recipe of the day to change automatically every day.
    - Page created for users to add recipes.
-   - View recipes
+   - View different recipes from same form
 2. Khanh:
    - "Save" recipes. Quotes around save since it is not saved under a specific user, just saves the recipe to the database where the user id is at.
    - Keyword search updated so it works correct.
@@ -34,12 +34,12 @@ Still Needs Completion
 
 Troubles/Issues/Roadblocks
 ----------------
-1. Code was lost due to Git commands.
+1. Some code was lost due to Git commands, had to rewrite them.
 2. Time management.
 
 Adjustments to Overall Design
 ----------------
-1. Writing recipes, this was harder than we thought. Rather than typing all of them out, we are thinking of looking some up and adding them to our database.
+1. Instead of making our own recipes, we are thinking of looking some up and adding them to our database because it would be a big time commitment to non-coding tasks.
 
 Helpful Tools & Approaches
 ----------------
@@ -50,7 +50,7 @@ Helpful Tools & Approaches
 
 One Important Thing Learned
 ----------------
-1. Shufan - ALWAYS commit and push your code.
+1. Shufan - ALWAYS commit and pull.
 2. Khanh - Do not use random Git commands you are not familiar with.
 3. Diana - Learned how to use Git commands without needing help from team!
 
@@ -62,12 +62,13 @@ Tasks:
    - User will get an alert if they try to post without an account
    - Posted recipes should be saved to user's account page
 2. Edit and delete recipe
-3. Review and Like Recipe
+   - Creators should be able to edit and delete the recipes they posted
+4. Review and Like Recipe
    - buttons attached to each post
    - review button will open a form on the same page
    - all users should see reviews and number of likes of a post
-4. Implement Admin accounts and admin delete
-5. Implement User Preference: Allergies and Dietary Restrictions
+5. Implement Admin accounts and admin delete
+6. Implement User Preference: Allergies and Dietary Restrictions
     - User prompted to select upon registration
     - Can be updated through user account (create seperate page inside user account for preferences)
 
@@ -82,6 +83,7 @@ Assigning:
    - Khanh
      - Save recipes
      - If time permits, write 10 recipes for testing
+   - Note: Everyone write documentations for the work you have done so far.
 
 Week 4 Plan
 ----------------
