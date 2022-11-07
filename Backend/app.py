@@ -97,6 +97,16 @@ def view_recipe():
     return render_template('ViewRecipe.html', recipe=recipe)
 
 
+@app.route('/view_category')
+def view_category():
+    db = get_db()
+    cats = request.args.get('category')
+    cur = db.execute('SELECT id, title, content, category FROM recipes WHERE category = ? ORDER BY id DESC',
+                     [cats])
+    category = cur.fetchall()
+    return render_template('category_recipes.html', category=category)
+
+
 @app.route('/search', methods=['POST'])
 def keyword_search():
     db = get_db()
@@ -109,7 +119,7 @@ def keyword_search():
     return render_template('SearchResults.html')
 
 
-@app.route('/register', methods=['GET','POST'])
+@app.route('/register', methods=['GET', 'POST'])
 def register():
     if request.method == 'POST':
         username = request.form['username']
@@ -144,7 +154,7 @@ def register():
     return render_template('register.html')
 
 
-@app.route('/login', methods=['GET','POST'])
+@app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
         username = request.form['username']
