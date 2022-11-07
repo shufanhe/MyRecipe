@@ -73,7 +73,7 @@ Tasks:
 Assigning:
    - Shufan
      - Implement User Account with add recipe
-     - Review and Rate Recipe
+     - Review and Like Recipe
    - Diana
      - Edit and delete recipe
      - Implement User Preferences
