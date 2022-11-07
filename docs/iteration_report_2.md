@@ -8,10 +8,8 @@ Tasks Assigned
    - Show different recipes with the same view_recipe file
 2. Khanh:   
    - Save recipes
-   - If time permits, write 10 recipes for testing
 3. Diana:
    - View Category Recipes
-   - If time permits, write 10 recipes for testing
 
 Completed Work
 ----------------
@@ -21,11 +19,11 @@ Completed Work
    - View different recipes from same form
 2. Khanh:
    - "Save" recipes. Quotes around save since it is not saved under a specific user, just saves the recipe to the database where the user id is at.
-   - Keyword search updated so it works correct.
+   - Keyword search updated so it works correctly.
    - Create user account, log in user account.
 3. Diana:
-   - Updated category page with front-end changes.
-   - View list of recipes after selecting category.
+   - Updated category page with all categories having cards.
+   - View list of recipes after selecting category using database.
    - Homepage front-end changes continued.
 
 Still Needs Completion
@@ -74,31 +72,29 @@ Tasks:
 
 Assigning:
    - Shufan
-     - Recipe of the day
-     - Add recipes 
-     - Show different recipes with the same view_recipe file
+     - Implement User Account with add recipe
+     - Review and Rate Recipe
    - Diana
-     - View Category 
-     - If time permits, write 10 recipes for testing
+     - Edit and delete recipe
+     - Implement User Preferences
    - Khanh
+     - Implement Admin accounts and admin delete
      - Save recipes
-     - If time permits, write 10 recipes for testing
    - Note: Everyone write documentations for the work you have done so far.
 
 Week 4 Plan
 ----------------
 1. User Stories:
-   - User account page frontend
-   - Homepage frontend
-2. Extra
-   - 10 more recipes and covers for Recipe of the Day and searching purposes
+   - Continue any missing stories from prior report.
+2. Extra:
+   - Front-end design
+   - Unit-tests
 
 Week 5 Plan
 ----------------
 1. User Stories:
    - Notifications for creators
-   - Creator profiles
-   - 
-2. Extra
-   - 10 more recipes and covers for Recipe of the Day and searching purposes
+   - Creator profiles, allowing other users to see profiles.
+2. Extra:
+   - Unit-test
     
