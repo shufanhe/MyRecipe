@@ -86,8 +86,8 @@ Week 4 Plan
 ----------------
 1. User Stories:
    - Continue any missing stories from prior report.
-2. Extra:
    - Front-end design
+2. Extra:
    - Unit-tests
 
 Week 5 Plan
