@@ -56,6 +56,7 @@ def close_db(error):
 def HomePage():
     name = None
     db = get_db()
+    # recipe of the day should show up according to the date, refering to the covers stored in calendar
     cov = db.execute('SELECT cover FROM calendar WHERE date_today=?', [date.today()])
     cover_today = cov.fetchone()
     return render_template('HomePage.html', cover=cover_today)
@@ -64,18 +65,21 @@ def HomePage():
 @app.route('/categories')
 def categories():
     db = get_db()
+    # redirect to category page
     return render_template('Categories.html')
 
 
 @app.route('/create_recipe')
 def create_recipe():
     db = get_db()
+    # redirect to create recipe form
     return render_template('CreateRecipe.html')
 
 
-@app.route('/post', methods=['POST'])
+@app.route('/post_recipe', methods=['POST'])
 def post_recipe():
     db = get_db()
+    # take user input and insert into the database, then let user know they posted
     db.execute('INSERT INTO recipes (title, category, content) VALUES (?, ?, ?)',
                [request.form['title'], request.form['category'], request.form['content']])
     db.commit()
@@ -86,10 +90,12 @@ def post_recipe():
 @app.route('/view_recipe')
 def view_recipe():
     db = get_db()
+    # route if the user clicked on recipe of the day, recipe should show up according to the date
     if ('recipe_of_the_day' in request.args):
         recipe_id_today = db.execute('SELECT recipe_id FROM recipes WHERE date_today=?', [date.today()])
         recipe_today = db.execute('SELECT title, category, content FROM recipes WHERE id=?', [recipe_id_today])
         recipe = recipe_today.fetchone()
+    # route if user clicked on a recipe (not through recipe of the day)
     else:
         post_id = request.args.get('clicked')
         rec = db.execute('SELECT title, category, content FROM recipes WHERE id=?', [post_id])
