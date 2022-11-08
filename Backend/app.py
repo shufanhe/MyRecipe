@@ -121,12 +121,13 @@ def view_category():
 def keyword_search():
     db = get_db()
     # search word, sentence
-    search_input = request.form['keyword_Search']
+    search_input = "%" + request.form['keyword_Search'] + "%"
 
-    # seach in the database if there is anything like or similar to that
-    cur = db.execute('SELECT * FROM recipes WHERE title LIKE ? OR category LIKE ? OR content LIKE ?', (search_input, search_input, search_input))
+    # search in the database if there is anything like or similar to that
+    cur = db.execute('SELECT * FROM recipes WHERE title LIKE ? OR category LIKE ? OR content LIKE ?',
+                     (search_input, search_input, search_input))
     search = cur.fetchall()
-    return render_template('SearchResults.html',recipes = search)
+    return render_template('SearchResults.html', recipes=search)
 
 
 @app.route('/register', methods=['GET', 'POST'])
@@ -158,7 +159,7 @@ def register():
                 # try to register the username, if not return error that user_id already registered
                 try:
                     db.execute("INSERT INTO user (username, password,email) VALUES (?, ?,?)",
-                               (username, generate_password_hash(password), email),)
+                               (username, generate_password_hash(password), email), )
                     db.commit()
                 except db.IntegrityError:
                     error = f"User {username} is already registered."
@@ -201,13 +202,25 @@ def login():
     return render_template('login.html')
 
 
-@app.route('/resetpassword', methods=['GET', 'POST'])
-def forget_password():
+@app.route('/resetpassword', methods=['GET','POST'])
+def reset_password():
     if request.method == 'POST':
-        # send a email to the user email to reset password
-        flash('Please check your email for the OTP code')
-        return redirect(url_for('login'))
-    return render_template('forgotPassword.html')
+        # get all the required field
+        email = request.form['email']
+        password = request.form['password']
+        retypePassword = request.form['RetypePassword']
+        if email is None or password is None or retypePassword is None:
+            flash('Please enter the missing field')
+        if password != retypePassword:
+            flash('Please retype your password!')
+        else:
+            # search in the database
+            db = get_db()
+            user = db.execute('SELECT * FROM user WHERE email = ?', (email,)).fetchone()
+            # change the password of user
+            user['password'] = generate_password_hash(password)
+            return redirect(url_for('login'))
+    return render_template('resetPassword.html')
 
 
 @app.route('/logout')
