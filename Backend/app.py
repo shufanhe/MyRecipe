@@ -154,7 +154,7 @@ def register():
 
         if error is None:
             if password != retypepassword:
-                # if the password is not the same as RetypePassword then return error
+                # If the password is not the same as RetypePassword then return error
                 if password != retypepassword:
                     error = 'Please enter your password correctly.'
                 else:
