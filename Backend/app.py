@@ -154,19 +154,19 @@ def register():
 
         if error is None:
             if password != retypepassword:
-            # if the password is not the same as RetypePassword then return error
-            if password != retypepassword:
-                error = 'Please enter your password correctly.'
-            else:
-                # try to register the username, if not return error that user_id already registered
-                try:
-                    db.execute("INSERT INTO user (username, password,email) VALUES (?, ?,?)",
-                               (username, generate_password_hash(password), email), )
-                    db.commit()
-                except db.IntegrityError:
-                    error = f"User {username} is already registered."
+                # if the password is not the same as RetypePassword then return error
+                if password != retypepassword:
+                    error = 'Please enter your password correctly.'
                 else:
-                    return redirect(url_for("login"))
+                    # try to register the username, if not return error that user_id already registered
+                    try:
+                        db.execute("INSERT INTO user (username, password,email) VALUES (?, ?,?)",
+                                   (username, generate_password_hash(password), email), )
+                        db.commit()
+                    except db.IntegrityError:
+                        error = f"User {username} is already registered."
+                    else:
+                        return redirect(url_for("login"))
         flash(error)
 
     return render_template('register.html')
