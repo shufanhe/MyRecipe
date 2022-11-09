@@ -99,11 +99,17 @@ def view_recipe():
 
 @app.route('/view_category')
 def view_category():
+    """ Shows a list of recipes for whichever category was selected by user. """
+
     db = get_db()
-    cats = request.args.get('category')
+    cats = request.args.get('category')  # Gets the category user selected.
+
+    # Query stores the selected recipes by whichever category was selected into cur.
     cur = db.execute('SELECT id, title, content, category FROM recipes WHERE category = ? ORDER BY id DESC',
                      [cats])
     category = cur.fetchall()
+
+    # Shows the list of categories calling category_recipes.html
     return render_template('category_recipes.html', category=category)
 
 
@@ -113,7 +119,7 @@ def keyword_search():
     search_input = request.form['keyword_Search']
     cur = db.execute('SELECT * FROM recipes WHERE title LIKE ? OR category LIKE ? OR content LIKE ?', (search_input, search_input, search_input))
     search = cur.fetchall()
-    return render_template('SearchResults.html',recipes = search)
+    return render_template('SearchResults.html', recipes=search)
 
 
 @app.route('/register', methods=['GET', 'POST'])
@@ -121,7 +127,7 @@ def register():
     if request.method == 'POST':
         username = request.form['username']
         password = request.form['password']
-        RetypePassword = request.form['RetypePassword']
+        retypepassword = request.form['RetypePassword']
         email = request.form['Email']
         db = get_db()
         error = None
@@ -129,13 +135,13 @@ def register():
             error = 'Username is required.'
         elif not password:
             error = 'Password is required.'
-        elif not RetypePassword:
+        elif not retypepassword:
             error = 'Please retype your password.'
         elif not email:
             error = 'Email is required.'
 
         if error is None:
-            if password != RetypePassword:
+            if password != retypepassword:
                 error = 'Please enter your password correctly.'
             else:
                 try:
