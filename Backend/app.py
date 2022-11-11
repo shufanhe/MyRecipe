@@ -59,7 +59,11 @@ def HomePage():
     # recipe of the day should show up according to the date, refering to the covers stored in calendar
     cov = db.execute('SELECT cover FROM calendar WHERE date_today=?', [date.today()])
     cover_today = cov.fetchone()
-    return render_template('HomePage.html', cover=cover_today)
+    id = db.execute('SELECT recipe_id FROM calendar WHERE date_today=?', [date.today()])
+    id_today = id.fetchone()
+    recipe = db.execute('SELECT title, category, content FROM recipes WHERE id=?', [id_today])
+    recipe_today = recipe.fetchone()
+    return render_template('HomePage.html', cover=cover_today, recipe=recipe_today)
 
 
 @app.route('/categories')
@@ -87,27 +91,47 @@ def post_recipe():
     return redirect(url_for('HomePage'))
 
 
-@app.route('/view_recipe')
+@app.route('/view_recipe', methods=["GET", "POST"])
 def view_recipe():
     db = get_db()
     # route if the user clicked on recipe of the day, recipe should show up according to the date
     if ('recipe_of_the_day' in request.args):
-        recipe_id_today = db.execute('SELECT recipe_id FROM recipes WHERE date_today=?', [date.today()])
-        recipe_today = db.execute('SELECT title, category, content FROM recipes WHERE id=?', [recipe_id_today])
+        recipe_id_today = db.execute('SELECT recipe_id FROM calendar WHERE date_today=?', [date.today()])
+        recipe_today = db.execute('SELECT title, category, content, likes, review FROM recipes WHERE id=?', [recipe_id_today])
         recipe = recipe_today.fetchone()
+        return redirect("/view_recipe/{{ recipe_id }}".format(recipe_id=recipe_id_today))
     # route if user clicked on a recipe (not through recipe of the day)
     else:
         post_id = request.args.get('clicked')
-        rec = db.execute('SELECT title, category, content FROM recipes WHERE id=?', [post_id])
+        rec = db.execute('SELECT id, title, category, content, likes, review FROM recipes WHERE id=?', [post_id])
         recipe = rec.fetchone()
+        if request.args.get("vote"):
+            recipe.likes = recipe.likes + 1
+            recipe.save()
+
     return render_template('ViewRecipe.html', recipe=recipe)
+
+
+@app.route('/like_recipe/<int:post_id>/<action>')
+#@login_required
+def like_recipe(recipe_id, action):
+    db = get_db()
+    recipe = Post.query.filter_by(id=recipe_id).first_or_404()
+    if action == 'like':
+        current_user.like_recipe(recipe)
+        db.session.commit()
+    if action == 'unlike':
+        current_user.unlike_recipe(recipe)
+        db.session.commit()
+    return redirect(request.referrer)
+
 
 
 @app.route('/view_category')
 def view_category():
     db = get_db()
     cats = request.args.get('category')
-    cur = db.execute('SELECT id, title, content, category FROM recipes WHERE category = ? ORDER BY id DESC',
+    cur = db.execute('SELECT recipe_id, title, content, category FROM recipes WHERE category = ? ORDER BY recipe_id DESC',
                      [cats])
     category = cur.fetchall()
     return render_template('category_recipes.html', category=category)
@@ -119,7 +143,7 @@ def keyword_search():
     search_input = request.form['keyword_Search']
     cur = db.execute('SELECT * FROM recipes WHERE title LIKE ? OR category LIKE ? OR content LIKE ?', (search_input, search_input, search_input))
     search = cur.fetchall()
-    return render_template('SearchResults.html',recipes = search)
+    return render_template('SearchResults.html', recipes=search)
 
 
 @app.route('/register', methods=['GET', 'POST'])
@@ -201,8 +225,8 @@ def save_recipe():
     recipe_id = request.get_json()['recipe_id']
     db = get_db()
     user = db.execute('SELECT * FROM user WHERE username = ?', (session['user_id'],)).fetchone()
-    recipe = db.execute('SELECT * FROM recipe WHERE id = ?', (recipe_id,)).fetchone()
-    db.execute("INSERT INTO save_recipe (username, save_recipe) VALUES (?, ?)", (user['username'], recipe['id']), )
+    recipe = db.execute('SELECT * FROM recipes WHERE recipe_id = ?', (recipe_id,)).fetchone()
+    db.execute("INSERT INTO save_recipe (username, save_recipe) VALUES (?, ?)", (user['username'], recipes['recipe_id']), )
     db.commit()
     return render_template('viewRecipe.html')
 

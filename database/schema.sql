@@ -12,9 +12,12 @@ create table recipes (
   id integer primary key autoincrement,
   title text not null,
   category text not null,
-  content text not null
+  content text not null,
+  likes int,
+  review text
 );
-CREATE TABLE save_recipe (
+
+CREATE TABLE if not exists save_recipe (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     username TEXT NOT NULL,
     save_recipe INT,
