@@ -10,24 +10,28 @@
   <body>
       <nav class="navbar p-3 mb-2 bg-light text-dark">
           <div class="container-fluid row flex-nowrap justify-content-between align-items-center">
-            <div class="col-4 pt-1">
-                <form action="{{ url_for ('categories') }}" method="get">
-                        <button type="submit" class="btn btn-outline-dark">Categories</button>
-                </form>
-                <form action="{{ url_for ('create_recipe') }}" method="get" class="create-recipe">
-                    <button type="submit" class="btn btn-outline-dark">Add</button>
-                </form>
+            <div class="row col-3" >
+                <div class="col">
+                    <form action="{{ url_for ('categories') }}" method="get">
+                            <button type="submit" class="btn btn-outline-dark">Categories</button>
+                    </form>
+                </div>
+                <div class="col">
+                    <form action="{{ url_for ('create_recipe') }}" method="get" class="create-recipe">
+                        <button type="submit" class="btn btn-outline-dark">Add</button>
+                    </form>
+                </div>
             </div>
-            <div class="col-4 text-center fs-2">
+            <div class="col-6 text-center fs-2">
               <a class="blog-header-logo text-dark" style="text-decoration:none" href="{{ url_for ('HomePage') }}">MyRecipe</a>
             </div>
-            <div class="col-4 d-flex justify-content-end align-items-center">
+            <div class="col-3 d-flex justify-content-end align-items-center">
               {% if session.user_id != None %}
-                  <a class="blog-header-logo text-dark" href="{{ url_for ('logout')}}">Logout</a>
-                  <a class="blog-header-logo text-dark" href="{{ url_for ('user_account')}}">User</a>
+                  <a class="blog-header-logo text-dark m-3" href="{{ url_for ('logout')}}">Logout</a>
+                  <a class="blog-header-logo text-dark m-3" href="{{ url_for ('user_account')}}">User</a>
               {% else %}
-                  <a class="blog-header-logo text-dark" href="{{ url_for ('register')}}">Register</a>
-                  <a class="blog-header-logo text-dark" href="{{ url_for ('login')}}">Login</a>
+                  <a class="blog-header-logo text-dark m-3" href="{{ url_for ('register')}}">Register</a>
+                  <a class="blog-header-logo text-dark m-3" href="{{ url_for ('login')}}">Login</a>
               {% endif %}
             </div>
           </div>

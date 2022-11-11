@@ -4,8 +4,6 @@ from sqlite3 import dbapi2 as sqlite3
 from flask import Flask, flash, g, redirect, render_template, request, session, url_for, abort
 from werkzeug.security import check_password_hash, generate_password_hash
 from datetime import date
-
-# This is our little documentation
 app = Flask(__name__)
 
 # Load default config and override config from an environment variable
@@ -106,14 +104,17 @@ def view_recipe():
 
 @app.route('/view_category')
 def view_category():
-    db = get_db()
+    """ Shows a list of recipes for whichever category was selected by user. """
 
-    # view categories
-    cats = request.args.get('category')
-    # get all categories from database
+    db = get_db()
+    cats = request.args.get('category')  # Gets the category user selected.
+
+    # Query stores the selected recipes by whichever category was selected into cur.
     cur = db.execute('SELECT id, title, content, category FROM recipes WHERE category = ? ORDER BY id DESC',
                      [cats])
     category = cur.fetchall()
+
+    # Shows the list of categories calling category_recipes.html
     return render_template('category_recipes.html', category=category)
 
 
@@ -136,7 +137,7 @@ def register():
         # get username, password, RetypePassword and email
         username = request.form['username']
         password = request.form['password']
-        RetypePassword = request.form['RetypePassword']
+        retypepassword = request.form['RetypePassword']
         email = request.form['Email']
         db = get_db()
         error = None
@@ -146,25 +147,26 @@ def register():
             error = 'Username is required.'
         elif not password:
             error = 'Password is required.'
-        elif not RetypePassword:
+        elif not retypepassword:
             error = 'Please retype your password.'
         elif not email:
             error = 'Email is required.'
 
         if error is None:
-            # if the password is not the same as RetypePassword then return error
-            if password != RetypePassword:
-                error = 'Please enter your password correctly.'
-            else:
-                # try to register the username, if not return error that user_id already registered
-                try:
-                    db.execute("INSERT INTO user (username, password,email) VALUES (?, ?,?)",
-                               (username, generate_password_hash(password), email), )
-                    db.commit()
-                except db.IntegrityError:
-                    error = f"User {username} is already registered."
+            if password != retypepassword:
+                # If the password is not the same as RetypePassword then return error
+                if password != retypepassword:
+                    error = 'Please enter your password correctly.'
                 else:
-                    return redirect(url_for("login"))
+                    # try to register the username, if not return error that user_id already registered
+                    try:
+                        db.execute("INSERT INTO user (username, password,email) VALUES (?, ?,?)",
+                                   (username, generate_password_hash(password), email), )
+                        db.commit()
+                    except db.IntegrityError:
+                        error = f"User {username} is already registered."
+                    else:
+                        return redirect(url_for("login"))
         flash(error)
 
     return render_template('register.html')

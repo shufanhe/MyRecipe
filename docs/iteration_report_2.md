@@ -61,12 +61,12 @@ Tasks:
    - Posted recipes should be saved to user's account page
 2. Edit and delete recipe
    - Creators should be able to edit and delete the recipes they posted
-4. Review and Like Recipe
+3. Review and Like Recipe
    - buttons attached to each post
    - review button will open a form on the same page
    - all users should see reviews and number of likes of a post
-5. Implement Admin accounts and admin delete
-6. Implement User Preference: Allergies and Dietary Restrictions
+4. Implement Admin accounts and admin delete
+5. Implement User Preference: Allergies and Dietary Restrictions
     - User prompted to select upon registration
     - Can be updated through user account (create seperate page inside user account for preferences)
 
