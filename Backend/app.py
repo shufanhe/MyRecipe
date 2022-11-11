@@ -91,7 +91,7 @@ def post_recipe():
     return redirect(url_for('HomePage'))
 
 
-@app.route('/view_recipe', methods=["GET", "POST"])
+@app.route('/view_recipe')
 def view_recipe():
     db = get_db()
     # route if the user clicked on recipe of the day, recipe should show up according to the date
@@ -102,13 +102,11 @@ def view_recipe():
         return redirect("/view_recipe/{{ recipe_id }}".format(recipe_id=recipe_id_today))
     # route if user clicked on a recipe (not through recipe of the day)
     else:
-        post_id = request.args.get('clicked')
-        rec = db.execute('SELECT id, title, category, content, likes, review FROM recipes WHERE id=?', [post_id])
+        rec = db.execute('SELECT id, title, category, content, likes, review FROM recipes WHERE id=?', [request.args['recipe_id']])
         recipe = rec.fetchone()
         if request.args.get("vote"):
             recipe.likes = recipe.likes + 1
             recipe.save()
-
     return render_template('ViewRecipe.html', recipe=recipe)
 
 
@@ -131,7 +129,7 @@ def like_recipe(recipe_id, action):
 def view_category():
     db = get_db()
     cats = request.args.get('category')
-    cur = db.execute('SELECT recipe_id, title, content, category FROM recipes WHERE category = ? ORDER BY recipe_id DESC',
+    cur = db.execute('SELECT id, title, content, category FROM recipes WHERE category = ? ORDER BY id DESC',
                      [cats])
     category = cur.fetchall()
     return render_template('category_recipes.html', category=category)
