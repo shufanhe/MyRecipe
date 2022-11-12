@@ -94,35 +94,43 @@ def post_recipe():
 @app.route('/view_recipe')
 def view_recipe():
     db = get_db()
+    liked = db.execute('SELECT liked FROM like_recipe WHERE user_id=?', [session['user_id']]).fetchone()
     # route if the user clicked on recipe of the day, recipe should show up according to the date
     if ('recipe_of_the_day' in request.args):
         recipe_id_today = db.execute('SELECT recipe_id FROM calendar WHERE date_today=?', [date.today()])
         recipe_today = db.execute('SELECT title, category, content, likes, review FROM recipes WHERE id=?', [recipe_id_today])
+        rev = db.execute('SELECT likes, review FROM reviews WHERE recipe_id=?', [recipe_id_today])
         recipe = recipe_today.fetchone()
-        return redirect("/view_recipe/{{ recipe_id }}".format(recipe_id=recipe_id_today))
+        reviews = rev.fetchall()
     # route if user clicked on a recipe (not through recipe of the day)
     else:
         rec = db.execute('SELECT id, title, category, content, likes, review FROM recipes WHERE id=?', [request.args['recipe_id']])
+        rev = db.execute('SELECT likes, review FROM reviews WHERE recipe_id=?', [request.args['recipe_id']])
         recipe = rec.fetchone()
-        if request.args.get("vote"):
-            recipe.likes = recipe.likes + 1
-            recipe.save()
-    return render_template('ViewRecipe.html', recipe=recipe)
+        reviews = rev.fetchall()
+    return render_template('ViewRecipe.html', recipe=recipe, reviews=reviews, liked=liked)
 
 
-@app.route('/like_recipe/<int:post_id>/<action>')
+@app.route('/like_recipe/<int:recipe_id>/<action>', methods=['POST'])
 #@login_required
 def like_recipe(recipe_id, action):
+    if session['user_id'] is None:
+        abort(401)
     db = get_db()
-    recipe = Post.query.filter_by(id=recipe_id).first_or_404()
+    current_user = db.execute('SELECT * FROM user WHERE username=?', (session['user_id'])).fetchone()
     if action == 'like':
-        current_user.like_recipe(recipe)
+        db.execute('UPDATE reviews SET likes=? WHERE recipe_id=?',
+                   [request.form['likes'] + 1, request.form['recipe_id']])
+        db.execute('UPDATE like_recipe SET liked=? WHERE recipe_id=? AND user_id=?',
+                   [1, request.form['recipe_id'], session['user_id']])
         db.session.commit()
     if action == 'unlike':
-        current_user.unlike_recipe(recipe)
+        db.execute('UPDATE reviews SET likes=? WHERE recipe_id=?',
+                   [request.form['likes'] - 1, request.form['recipe_id']])
+        db.execute('UPDATE like_recipe SET liked=? WHERE recipe_id=? AND user_id=?',
+                   [0, request.form['recipe_id'], session['user_id']])
         db.session.commit()
-    return redirect(request.referrer)
-
+    return redirect(url_for('view_recipe'))
 
 
 @app.route('/view_category')

@@ -9,7 +9,13 @@
             <dt>{{recipe.category}}</dt>
             <dt>{{recipe.content}}</dt>
 
+            {% if liked==1 %}
+                <a href="{{ url_for('like_recipe', recipe_id=recipe.id, action='unlike') }}">Unlike</a>
+            {% else %}
+                <a href="{{ url_for('like_recipe', recipe_id=recipe.id, action='like') }}">Like</a>
+            {% endif %}
 
+            <dt>{{recipe.likes}}</dt>
         </dl>
     </form>
 </div>
