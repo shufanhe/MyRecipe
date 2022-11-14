@@ -30,8 +30,8 @@
                   <a class="blog-header-logo text-dark m-3" href="{{ url_for ('logout')}}">Logout</a>
                   <a class="blog-header-logo text-dark m-3" href="{{ url_for ('user_account')}}">User</a>
               {% else %}
-                  <a class="blog-header-logo text-dark m-3" href="{{ url_for ('register')}}">Register</a>
-                  <a class="blog-header-logo text-dark m-3" href="{{ url_for ('login')}}">Login</a>
+                  <a class="blog-header-logo text-dark m-3" href="{{ url_for ('registerPage')}}">Register</a>
+                  <a class="blog-header-logo text-dark m-3" href="{{ url_for ('loginPage')}}">Login</a>
               {% endif %}
             </div>
           </div>
