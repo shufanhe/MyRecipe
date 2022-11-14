@@ -1,5 +1,8 @@
 drop table if exists recipes;
 drop table if exists user;
+drop table if exists reviews;
+drop table if exists like_recipe;
+drop table if exists created_recipes;
 
 CREATE TABLE user (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -10,25 +13,36 @@ CREATE TABLE user (
 
 create table recipes (
   id integer primary key autoincrement,
+  user_id INT NOT NULL,
   title text not null,
   category text not null,
   content text not null,
-  likes int,
-  review text
+  likes INTEGER DEFAULT 0 NOT NULL,
+  review text,
+  FOREIGN KEY(user_id) REFERENCES user(id) ON UPDATE CASCADE ON DELETE CASCADE
 );
 
-CREATE TABLE if not exists reviews (
-    recipe_id INT NOT NULL,
-    likes INT,
+CREATE TABLE reviews (
+    recipe_id INTEGER NOT NULL,
     review TEXT,
     FOREIGN KEY(recipe_id) REFERENCES recipes(id) ON UPDATE CASCADE ON DELETE RESTRICT
 );
 
-CREATE TABLE if not exists like_recipe (
-    recipe_id INT NOT NULL,
-    user_id INT NOT NULL,
-    liked INT,
+CREATE TABLE like_recipe (
+    recipe_id INTEGER NOT NULL,
+    user_id INTEGER NOT NULL,
+    liked INTEGER DEFAULT 0 NOT NULL,
     FOREIGN KEY(recipe_id) REFERENCES recipes(id) ON UPDATE CASCADE ON DELETE RESTRICT,
+    FOREIGN KEY(user_id) REFERENCES user(id) ON UPDATE CASCADE ON DELETE RESTRICT
+);
+
+CREATE TABLE created_recipes (
+    user_id INTEGER NOT NULL,
+    title text not null,
+    category text not null,
+    content text not null,
+    likes INTEGER DEFAULT 0 NOT NULL,
+    review text,
     FOREIGN KEY(user_id) REFERENCES user(id) ON UPDATE CASCADE ON DELETE RESTRICT
 );
 

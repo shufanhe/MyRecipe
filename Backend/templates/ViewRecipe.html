@@ -2,21 +2,23 @@
 {% block body %}
 <div class="container">
     <form action="{{ url_for('view_recipe') }}" id="view_recipe">
-        <label for="view_recipe" class="form-label">View Recipe Page</label>
-        <dl>
-            <dt>{{recipe.id}}</dt>
-            <dt>{{recipe.title}}</dt>
+
+            <h1>{{recipe.title}}</h1>
             <dt>{{recipe.category}}</dt>
-            <dt>{{recipe.content}}</dt>
+            <p>{{recipe.content}}</p>
 
             {% if liked==1 %}
-                <a href="{{ url_for('like_recipe', recipe_id=recipe.id, action='unlike') }}">Unlike</a>
+                <form action="{{ url_for('like_recipe', recipe_id=1, action='unlike') }}" method="post" class="like-recipe">
+                    <button type="submit" class="btn btn-outline-dark">Unlike</button>
+                </form>
             {% else %}
-                <a href="{{ url_for('like_recipe', recipe_id=recipe.id, action='like') }}">Like</a>
+                <form action="{{ url_for('like_recipe', recipe_id=1, action='like') }}" method="post" class="like-recipe">
+                    <button type="submit" class="btn btn-outline-dark">Like</button>
+                </form>
             {% endif %}
 
             <dt>{{recipe.likes}}</dt>
-        </dl>
+
     </form>
 </div>
 {% endblock %}

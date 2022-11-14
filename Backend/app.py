@@ -75,6 +75,8 @@ def categories():
 
 @app.route('/create_recipe')
 def create_recipe():
+    if session['user_id'] is None:
+        abort(401)
     db = get_db()
     # redirect to create recipe form
     return render_template('CreateRecipe.html')
@@ -84,8 +86,10 @@ def create_recipe():
 def post_recipe():
     db = get_db()
     # take user input and insert into the database, then let user know they posted
-    db.execute('INSERT INTO recipes (title, category, content) VALUES (?, ?, ?)',
-               [request.form['title'], request.form['category'], request.form['content']])
+    db.execute('INSERT INTO recipes (user_id, title, category, content) VALUES (?, ?, ?, ?)',
+               [session['user_id'], request.form['title'], request.form['category'], request.form['content']])
+    db.execute('INSERT INTO created_recipes (user_id, title, category, content) VALUES (?, ?, ?, ?)',
+               [session['user_id'], request.form['title'], request.form['category'], request.form['content']])
     db.commit()
     flash('New recipe successfully posted!')
     return redirect(url_for('HomePage'))
@@ -104,33 +108,33 @@ def view_recipe():
         reviews = rev.fetchall()
     # route if user clicked on a recipe (not through recipe of the day)
     else:
-        rec = db.execute('SELECT id, title, category, content, likes, review FROM recipes WHERE id=?', [request.args['recipe_id']])
-        rev = db.execute('SELECT likes, review FROM reviews WHERE recipe_id=?', [request.args['recipe_id']])
+        rec = db.execute('SELECT id, title, category, content, likes, review FROM recipes WHERE id=?', [request.args.get('recipe_id')])
+        rev = db.execute('SELECT review FROM reviews WHERE recipe_id=?', [request.args.get('recipe_id')])
         recipe = rec.fetchone()
-        reviews = rev.fetchall()
+        reviews = rev.fetchone()
     return render_template('ViewRecipe.html', recipe=recipe, reviews=reviews, liked=liked)
 
 
-@app.route('/like_recipe/<int:recipe_id>/<action>', methods=['POST'])
+@app.route('/like_recipe/<int:recipe_id>/<action>', methods=['GET', 'POST'])
 #@login_required
 def like_recipe(recipe_id, action):
     if session['user_id'] is None:
         abort(401)
     db = get_db()
-    current_user = db.execute('SELECT * FROM user WHERE username=?', (session['user_id'])).fetchone()
-    if action == 'like':
-        db.execute('UPDATE reviews SET likes=? WHERE recipe_id=?',
+    current_user = db.execute('SELECT * FROM user WHERE id=?', [session['user_id']]).fetchone()
+    # if action == 'like':
+    db.execute('UPDATE recipes SET likes=? WHERE recipe_id=?',
                    [request.form['likes'] + 1, request.form['recipe_id']])
-        db.execute('UPDATE like_recipe SET liked=? WHERE recipe_id=? AND user_id=?',
+    db.execute('UPDATE like_recipe SET liked=? WHERE recipe_id=? AND user_id=?',
                    [1, request.form['recipe_id'], session['user_id']])
-        db.session.commit()
+    db.session.commit()
     if action == 'unlike':
-        db.execute('UPDATE reviews SET likes=? WHERE recipe_id=?',
+        db.execute('UPDATE recipes SET likes=? WHERE recipe_id=?',
                    [request.form['likes'] - 1, request.form['recipe_id']])
         db.execute('UPDATE like_recipe SET liked=? WHERE recipe_id=? AND user_id=?',
                    [0, request.form['recipe_id'], session['user_id']])
         db.session.commit()
-    return redirect(url_for('view_recipe'))
+    #return redirect(url_for('view_recipe'))
 
 
 @app.route('/view_category')
