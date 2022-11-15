@@ -113,8 +113,8 @@ def view_recipe():
         recipe_today = db.execute('SELECT title, category, content FROM recipes WHERE id=?', [recipe_id_today])
         recipe = recipe_today.fetchone()
     else:
-        post_id = request.args.get('clicked')
-        rec = db.execute('SELECT title, category, content FROM recipes WHERE id=?', [post_id])
+        rec = db.execute('SELECT id, title, category, content FROM recipes WHERE id=?',
+                         [request.args.get('recipe_id')])
         recipe = rec.fetchone()
     return render_template('ViewRecipe.html', recipe=recipe)
 
