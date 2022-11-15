@@ -2,7 +2,6 @@ drop table if exists recipes;
 drop table if exists user;
 drop table if exists reviews;
 drop table if exists like_recipe;
-drop table if exists created_recipes;
 
 CREATE TABLE user (
     id INTEGER PRIMARY KEY AUTOINCREMENT,

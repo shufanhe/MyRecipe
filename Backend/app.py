@@ -97,9 +97,6 @@ def post_recipe():
                     [user, title, category, content, date_today])
     just_posted = cur.fetchone()
     id_posted = just_posted['id']
-    # save that id to the user account
-    db.execute('INSERT INTO created_recipes (recipe_id, user_id, posted_date) VALUES (?, ?, ?)',
-               [id_posted, user, date_today])
     db.commit()
     flash('New recipe successfully posted!')
     return redirect(url_for('HomePage'))
@@ -256,10 +253,5 @@ def user_account():
     db = get_db()
     if session['user_id'] is None:
         abort(401)
-    recipes = db.execute('SELECT * FROM created_recipes WHERE user_id=?', [session['user_id']]).fetchall()
-    recipe_ids = []
-    for recipe in recipes:
-        recipe_id = recipe['recipe_id']
-        recipe_ids.append(recipe_id)
-    created_recipes = db.execute('SELECT * FROM recipes WHERE id i (?)', [recipe_id]).fetchall()
+    created_recipes = db.execute('SELECT * FROM recipes WHERE user_id=?', [session['user_id']]).fetchall()
     return render_template('user_account.html', created_recipes=created_recipes)
