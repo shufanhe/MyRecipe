@@ -109,12 +109,12 @@ def view_category():
     cats = request.args.get('category')  # Gets the category user selected.
 
     # Query stores the selected recipes by whichever category was selected into cur.
-    cur = db.execute('SELECT id, title, content, category FROM recipes WHERE category = ? ORDER BY id DESC',
+    cur = db.execute('SELECT * FROM recipes WHERE category = ? ORDER BY id DESC',
                      [cats])
-    category = cur.fetchall()
+    recipes = cur.fetchall()
 
     # Shows the list of categories calling category_recipes.html
-    return render_template('category_recipes.html', category=category)
+    return render_template('category_recipes.html', recipes=recipes, category=cats)
 
 
 @app.route('/search', methods=['POST'])
@@ -257,3 +257,19 @@ def user_account():
     if session['user_id'] is None:
         abort(401)
     return render_template('user_account.html')
+
+
+@app.route('/delete_recipe', methods=['POST'])
+def delete_recipe():
+    """Deletes recipe only if the user is the one that posted the recipe."""
+
+    # Checks if the user has an account so that it allows them to use the delete feature or not.
+    if session['user_id'] is None:
+        abort(401)
+    else:
+        # Deletes the recipe using id to delete.
+        db = get_db()
+        db.execute('DELETE FROM recipes WHERE id = ?', request.form["id"])
+        db.commit()
+        flash("Recipe was successfully deleted!")
+    return redirect(url_for('user_account'))

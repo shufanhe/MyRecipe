@@ -1,9 +1,7 @@
 {% extends "layout.html" %}
 {% block body %}
 <div class="container">
-    <form action="{{ url_for('view_category') }}" method="get" id="category">
-        <label for="category" class="form-label">{{category.category}}</label>
-    </form>
+        <label class="form-label">{{category}} Recipes</label>
 </div>
 
 <ul class="entries" id="entries">
@@ -13,7 +11,7 @@
             <div class="card" style="width: 18rem;">
                 <img src="..." class="card-img" alt="...">
                 <div class="card-body">
-                    <p class="card-text">An example Recipe</p>
+                    <p class="card-text">{{ recipe.title }}</p>
                     <a href="{{ url_for ('view_recipe')}}" class="stretched-link"></a>
                     <input type="hidden" name="clicked" value="{{ recipe.id }}">
                 </div>
