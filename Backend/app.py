@@ -77,19 +77,29 @@ def categories():
 def create_recipe():
     if session['user_id'] is None:
         abort(401)
-    db = get_db()
     # redirect to create recipe form
     return render_template('CreateRecipe.html')
 
 
-@app.route('/post_recipe', methods=['POST'])
+@app.route('/post_recipe', methods=['GET', 'POST'])
 def post_recipe():
     db = get_db()
-    # take user input and insert into the database, then let user know they posted
-    db.execute('INSERT INTO recipes (user_id, title, category, content) VALUES (?, ?, ?, ?)',
-               [session['user_id'], request.form['title'], request.form['category'], request.form['content']])
-    db.execute('INSERT INTO created_recipes (user_id, title, category, content) VALUES (?, ?, ?, ?)',
-               [session['user_id'], request.form['title'], request.form['category'], request.form['content']])
+    user = session['user_id']
+    title = request.form['title']
+    category = request.form['category']
+    content = request.form['content']
+    date_today = str(date.today())
+    # take user input and insert into the database
+    db.execute('INSERT INTO recipes (user_id, title, category, content, posted_date) VALUES (?, ?, ?, ?, ?)',
+               [user, title, category, content, date_today])
+    # get the id of the recipe the user just posted
+    cur = db.execute('SELECT id FROM recipes WHERE user_id=? AND title=? AND category=? AND content=? AND posted_date=?',
+                    [user, title, category, content, date_today])
+    just_posted = cur.fetchone()
+    id_posted = just_posted['id']
+    # save that id to the user account
+    db.execute('INSERT INTO created_recipes (recipe_id, user_id, posted_date) VALUES (?, ?, ?)',
+               [id_posted, user, date_today])
     db.commit()
     flash('New recipe successfully posted!')
     return redirect(url_for('HomePage'))
@@ -243,6 +253,13 @@ def save_recipe():
 
 @app.route('/user_account')
 def user_account():
+    db = get_db()
     if session['user_id'] is None:
         abort(401)
-    return render_template('user_account.html')
+    recipes = db.execute('SELECT * FROM created_recipes WHERE user_id=?', [session['user_id']]).fetchall()
+    recipe_ids = []
+    for recipe in recipes:
+        recipe_id = recipe['recipe_id']
+        recipe_ids.append(recipe_id)
+    created_recipes = db.execute('SELECT * FROM recipes WHERE id i (?)', [recipe_id]).fetchall()
+    return render_template('user_account.html', created_recipes=created_recipes)

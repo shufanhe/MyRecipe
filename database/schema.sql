@@ -17,6 +17,7 @@ create table recipes (
   title text not null,
   category text not null,
   content text not null,
+  posted_date text not null,
   likes INTEGER DEFAULT 0 NOT NULL,
   review text,
   FOREIGN KEY(user_id) REFERENCES user(id) ON UPDATE CASCADE ON DELETE CASCADE
@@ -36,15 +37,6 @@ CREATE TABLE like_recipe (
     FOREIGN KEY(user_id) REFERENCES user(id) ON UPDATE CASCADE ON DELETE RESTRICT
 );
 
-CREATE TABLE created_recipes (
-    user_id INTEGER NOT NULL,
-    title text not null,
-    category text not null,
-    content text not null,
-    likes INTEGER DEFAULT 0 NOT NULL,
-    review text,
-    FOREIGN KEY(user_id) REFERENCES user(id) ON UPDATE CASCADE ON DELETE RESTRICT
-);
 
 CREATE TABLE if not exists save_recipe (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
