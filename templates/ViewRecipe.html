@@ -9,5 +9,14 @@
             <dt>{{recipe.content}}</dt>
         </dl>
     </form>
+    <form action="{{ url_for('save_recipe') }}" method="post" id="save_recipe">
+{#        onclick="save_recipe({{ recipe.title, recipe.category, recipe.content }})"#}
+        <button>delete</button>
+        {{ print(recipe.title) }}
+        <input type="hidden" name="title" value="{{ recipe.title }}" class="title">
+        <input type="hidden" name="category" value="{{ recipe.category }}" class="category">
+        <input type="hidden" name="text" value="{{ recipe.content }}" class="content">
+
+    </form>
 </div>
 {% endblock %}

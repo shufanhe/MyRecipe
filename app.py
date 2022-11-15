@@ -260,24 +260,27 @@ def logout():
     return redirect(url_for('HomePage'))
 
 
-@app.route('/save')
+@app.route('/save', methods=['POST'])
 def save_recipe():
     if session['user_id'] is None or session['user_id'] == 'admin':
         # abort if there is the user is not logged in
         abort(401)
     # save recipe to user_id in the database
-    recipe_id = request.get_json()['recipe_id']
-    db = get_db()
-
-    # get the user database
-    user = db.execute('SELECT * FROM user WHERE username = ?', (session['user_id'],)).fetchone()
-
-    # get the recipe database
-    recipe = db.execute('SELECT * FROM recipe WHERE id = ?', (recipe_id,)).fetchone()
-
-    # save the recipe in the save_recipe database
-    db.execute("INSERT INTO save_recipe (username, save_recipe) VALUES (?, ?)", (user['username'], recipe['id']), )
-    db.commit()
+    # request_id = request.get_json()
+    title = request.form['title']
+    content = request.form['content']
+    category = request.form['category']
+    # db = get_db()
+    #
+    # # get the user database
+    # user = db.execute('SELECT * FROM user WHERE username = ?', (session['user_id'],)).fetchone()
+    #
+    # # get the recipe database
+    # recipe = db.execute('SELECT * FROM recipe WHERE id = ?', (recipe_id,)).fetchone()
+    #
+    # # save the recipe in the save_recipe database
+    # db.execute("INSERT INTO save_recipe (username, save_recipe) VALUES (?, ?)", (user['username'], recipe['id']))
+    # db.commit()
     return render_template('viewRecipe.html')
 
 
