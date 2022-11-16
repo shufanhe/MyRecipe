@@ -4,10 +4,12 @@ from sqlite3 import dbapi2 as sqlite3
 from flask import Flask, flash, g, redirect, render_template, request, session, url_for, abort
 from werkzeug.security import check_password_hash, generate_password_hash
 from datetime import date
+
 app = Flask(__name__)
+
 # Load default config and override config from an environment variable
 app.config.update(dict(
-    DATABASE=os.path.join(app.root_path, '../database/recipe.db'),
+    DATABASE=os.path.join(app.root_path, 'recipe.db'),
     DEBUG=True,
     SECRET_KEY='development key',
 ))
@@ -24,7 +26,7 @@ def connect_db():
 def init_db():
     """Initializes the database."""
     db = get_db()
-    with app.open_resource('../database/schema.sql', mode='r') as f:
+    with app.open_resource('schema.sql', mode='r') as f:
         db.cursor().executescript(f.read())
     db.commit()
 
@@ -33,6 +35,8 @@ def init_db():
 def initdb_command():
     """Creates the database tables."""
     init_db()
+    # make a new admin user
+    adminUser()
     print('Initialized the database.')
 
 
@@ -52,6 +56,19 @@ def close_db(error):
         g.sqlite_db.close()
 
 
+def adminUser():
+    """
+    We use this so that the us as the developers can mock the website as an administrator
+    to test out some specific functions that belong to the administrator only
+    """
+    db = get_db()
+    user = 'admin'
+    password = 'verysecurepassword'
+    email = 'food@gmail.com'
+    db.execute('INSERT INTO user (username, password, email) VALUES (?, ?, ?)', (user, generate_password_hash(password), email))
+    db.commit()
+
+
 @app.route('/')
 def HomePage():
     name = None
@@ -68,8 +85,7 @@ def HomePage():
 
 @app.route('/categories')
 def categories():
-    db = get_db()
-    # redirect to category page
+    # Go to categories to search for other things
     return render_template('Categories.html')
 
 
@@ -140,106 +156,165 @@ def like_recipe(recipe_id, action):
     #return redirect(url_for('view_recipe'))
 
 
+
 @app.route('/view_category')
 def view_category():
+    """ Shows a list of recipes for whichever category was selected by user. """
+
     db = get_db()
-    cats = request.args.get('category')
+    cats = request.args.get('category')  # Gets the category user selected.
+
+    # Query stores the selected recipes by whichever category was selected into cur.
     cur = db.execute('SELECT id, title, content, category FROM recipes WHERE category = ? ORDER BY id DESC',
                      [cats])
     category = cur.fetchall()
+
+    # Shows the list of categories calling category_recipes.html
     return render_template('category_recipes.html', category=category)
 
 
 @app.route('/search', methods=['POST'])
 def keyword_search():
     db = get_db()
-    search_input = request.form['keyword_Search']
-    cur = db.execute('SELECT * FROM recipes WHERE title LIKE ? OR category LIKE ? OR content LIKE ?', (search_input, search_input, search_input))
+    # search word, sentence
+    search_input = "%" + request.form['keyword_Search'] + "%"
+
+    # search in the database if there is anything like or similar to that
+    cur = db.execute('SELECT * FROM recipes WHERE title LIKE ? OR category LIKE ? OR content LIKE ?',
+                     (search_input, search_input, search_input))
     search = cur.fetchall()
     return render_template('SearchResults.html', recipes=search)
 
 
-@app.route('/register', methods=['GET', 'POST'])
-def register():
-    if request.method == 'POST':
-        username = request.form['username']
-        password = request.form['password']
-        RetypePassword = request.form['RetypePassword']
-        email = request.form['Email']
-        db = get_db()
-        error = None
-        if not username:
-            error = 'Username is required.'
-        elif not password:
-            error = 'Password is required.'
-        elif not RetypePassword:
-            error = 'Please retype your password.'
-        elif not email:
-            error = 'Email is required.'
-
-        if error is None:
-            if password != RetypePassword:
-                error = 'Please enter your password correctly.'
-            else:
-                try:
-                    db.execute("INSERT INTO user (username, password,email) VALUES (?, ?,?)",
-                               (username, generate_password_hash(password), email),)
-                    db.commit()
-                except db.IntegrityError:
-                    error = f"User {username} is already registered."
-                else:
-                    return redirect(url_for("login"))
-        flash(error)
-
+@app.route('/registerPage', methods=['GET'])
+def registerPage():
     return render_template('register.html')
 
 
-@app.route('/login', methods=['GET', 'POST'])
-def login():
-    if request.method == 'POST':
-        username = request.form['username']
-        password = request.form['password']
-        db = get_db()
-        error = None
-        if "@" in username:
-            user = db.execute('SELECT * FROM user WHERE email = ?', (username,)).fetchone()
+@app.route('/register', methods=['POST'])
+def register():
+    # get username, password, RetypePassword and email
+    username = request.form['username']
+    password = request.form['password']
+    retypepassword = request.form['RetypePassword']
+    email = request.form['Email']
+    db = get_db()
+    error = None
+
+    # check if any information is none, otherwise notify the user to enter the required field
+    if not username:
+        error = 'Username is required.'
+    elif not password:
+        error = 'Password is required.'
+    elif not retypepassword:
+        error = 'Please retype your password.'
+    elif not email:
+        error = 'Email is required.'
+
+    if error is None:
+        if password != retypepassword:
+            error = 'Please enter your password correctly.'
         else:
-            user = db.execute('SELECT * FROM user WHERE username = ?', (username,)).fetchone()
-        if user is None:
-            error = 'Incorrect username or email.'
-        elif not check_password_hash(user['password'], password):
-            error = 'Incorrect password.'
-        if error is None:
-            session.clear()
-            session['user_id'] = user['username']
-            return redirect(url_for('HomePage'))
-        flash(error)
+            # try to register the username, if not return error that user_id already registered
+            try:
+                db.execute("INSERT INTO user (username, password,email) VALUES (?, ?,?)",
+                           (username, generate_password_hash(password), email), )
+                db.commit()
+            except db.IntegrityError:
+                error = f"User {username} is already registered."
+            else:
+                return redirect(url_for("loginPage"))
+    flash(error)
+    return render_template('register.html')
+
+
+@app.route('/loginPage', methods=['GET'])
+def loginPage():
     return render_template('login.html')
 
 
-@app.route('/resetpassword', methods=['GET', 'POST'])
-def forget_password():
-    if request.method == 'POST':
-        flash('Please check your email for the OTP code')
-        return redirect(url_for('login'))
-    return render_template('forgotPassword.html')
+@app.route('/login', methods=['POST'])
+def login():
+    # get username and password
+    # username can be used by both email and user_id
+    username = request.form['username']
+    password = request.form['password']
+    db = get_db()
+    error = None
+
+    # check if the user wants to use email or user_id to login
+    if "@" in username:
+        user = db.execute('SELECT * FROM user WHERE email = ?', (username,)).fetchone()
+    else:
+        user = db.execute('SELECT * FROM user WHERE username = ?', (username,)).fetchone()
+
+    # check to see if the username is empty or not
+    if username is None:
+        error = 'Incorrect username or email.'
+
+    # check to see if the password is correct or not
+    elif not check_password_hash(user['password'], password):
+        error = 'Incorrect password.'
+    if error is None:
+        session.clear()
+        # login with session being username
+        session['user_id'] = user['username']
+        return redirect(url_for('HomePage'))
+    else:
+        flash(error)
+        return render_template('login.html')
+
+
+@app.route('/resetpasswordPage', methods=['GET'])
+def reset_passwordPage():
+    return render_template('resetPassword.html')
+
+
+@app.route('/resetpassword', methods=['POST'])
+def reset_password():
+    # get all the required field
+    email = request.form['email']
+    password = request.form['password']
+    retypePassword = request.form['RetypePassword']
+
+    # check if the user enters any information
+    if email is None or password is None or retypePassword is None:
+        flash('Please enter the missing field')
+    if password != retypePassword:
+        flash('Please retype your password!')
+    else:
+        # search in the database to give the user a new password
+        db = get_db()
+        user = db.execute('SELECT * FROM user WHERE email = ?', (email,)).fetchone()
+        # change the password of user
+        user['password'] = generate_password_hash(password)
+        return redirect(url_for('loginPage'))
 
 
 @app.route('/logout')
 def logout():
+    # log out of the website
     session['user_id'] = None
     return redirect(url_for('HomePage'))
 
 
 @app.route('/save')
 def save_recipe():
-    if session['user_id'] is None:
+    if session['user_id'] is None or session['user_id'] == 'admin':
+        # abort if there is the user is not logged in
         abort(401)
+    # save recipe to user_id in the database
     recipe_id = request.get_json()['recipe_id']
     db = get_db()
+
+    # get the user database
     user = db.execute('SELECT * FROM user WHERE username = ?', (session['user_id'],)).fetchone()
-    recipe = db.execute('SELECT * FROM recipes WHERE recipe_id = ?', (recipe_id,)).fetchone()
-    db.execute("INSERT INTO save_recipe (username, save_recipe) VALUES (?, ?)", (user['username'], recipes['recipe_id']), )
+
+    # get the recipe database
+    recipe = db.execute('SELECT * FROM recipe WHERE id = ?', (recipe_id,)).fetchone()
+
+    # save the recipe in the save_recipe database
+    db.execute("INSERT INTO save_recipe (username, save_recipe) VALUES (?, ?)", (user['username'], recipe['id']), )
     db.commit()
     return render_template('viewRecipe.html')
 
