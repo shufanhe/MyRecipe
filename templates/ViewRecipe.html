@@ -16,6 +16,7 @@
             {% else %}
                 <form action="{{ url_for('like_recipe', recipe_id=1, action='like') }}" method="post" class="like-recipe">
                     <button type="submit" class="btn btn-outline-dark">Like</button>
+                    <button onclick="like_page({{ recipe.id }});like_recipe({{ recipe.id }})">Like</button>
                 </form>
             {% endif %}
 
