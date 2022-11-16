@@ -273,3 +273,33 @@ def delete_recipe():
         db.commit()
         flash("Recipe was successfully deleted!")
     return redirect(url_for('user_account'))
+
+
+@app.route('/edit', methods=['GET'])
+def edit():
+    """Redirects to edit screen"""
+
+    # Checks if user has an account to have access to edit this post.
+    if session['user_id'] is None:
+        abort(401)
+    else:
+        # Can edit recipe by id
+        args = request.args
+        edit_id = args.get('id')
+        db = get_db()
+        cur = db.execute('SELECT * FROM recipes WHERE id=?', [edit_id])
+        recipe = cur.fetchone()
+        return render_template('edit.html', recipe=recipe)
+
+
+@app.route('/edit_recipe', methods=['POST'])
+def edit_recipe():
+    """Allows changes to be made to recipe using ID"""
+
+    db = get_db()
+    db.execute('UPDATE recipe SET title = ?, category = ?, text = ? WHERE id = ?',
+               request.form['title'], request.form['category'], request.form['text'], request.form['id'])
+    db.commit()
+    flash('Recipe was successfully updated')
+    return redirect(url_for('ViewRecipe'))
+
