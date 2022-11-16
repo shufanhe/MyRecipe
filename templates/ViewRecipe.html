@@ -4,9 +4,9 @@
     <form action="{{ url_for('view_recipe') }}" method="get" id="view_recipe">
         <label for="view_recipe" class="form-label">View Recipe Page</label>
         <dl>
-            <dt>{{recipe.title}}</dt>
+            <h1>{{recipe.title}}</h1>
             <dt>{{recipe.category}}</dt>
-            <dt>{{recipe.content}}</dt>
+            <p>{{recipe.content}}</p>
         </dl>
 
         <button type="submit" class="btn btn-outline-dark">Delete</button>

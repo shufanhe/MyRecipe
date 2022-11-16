@@ -4,6 +4,7 @@ from sqlite3 import dbapi2 as sqlite3
 from flask import Flask, flash, g, redirect, render_template, request, session, url_for, abort
 from werkzeug.security import check_password_hash, generate_password_hash
 from datetime import date
+
 app = Flask(__name__)
 
 # Load default config and override config from an environment variable
@@ -34,6 +35,8 @@ def init_db():
 def initdb_command():
     """Creates the database tables."""
     init_db()
+    # make a new admin user
+    adminUser()
     print('Initialized the database.')
 
 
@@ -51,6 +54,19 @@ def close_db(error):
     """Closes the database again at the end of the request."""
     if hasattr(g, 'sqlite_db'):
         g.sqlite_db.close()
+
+
+def adminUser():
+    """
+    We use this so that the us as the developers can mock the website as an administrator
+    to test out some specific functions that belong to the administrator only
+    """
+    db = get_db()
+    user = 'admin'
+    password = 'verysecurepassword'
+    email = 'food@gmail.com'
+    db.execute('INSERT INTO user (username, password, email) VALUES (?, ?, ?)', (user, generate_password_hash(password), email))
+    db.commit()
 
 
 @app.route('/')
@@ -77,6 +93,8 @@ def create_recipe():
 
 @app.route('/post', methods=['POST'])
 def post_recipe():
+    if session['user_id'] == 'admin':
+        abort(401)
     db = get_db()
     # push recipe created
     db.execute('INSERT INTO recipes (title, category, content) VALUES (?, ?, ?)',
@@ -95,8 +113,8 @@ def view_recipe():
         recipe_today = db.execute('SELECT title, category, content FROM recipes WHERE id=?', [recipe_id_today])
         recipe = recipe_today.fetchone()
     else:
-        post_id = request.args.get('clicked')
-        rec = db.execute('SELECT title, category, content FROM recipes WHERE id=?', [post_id])
+        rec = db.execute('SELECT id, title, category, content FROM recipes WHERE id=?',
+                         [request.args.get('recipe_id')])
         recipe = rec.fetchone()
     return render_template('ViewRecipe.html', recipe=recipe)
 
@@ -130,98 +148,109 @@ def keyword_search():
     return render_template('SearchResults.html', recipes=search)
 
 
-@app.route('/register', methods=['GET', 'POST'])
-def register():
-    if request.method == 'POST':
-        # get username, password, RetypePassword and email
-        username = request.form['username']
-        password = request.form['password']
-        retypepassword = request.form['RetypePassword']
-        email = request.form['Email']
-        db = get_db()
-        error = None
-
-        # check if any is none
-        if not username:
-            error = 'Username is required.'
-        elif not password:
-            error = 'Password is required.'
-        elif not retypepassword:
-            error = 'Please retype your password.'
-        elif not email:
-            error = 'Email is required.'
-
-        if error is None:
-            if password != retypepassword:
-                # If the password is not the same as RetypePassword then return error
-                if password != retypepassword:
-                    error = 'Please enter your password correctly.'
-                else:
-                    # try to register the username, if not return error that user_id already registered
-                    try:
-                        db.execute("INSERT INTO user (username, password,email) VALUES (?, ?,?)",
-                                   (username, generate_password_hash(password), email), )
-                        db.commit()
-                    except db.IntegrityError:
-                        error = f"User {username} is already registered."
-                    else:
-                        return redirect(url_for("login"))
-        flash(error)
-
+@app.route('/registerPage', methods=['GET'])
+def registerPage():
     return render_template('register.html')
 
 
-@app.route('/login', methods=['GET', 'POST'])
-def login():
-    if request.method == 'POST':
-        # get username and password
-        # username can be used by both email and user_id
-        username = request.form['username']
-        password = request.form['password']
-        db = get_db()
-        error = None
+@app.route('/register', methods=['POST'])
+def register():
+    # get username, password, RetypePassword and email
+    username = request.form['username']
+    password = request.form['password']
+    retypepassword = request.form['RetypePassword']
+    email = request.form['Email']
+    db = get_db()
+    error = None
 
-        # check if there the username is email or just user_id
-        if "@" in username:
-            user = db.execute('SELECT * FROM user WHERE email = ?', (username,)).fetchone()
+    # check if any information is none, otherwise notify the user to enter the required field
+    if not username:
+        error = 'Username is required.'
+    elif not password:
+        error = 'Password is required.'
+    elif not retypepassword:
+        error = 'Please retype your password.'
+    elif not email:
+        error = 'Email is required.'
+
+    if error is None:
+        if password != retypepassword:
+            error = 'Please enter your password correctly.'
         else:
-            user = db.execute('SELECT * FROM user WHERE username = ?', (username,)).fetchone()
+            # try to register the username, if not return error that user_id already registered
+            try:
+                db.execute("INSERT INTO user (username, password,email) VALUES (?, ?,?)",
+                           (username, generate_password_hash(password), email), )
+                db.commit()
+            except db.IntegrityError:
+                error = f"User {username} is already registered."
+            else:
+                return redirect(url_for("loginPage"))
+    flash(error)
+    return render_template('register.html')
 
-        # check to see if the username is empty or not
-        if username is None:
-            error = 'Incorrect username or email.'
 
-        # check to see if the password is correct or not
-        elif not check_password_hash(user['password'], password):
-            error = 'Incorrect password.'
-        if error is None:
-            session.clear()
-            # login with session being username
-            session['user_id'] = user['username']
-            return redirect(url_for('HomePage'))
-        flash(error)
+@app.route('/loginPage', methods=['GET'])
+def loginPage():
     return render_template('login.html')
 
 
-@app.route('/resetpassword', methods=['GET','POST'])
-def reset_password():
-    if request.method == 'POST':
-        # get all the required field
-        email = request.form['email']
-        password = request.form['password']
-        retypePassword = request.form['RetypePassword']
-        if email is None or password is None or retypePassword is None:
-            flash('Please enter the missing field')
-        if password != retypePassword:
-            flash('Please retype your password!')
-        else:
-            # search in the database
-            db = get_db()
-            user = db.execute('SELECT * FROM user WHERE email = ?', (email,)).fetchone()
-            # change the password of user
-            user['password'] = generate_password_hash(password)
-            return redirect(url_for('login'))
+@app.route('/login', methods=['POST'])
+def login():
+    # get username and password
+    # username can be used by both email and user_id
+    username = request.form['username']
+    password = request.form['password']
+    db = get_db()
+    error = None
+
+    # check if the user wants to use email or user_id to login
+    if "@" in username:
+        user = db.execute('SELECT * FROM user WHERE email = ?', (username,)).fetchone()
+    else:
+        user = db.execute('SELECT * FROM user WHERE username = ?', (username,)).fetchone()
+
+    # check to see if the username is empty or not
+    if username is None:
+        error = 'Incorrect username or email.'
+
+    # check to see if the password is correct or not
+    elif not check_password_hash(user['password'], password):
+        error = 'Incorrect password.'
+    if error is None:
+        session.clear()
+        # login with session being username
+        session['user_id'] = user['username']
+        return redirect(url_for('HomePage'))
+    else:
+        flash(error)
+        return render_template('login.html')
+
+
+@app.route('/resetpasswordPage', methods=['GET'])
+def reset_passwordPage():
     return render_template('resetPassword.html')
+
+
+@app.route('/resetpassword', methods=['POST'])
+def reset_password():
+    # get all the required field
+    email = request.form['email']
+    password = request.form['password']
+    retypePassword = request.form['RetypePassword']
+
+    # check if the user enters any information
+    if email is None or password is None or retypePassword is None:
+        flash('Please enter the missing field')
+    if password != retypePassword:
+        flash('Please retype your password!')
+    else:
+        # search in the database to give the user a new password
+        db = get_db()
+        user = db.execute('SELECT * FROM user WHERE email = ?', (email,)).fetchone()
+        # change the password of user
+        user['password'] = generate_password_hash(password)
+        return redirect(url_for('loginPage'))
 
 
 @app.route('/logout')
@@ -233,7 +262,7 @@ def logout():
 
 @app.route('/save')
 def save_recipe():
-    if session['user_id'] is None:
+    if session['user_id'] is None or session['user_id'] == 'admin':
         # abort if there is the user is not logged in
         abort(401)
     # save recipe to user_id in the database
