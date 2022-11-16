@@ -160,17 +160,14 @@ def like_recipe(recipe_id, action):
 @app.route('/view_category')
 def view_category():
     """ Shows a list of recipes for whichever category was selected by user. """
-
     db = get_db()
-    cats = request.args.get('category')  # Gets the category user selected.
-
+    cats = request.args.get('category')
+    # Gets the category user selected.
     # Query stores the selected recipes by whichever category was selected into cur.
-    cur = db.execute('SELECT id, title, content, category FROM recipes WHERE category = ? ORDER BY id DESC',
-                     [cats])
-    category = cur.fetchall()
-
+    cur = db.execute('SELECT * FROM recipes WHERE category = ? ORDER BY id DESC', [cats])
+    recipes = cur.fetchall()
     # Shows the list of categories calling category_recipes.html
-    return render_template('category_recipes.html', category=category)
+    return render_template('category_recipes.html', recipes=recipes, category=cats)
 
 
 @app.route('/search', methods=['POST'])
