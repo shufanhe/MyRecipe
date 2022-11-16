@@ -1,5 +1,6 @@
 {% extends "layout.html" %}
 {% block body %}
+<script type="text/javascript" src="scripts/main.js"></script>
 <div class="container">
     <form action="{{ url_for('view_recipe') }}" id="view_recipe">
 
@@ -10,6 +11,7 @@
             {% if liked==1 %}
                 <form action="{{ url_for('like_recipe', recipe_id=1, action='unlike') }}" method="post" class="like-recipe">
                     <button type="submit" class="btn btn-outline-dark">Unlike</button>
+                    <button onclick="like_page({{ recipe.id }});like_recipe({{ recipe.id }})">Unlike</button>
                 </form>
             {% else %}
                 <form action="{{ url_for('like_recipe', recipe_id=1, action='like') }}" method="post" class="like-recipe">

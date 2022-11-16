@@ -92,11 +92,6 @@ def post_recipe():
     # take user input and insert into the database
     db.execute('INSERT INTO recipes (user_id, title, category, content, posted_date) VALUES (?, ?, ?, ?, ?)',
                [user, title, category, content, date_today])
-    # get the id of the recipe the user just posted
-    cur = db.execute('SELECT id FROM recipes WHERE user_id=? AND title=? AND category=? AND content=? AND posted_date=?',
-                    [user, title, category, content, date_today])
-    just_posted = cur.fetchone()
-    id_posted = just_posted['id']
     db.commit()
     flash('New recipe successfully posted!')
     return redirect(url_for('HomePage'))
@@ -129,6 +124,7 @@ def like_recipe(recipe_id, action):
         abort(401)
     db = get_db()
     current_user = db.execute('SELECT * FROM user WHERE id=?', [session['user_id']]).fetchone()
+    recipe_to_like = request.get_json()['to_like']
     # if action == 'like':
     db.execute('UPDATE recipes SET likes=? WHERE recipe_id=?',
                    [request.form['likes'] + 1, request.form['recipe_id']])
