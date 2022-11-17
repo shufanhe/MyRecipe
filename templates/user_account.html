@@ -2,7 +2,6 @@
 {% block body %}
     <h1>{{ session.user_id }}</h1>
     <img src="../static/profile_picture.png" alt="profile picture">
-    <label>{{ session.user_id }}</label>
     <ul class="save_recipe" id="save_recipe">
 
         {% for recipe in save_recipe %}
