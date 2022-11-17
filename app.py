@@ -141,19 +141,20 @@ def like_recipe(recipe_id, action):
     db = get_db()
     current_user = db.execute('SELECT * FROM user WHERE id=?', [session['user_id']]).fetchone()
     recipe_to_like = request.get_json()['to_like']
-    # if action == 'like':
-    db.execute('UPDATE recipes SET likes=? WHERE recipe_id=?',
-                   [request.form['likes'] + 1, request.form['recipe_id']])
-    db.execute('UPDATE like_recipe SET liked=? WHERE recipe_id=? AND user_id=?',
-                   [1, request.form['recipe_id'], session['user_id']])
-    db.session.commit()
+    print("ID", recipe_to_like)
+    if action == 'like':
+        db.execute('UPDATE recipes SET likes=? WHERE recipe_id=?',
+                       [request.form['likes'] + 1, request.form['recipe_id']])
+        db.execute('UPDATE like_recipe SET liked=? WHERE recipe_id=? AND user_id=?',
+                       [1, request.form['recipe_id'], session['user_id']])
+        db.session.commit()
     if action == 'unlike':
         db.execute('UPDATE recipes SET likes=? WHERE recipe_id=?',
                    [request.form['likes'] - 1, request.form['recipe_id']])
         db.execute('UPDATE like_recipe SET liked=? WHERE recipe_id=? AND user_id=?',
                    [0, request.form['recipe_id'], session['user_id']])
         db.session.commit()
-    #return redirect(url_for('view_recipe'))
+    return redirect(url_for('view_recipe'))
 
 
 
