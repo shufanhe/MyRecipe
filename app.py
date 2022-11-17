@@ -260,32 +260,33 @@ def logout():
     return redirect(url_for('HomePage'))
 
 
-@app.route('/save', methods=['POST'])
+@app.route('/save_recipe', methods=['POST'])
 def save_recipe():
     if session['user_id'] is None or session['user_id'] == 'admin':
         # abort if there is the user is not logged in
         abort(401)
     # save recipe to user_id in the database
-    # request_id = request.get_json()
     title = request.form['title']
     content = request.form['content']
     category = request.form['category']
-    # db = get_db()
-    #
-    # # get the user database
-    # user = db.execute('SELECT * FROM user WHERE username = ?', (session['user_id'],)).fetchone()
-    #
-    # # get the recipe database
-    # recipe = db.execute('SELECT * FROM recipe WHERE id = ?', (recipe_id,)).fetchone()
-    #
-    # # save the recipe in the save_recipe database
-    # db.execute("INSERT INTO save_recipe (username, save_recipe) VALUES (?, ?)", (user['username'], recipe['id']))
-    # db.commit()
-    return render_template('viewRecipe.html')
+    db = get_db()
+
+    # get the recipe database
+    recipe = db.execute('SELECT * FROM recipes WHERE title = ? AND content = ? AND category = ?', (title, content, category)).fetchone()
+    # save the recipe in the save_recipe database
+    check_save = db.execute('SELECT * FROM save_recipe WHERE title = ? AND content = ? AND category = ?', (title, content, category)).fetchone()
+    if check_save is None:
+        db.execute("INSERT INTO save_recipe (username, title, content, category) VALUES (?, ?, ?, ?)", (session['user_id'], recipe['title'], recipe['content'], recipe['category']))
+        db.commit()
+    else:
+        flash('This recipe has already been saved!')
+    return redirect(url_for('view_recipe', recipe_id=recipe['id']))
 
 
 @app.route('/user_account')
 def user_account():
     if session['user_id'] is None:
         abort(401)
-    return render_template('user_account.html')
+    db = get_db()
+    save_recipe = db.execute('SELECT * FROM save_recipe WHERE username = ?', (session['user_id'],)).fetchall()
+    return render_template('user_account.html', save_recipe=save_recipe)

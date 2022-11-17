@@ -1,15 +1,9 @@
 let save_recipe = async function(title, category, content){
-    const data = {title : title, category: category, content: content};
-    return fetch("/save", {
+    const data = JSON.stringify({title : title, category: category, content: content});
+    return fetch("/save_recipe", {
         method: 'POST',
-        headers: {
-      'Content-Type': 'application/json'
-        },
+        headers: {"Content-Type": "application/json"},
         redirect: 'follow',
-        body: JSON.stringify(data)
+        body: data
     });
 }
-let deleted_rows = (function(i){
-    const lists = document.getElementById(i);
-    lists.remove();
-})
