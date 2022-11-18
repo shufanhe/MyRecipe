@@ -2,6 +2,7 @@ import functools
 import os
 from sqlite3 import dbapi2 as sqlite3
 from flask import Flask, flash, g, redirect, render_template, request, session, url_for, abort
+from flask_mail import Mail, Message
 from werkzeug.security import check_password_hash, generate_password_hash
 from datetime import date
 
@@ -15,6 +16,17 @@ app.config.update(dict(
 ))
 app.config.from_envvar('FLASKR_SETTINGS', silent=True)
 
+app.config['MAIL_SERVER'] = 'smtp.gmail.com'
+app.config['MAIL_PORT'] = 465
+app.config['MAIL_USERNAME'] = 'testdevappfood@gmail.com'
+app.config['MAIL_PASSWORD'] = 'kgwkcbrlcssztipt'
+app.config['MAIL_USE_TLS'] = False
+app.config['MAIL_USE_SSL'] = True
+app.config['MAIL_DEFAULT_SENDER'] = 'testdevappfood@gmail.com'
+app.config['MAIL_ASCII_ATTACHMENTS'] = True
+app.config['DEBUG'] = True
+
+mail = Mail(app)
 
 def connect_db():
     """Connects to the specific database."""
@@ -65,7 +77,8 @@ def adminUser():
     user = 'admin'
     password = 'verysecurepassword'
     email = 'food@gmail.com'
-    db.execute('INSERT INTO user (username, password, email) VALUES (?, ?, ?)', (user, generate_password_hash(password), email))
+    db.execute('INSERT INTO user (username, password, email) VALUES (?, ?, ?)',
+               (user, generate_password_hash(password), email))
     db.commit()
 
 
@@ -235,21 +248,30 @@ def reset_passwordPage():
 def reset_password():
     # get all the required field
     email = request.form['email']
-    password = request.form['password']
-    retypePassword = request.form['RetypePassword']
-
-    # check if the user enters any information
-    if email is None or password is None or retypePassword is None:
-        flash('Please enter the missing field')
-    if password != retypePassword:
-        flash('Please retype your password!')
-    else:
-        # search in the database to give the user a new password
-        db = get_db()
-        db.execute('UPDATE user SET password = ? WHERE email = ?', (generate_password_hash(password),email))
-        db.commit()
-        # change the password of user
-        return redirect(url_for('loginPage'))
+    try:
+        msg = Message("Subject", recipients=[email])
+        msg.body = "Hello Flask message sent from Flask-Mail"
+        msg.html = "Yo, look how I did this even though Mark said it's impossible to do this within the time limit :)"
+        mail.send(msg)
+    except Exception as e:
+        raise e
+    # password = request.form['password']
+    # retypePassword = request.form['RetypePassword']
+    #
+    # # check if the user enters any information
+    # if email is None or password is None or retypePassword is None:
+    #     flash('Please enter the missing field')
+    # if password != retypePassword:
+    #     flash('Please retype your password!')
+    # else:
+    #     # search in the database to give the user a new password
+    #     db = get_db()
+    #     db.execute('UPDATE user SET password = ? WHERE email = ?', (generate_password_hash(password),email))
+    #     db.commit()
+    #     # change the password of user
+    mail.send(msg)
+    # return redirect(url_for('loginPage'))
+    return "Message sent!"
 
 
 @app.route('/logout')
