@@ -116,7 +116,9 @@ def post_recipe():
 @app.route('/view_recipe')
 def view_recipe():
     db = get_db()
-    liked = db.execute('SELECT liked FROM like_recipe WHERE user_id=?', [session['user_id']]).fetchone()
+    cur = db.execute('SELECT COUNT(1) FROM like_recipe WHERE user_id=? AND recipe_id=?',
+                       [session['user_id'], request.args.get('recipe_id')])
+    whether_liked = cur.fetchone()[0]
     # route if the user clicked on recipe of the day, recipe should show up according to the date
     if ('recipe_of_the_day' in request.args):
         recipe_id_today = db.execute('SELECT recipe_id FROM calendar WHERE date_today=?', [date.today()])
@@ -130,30 +132,31 @@ def view_recipe():
         rev = db.execute('SELECT review FROM reviews WHERE recipe_id=?', [request.args.get('recipe_id')])
         recipe = rec.fetchone()
         reviews = rev.fetchone()
-    return render_template('ViewRecipe.html', recipe=recipe, reviews=reviews, liked=liked)
+    return render_template('ViewRecipe.html', recipe=recipe, reviews=reviews, liked=whether_liked)
 
 
-@app.route('/like_recipe/<int:recipe_id>/<action>', methods=['GET', 'POST'])
-#@login_required
-def like_recipe(recipe_id, action):
+@app.route('/like_recipe', methods=['POST'])
+def like_recipe():
     if session['user_id'] is None:
         abort(401)
     db = get_db()
-    current_user = db.execute('SELECT * FROM user WHERE id=?', [session['user_id']]).fetchone()
-    recipe_to_like = request.get_json()['to_like']
-    print("ID", recipe_to_like)
+    # current_user = db.execute('SELECT * FROM user WHERE id=?', [session['user_id']]).fetchone()
+    # recipe_liked = request.get_json()['to_like']
+    # recipe_to_like = request.form['like_me']
+    # print("ID", recipe_to_like)
+    action = request.form['action']
     if action == 'like':
-        db.execute('UPDATE recipes SET likes=? WHERE recipe_id=?',
-                       [request.form['likes'] + 1, request.form['recipe_id']])
-        db.execute('UPDATE like_recipe SET liked=? WHERE recipe_id=? AND user_id=?',
-                       [1, request.form['recipe_id'], session['user_id']])
-        db.session.commit()
+        recipe_liked = request.form['like_me']
+        db.execute('UPDATE recipes SET likes=likes+1 WHERE id=?', [recipe_liked])
+        db.execute('INSERT INTO like_recipe (recipe_id, user_id) VALUES (?, ?)', [recipe_liked, session['user_id']])
+        db.commit()
     if action == 'unlike':
-        db.execute('UPDATE recipes SET likes=? WHERE recipe_id=?',
-                   [request.form['likes'] - 1, request.form['recipe_id']])
-        db.execute('UPDATE like_recipe SET liked=? WHERE recipe_id=? AND user_id=?',
-                   [0, request.form['recipe_id'], session['user_id']])
-        db.session.commit()
+        recipe_unliked = request.form['unlike_me']
+        # just check if row is in table, if no than have not liked
+        # don't need to request action from frontend
+        db.execute('UPDATE recipes SET likes=likes-1 WHERE id=?', [recipe_unliked])
+        db.execute('DELETE FROM like_recipe WHERE recipe_id=? AND user_id=?', [recipe_unliked, session['user_id']])
+        db.commit()
     return redirect(url_for('view_recipe'))
 
 

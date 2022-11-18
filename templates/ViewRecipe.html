@@ -1,30 +1,30 @@
 {% extends "layout.html" %}
 {% block body %}
-<script type="text/javascript" src="scripts/main.js"></script>
+
 <div class="container">
     <form action="{{ url_for('view_recipe') }}" id="view_recipe">
-
             <h1>{{recipe.title}}</h1>
             <dt>{{recipe.category}}</dt>
             <p>{{recipe.content}}</p>
+    </form>
 
             {% if liked==1 %}
-                <form action="{{ url_for('like_recipe', recipe_id=1, action='unlike') }}" method="post" class="like-recipe">
+                <form action="{{ url_for('like_recipe') }}" method="post" class="like-recipe">
+                   <input type="hidden" name="action" value='unlike'>
                     <button type="submit" class="btn btn-outline-dark">Unlike</button>
-                    <button onclick="like_page({{ recipe.id }});like_recipe({{ recipe.id }})">Unlike</button>
+                    <input type="hidden" name="unlike_me" value={{ recipe.id }}>
+                    <input type="hidden" name="like_count" value={{ recipe.likes }}>
                 </form>
-            {% else %}
-                <form action="{{ url_for('like_recipe', recipe_id=1, action='like') }}" method="post" class="like-recipe">
-                    <button type="submit" class="btn btn-outline-dark">Like</button>
+            {% elif liked==0 %}
+                <form action="{{ url_for('like_recipe') }}" method="post" class="like-recipe">
+                    <input type="hidden" name="action" value='like'>
+                    <button id="like_button" type="submit" class="btn btn-outline-dark">Like</button>
+                    <input type="hidden" name="like_me" value={{ recipe.id }}>
+                    <input type="hidden" name="like_count" value={{ recipe.likes }}>
                 </form>
-
-                 <div class="p-2"><button  id="like_recipe/{{recipe.id}}/like">Like</button>
-
-                 </div>
             {% endif %}
 
             <dt>{{recipe.likes}}</dt>
 
-    </form>
 </div>
 {% endblock %}

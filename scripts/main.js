@@ -1,20 +1,23 @@
-let like_page = async function(id){
-    const data = {to_like : id};
-    return fetch("/like_recipe/<int:recipe_id>/<action>", {
-        method: 'POST',
-        headers: {
-      'Content-Type': 'application/json'
-        },
-        redirect: 'follow',
-        body: JSON.stringify(data)
-    });
-}
-let like_recipe = (function(i){
-    const lists = document.getElementById(i);
-})
 
-let button = document.querySelector('button')
-button.addEventListener('click', () => {
-    button.classList.toggle('liked')
 
-})
+function like_recipe(recipe_id){
+    const data = {like_me : recipe_id };
+    return fetch("/like_recipe",
+                {method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    redirect: 'follow',
+                    body: JSON.stringify(data)});
+};
+
+// A function for attaching events to DOM elements
+function setupEvents() {
+  const like_button = document.querySelector("#like_button");
+  like_button.addEventListener('click', like_recipe());
+  like_button.addEventListener('click', () => {like_button.classList.toggle('liked')});
+};
+
+// Attach our setup function to DOMContentLoaded
+document.addEventListener('DOMContentLoaded', setupEvents);
+
+
+
