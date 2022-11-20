@@ -97,7 +97,7 @@ def create_recipe():
     return render_template('CreateRecipe.html')
 
 
-@app.route('/post_recipe', methods=['GET', 'POST'])
+@app.route('/post_recipe', methods=['POST'])
 def post_recipe():
     db = get_db()
     user = session['user_id']
@@ -159,6 +159,19 @@ def like_recipe():
         db.commit()
     return redirect(url_for('view_recipe'))
 
+@app.route('/review_recipe')
+def review_recipe():
+    if session['user_id'] is None:
+        abort(401)
+    return render_template('review_recipe.html')
+
+@app.route('/post_review', method=['POST'])
+def post_review():
+    db = get_db()
+    recipe_to_review = request.form['review_me']
+    review = request.form['review']
+    db.execute('INSERT INTO reviews (recipe_id, review) VALUES (?, ?)', [recipe_to_review, review])
+    return redirect(url_for('view_recipe'))
 
 
 @app.route('/view_category')
