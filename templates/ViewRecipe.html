@@ -30,6 +30,14 @@
             <input type="hidden" name="review_me" value={{ recipe.id }}>
         </form>
 
+        {% for each_review in reviews %}
+            <p>{{ each_review.review }}</p>
+        {% else %}
+           <div class="alert alert-dark" role="alert">
+                No reviews here so far!
+           </div>
+        {% endfor %}
+
 
     </div>
 {% endblock %}

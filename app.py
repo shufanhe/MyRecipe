@@ -128,10 +128,12 @@ def view_recipe():
         reviews = rev.fetchall()
     # route if user clicked on a recipe (not through recipe of the day)
     else:
-        rec = db.execute('SELECT id, title, category, content, likes, review FROM recipes WHERE id=?', [request.args.get('recipe_id')])
-        rev = db.execute('SELECT review FROM reviews WHERE recipe_id=?', [request.args.get('recipe_id')])
+        rec = db.execute('SELECT id, title, category, content, likes FROM recipes WHERE id=?', [request.args.get('recipe_id')])
+        rev = db.execute('SELECT recipe_id, review FROM reviews WHERE recipe_id=?', [int(request.args.get('recipe_id'))])
+        id = int(request.args.get('recipe_id'))
         recipe = rec.fetchone()
         reviews = rev.fetchone()
+        flash(reviews[0])
     return render_template('ViewRecipe.html', recipe=recipe, reviews=reviews, liked=whether_liked)
 
 
@@ -159,16 +161,22 @@ def like_recipe():
         db.commit()
     return redirect(url_for('view_recipe'))
 
+
 @app.route('/review_recipe')
 def review_recipe():
     if session['user_id'] is None:
         abort(401)
-    return render_template('review_recipe.html')
+    db = get_db()
+    recipe_id = request.args.get('review_me')
+    cur = db.execute('SELECT * FROM recipes WHERE id=?', [recipe_id])
+    recipe = cur.fetchone()
+    return render_template('review_recipe.html', recipe=recipe)
 
-@app.route('/post_review', method=['POST'])
+
+@app.route('/post_review', methods=['POST'])
 def post_review():
     db = get_db()
-    recipe_to_review = request.form['review_me']
+    recipe_to_review = int(request.form['review_me'])
     review = request.form['review']
     db.execute('INSERT INTO reviews (recipe_id, review) VALUES (?, ?)', [recipe_to_review, review])
     return redirect(url_for('view_recipe'))
