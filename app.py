@@ -93,8 +93,9 @@ def create_recipe():
 
 @app.route('/post', methods=['POST'])
 def post_recipe():
-    if session['user_id'] == 'admin':
-        abort(401)
+    if not session['user_id']:
+        flash('Make an account to be able to add a recipe!')
+        return redirect(url_for('create_recipe'))
     db = get_db()
     # push recipe created
     db.execute('INSERT INTO recipes (title, category, content) VALUES (?, ?, ?)',
@@ -119,7 +120,7 @@ def view_recipe():
     return render_template('ViewRecipe.html', recipe=recipe)
 
 
-@app.route('/view_category')
+@app.route('/view_category', methods=['GET'])
 def view_category():
     """ Shows a list of recipes for whichever category was selected by user. """
 
@@ -292,43 +293,16 @@ def user_account():
 def delete_recipe():
     """Deletes recipe only if the user is the one that posted the recipe."""
 
-    # Checks if the user has an account so that it allows them to use the delete feature or not.
-    if session['user_id'] is None:
-        abort(401)
+    # If user does not have an account then it will redirect to HomePage and flashes message
+    if not session['user_id']:
+        flash("Unable to Delete Post!")
+        return redirect(url_for('HomePage'))
     else:
         # Deletes the recipe using id to delete.
         db = get_db()
         db.execute('DELETE FROM recipes WHERE id = ?', request.form["id"])
         db.commit()
         flash("Recipe was successfully deleted!")
-    return redirect(url_for('user_account'))
+    return redirect(url_for('HomePage'))
 
-
-@app.route('/edit', methods=['GET'])
-def edit():
-    """Redirects to edit screen"""
-
-    # Checks if user has an account to have access to edit this post.
-    if session['user_id'] is None:
-        abort(401)
-    else:
-        # Can edit recipe by id
-        args = request.args
-        edit_id = args.get('id')
-        db = get_db()
-        cur = db.execute('SELECT * FROM recipes WHERE id=?', [edit_id])
-        recipe = cur.fetchone()
-        return render_template('edit.html', recipe=recipe)
-
-
-@app.route('/edit_recipe', methods=['POST'])
-def edit_recipe():
-    """Allows changes to be made to recipe using ID"""
-
-    db = get_db()
-    db.execute('UPDATE recipe SET title = ?, category = ?, text = ? WHERE id = ?',
-               request.form['title'], request.form['category'], request.form['text'], request.form['id'])
-    db.commit()
-    flash('Recipe was successfully updated')
-    return redirect(url_for('ViewRecipe'))
 

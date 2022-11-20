@@ -8,8 +8,14 @@
             <dt>{{recipe.category}}</dt>
             <p>{{recipe.content}}</p>
         </dl>
-
-        <button type="submit" class="btn btn-outline-dark">Delete</button>
+    </form>
+    <form action="{{ url_for('delete_recipe') }}" method="post">
+            <input type="hidden" name="id" value= "{{ recipe.id }}">
+            <button type="submit" class="btn btn-outline-dark">Delete</button>
+    </form>
+    <form action="{{ url_for('edit') }}" method="get">
+            <input type="hidden" name="id" value= "{{ recipe.id }}">
+            <button type="submit" class="btn btn-outline-dark">Edit</button>
     </form>
 </div>
 {% endblock %}
