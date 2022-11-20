@@ -130,7 +130,6 @@ def view_recipe():
     else:
         rec = db.execute('SELECT id, title, category, content, likes FROM recipes WHERE id=?', [request.args.get('recipe_id')])
         rev = db.execute('SELECT recipe_id, review FROM reviews WHERE recipe_id=?', [int(request.args.get('recipe_id'))])
-        id = int(request.args.get('recipe_id'))
         recipe = rec.fetchone()
         reviews = rev.fetchone()
         flash(reviews[0])
