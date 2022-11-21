@@ -91,10 +91,10 @@ def create_recipe():
     return render_template('CreateRecipe.html')
 
 
-@app.route('/post', methods=['POST'])
+@app.route('/post_recipe', methods=['POST'])
 def post_recipe():
-    if session['user_id'] == 'admin':
-        abort(401)
+    if session['user_id'] == 'admin' or session['user_id'] is None:
+        flash("You don't have access to this function")
     db = get_db()
     # push recipe created
     db.execute('INSERT INTO recipes (title, category, content) VALUES (?, ?, ?)',
