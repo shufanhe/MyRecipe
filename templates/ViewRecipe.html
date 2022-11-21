@@ -31,9 +31,11 @@
         </form>
 
         {% for each_review in reviews %}
+        {% print('each_review') %}
             <p>{{ each_review.review }}</p>
         {% else %}
            <div class="alert alert-dark" role="alert">
+               {% print(reviews) %}
                 No reviews here so far!
            </div>
         {% endfor %}

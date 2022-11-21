@@ -129,9 +129,9 @@ def view_recipe():
     # route if user clicked on a recipe (not through recipe of the day)
     else:
         rec = db.execute('SELECT id, title, category, content, likes FROM recipes WHERE id=?', [request.args.get('recipe_id')])
-        rev = db.execute('SELECT recipe_id, review FROM reviews WHERE recipe_id=?', [int(request.args.get('recipe_id'))])
         recipe = rec.fetchone()
-        reviews = rev.fetchone()
+        rev = db.execute('SELECT recipe_id, review FROM reviews WHERE recipe_id=?', [request.args.get('recipe_id')])
+        reviews = rev.fetchall()
     return render_template('ViewRecipe.html', recipe=recipe, reviews=reviews, liked=whether_liked)
 
 
@@ -146,21 +146,21 @@ def like_recipe():
     # print("ID", recipe_to_like)
     action = request.form['action']
     if action == 'like':
-        recipe_liked = request.form['like_me']
-        db.execute('UPDATE recipes SET likes=likes+1 WHERE id=?', [recipe_liked])
-        db.execute('INSERT INTO like_recipe (recipe_id, user_id) VALUES (?, ?)', [recipe_liked, session['user_id']])
+        recipe_id = request.form['like_me']
+        db.execute('UPDATE recipes SET likes=likes+1 WHERE id=?', [recipe_id])
+        db.execute('INSERT INTO like_recipe (recipe_id, user_id) VALUES (?, ?)', [recipe_id, session['user_id']])
         db.commit()
     if action == 'unlike':
-        recipe_unliked = request.form['unlike_me']
+        recipe_id = request.form['unlike_me']
         # just check if row is in table, if no than have not liked
         # don't need to request action from frontend
-        db.execute('UPDATE recipes SET likes=likes-1 WHERE id=?', [recipe_unliked])
-        db.execute('DELETE FROM like_recipe WHERE recipe_id=? AND user_id=?', [recipe_unliked, session['user_id']])
+        db.execute('UPDATE recipes SET likes=likes-1 WHERE id=?', [recipe_id])
+        db.execute('DELETE FROM like_recipe WHERE recipe_id=? AND user_id=?', [recipe_id, session['user_id']])
         db.commit()
-    return redirect(url_for('view_recipe'))
+    return redirect(url_for('view_recipe', recipe_id=recipe_id))
 
 
-@app.route('/review_recipe')
+@app.route('/review_recipe', methods=['GET'])
 def review_recipe():
     if session['user_id'] is None:
         abort(401)
@@ -177,9 +177,10 @@ def post_review():
     recipe_to_review = int(request.form['review_me'])
     review = request.form['review']
     db.execute('INSERT INTO reviews (recipe_id, review) VALUES (?, ?)', [recipe_to_review, review])
+    db.commit()
     cur = db.execute('SELECT * FROM reviews WHERE recipe_id=?', [recipe_to_review])
     reviews = cur.fetchall()
-    return redirect(url_for('view_recipe', reviews=reviews))
+    return redirect(url_for('view_recipe', reviews=reviews, recipe_id=recipe_to_review))
 
 
 @app.route('/view_category')
