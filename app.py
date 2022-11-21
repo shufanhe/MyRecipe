@@ -211,7 +211,7 @@ def login():
         user = db.execute('SELECT * FROM user WHERE username = ?', (username,)).fetchone()
 
     # check to see if the username is empty or not
-    if username is None:
+    if user is None:
         error = 'Incorrect username or email.'
 
     # check to see if the password is correct or not
@@ -247,9 +247,9 @@ def reset_password():
     else:
         # search in the database to give the user a new password
         db = get_db()
-        user = db.execute('SELECT * FROM user WHERE email = ?', (email,)).fetchone()
+        db.execute('UPDATE user SET password = ? WHERE email = ?', (generate_password_hash(password), email))
+        db.commit()
         # change the password of user
-        user['password'] = generate_password_hash(password)
         return redirect(url_for('loginPage'))
 
 

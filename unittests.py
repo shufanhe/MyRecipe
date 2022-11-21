@@ -40,16 +40,17 @@ class FlaskrTestCase(unittest.TestCase):
         assert b'<title>MyRecipe</title>' in rv.data
         assert b'Recipe of the Day!' in rv.data
         assert b'Search For Recipes!' in rv.data
-        try:
-            # the user login then assert login
-            assert b'Login' in rv.data
-            assert b'Register' in rv.data
-            print('Without User login')
-        except:
-            # assert without user login
-            assert b'Logout' in rv.data
-            assert b'User' in rv.data
-            print('With User login')
+        # assert with user login
+        assert b'Logout' in rv.data
+        assert b'User' in rv.data
+
+        # assert without user login
+        rv = self.app.get('/logout', follow_redirects=True)
+        assert b'<title>MyRecipe</title>' in rv.data
+        assert b'Recipe of the Day!' in rv.data
+        assert b'Search For Recipes!' in rv.data
+        assert b'Login' in rv.data
+        assert b'Register' in rv.data
 
     def test_authentication(self):
         # Register the user to login
@@ -110,7 +111,7 @@ class FlaskrTestCase(unittest.TestCase):
         assert b'Logout' in rv.data
         assert b'User' in rv.data
 
-        # Log out after sucessfully login
+        # Log out after successfully login
         rv = self.app.get('/logout', follow_redirects=True)
         assert b'<title>MyRecipe</title>' in rv.data
         assert b'Recipe of the Day!' in rv.data
@@ -125,7 +126,7 @@ class FlaskrTestCase(unittest.TestCase):
         assert b'Username/Email' in rv.data
         assert b'Password' in rv.data
 
-        #Login to the account
+        # Login to the account
         rv = self.login('khanhta2001', 'testing1234!')
         assert b'<title>MyRecipe</title>' in rv.data
         assert b'Recipe of the Day!' in rv.data
@@ -139,11 +140,22 @@ class FlaskrTestCase(unittest.TestCase):
         assert b'img' in rv.data
 
     def test_searchResults(self):
-        rv = self.searchResults('bruh')
-        try:
-            assert b'Nothing in here so far' in rv.data
-        except:
-            print('Something')
+        # Register an account
+        rv = self.register('khanhta2001', 'khanhta2001@gmail.com', 'testing1234!')
+        assert b'Login' in rv.data
+        assert b'Username/Email' in rv.data
+        assert b'Password' in rv.data
+
+        # Login to the account
+        rv = self.login('khanhta2001', 'testing1234!')
+        assert b'<title>MyRecipe</title>' in rv.data
+        assert b'Recipe of the Day!' in rv.data
+        assert b'Search For Recipes!' in rv.data
+        assert b'Logout' in rv.data
+        assert b'User' in rv.data
+
+        # search for a specific recipe
+        rv = self.searchResults('test1')
 
 
 if __name__ == '__main__':
