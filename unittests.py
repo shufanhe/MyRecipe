@@ -37,7 +37,7 @@ class FlaskrTestCase(unittest.TestCase):
 
     def test_homePage(self):
         rv = self.app.get('/')
-        assert b'<title>MyRecipe</title>' in rv.data
+        assert b'MyRecipe' in rv.data
         assert b'Recipe of the Day!' in rv.data
         assert b'Search For Recipes!' in rv.data
         # assert with user login
@@ -55,13 +55,13 @@ class FlaskrTestCase(unittest.TestCase):
     def test_authentication(self):
         # Register the user to login
         rv = self.register('khanhta2001', 'khanhta2001@gmail.com', 'testing1234!')
-        assert b'Login' in rv.data
-        assert b'Username/Email' in rv.data
+        assert b'Sign in' in rv.data
+        assert b'Username or Email' in rv.data
         assert b'Password' in rv.data
 
         # Correct password
         rv = self.login('khanhta2001', 'testing1234!')
-        assert b'<title>MyRecipe</title>' in rv.data
+        assert b'MyRecipe' in rv.data
         assert b'Recipe of the Day!' in rv.data
         assert b'Search For Recipes!' in rv.data
         assert b'Logout' in rv.data
@@ -69,7 +69,7 @@ class FlaskrTestCase(unittest.TestCase):
 
         # logout
         rv = self.app.get('/logout', follow_redirects=True)
-        assert b'<title>MyRecipe</title>' in rv.data
+        assert b'MyRecipe' in rv.data
         assert b'Recipe of the Day!' in rv.data
         assert b'Search For Recipes!' in rv.data
         assert b'Login' in rv.data
@@ -77,35 +77,35 @@ class FlaskrTestCase(unittest.TestCase):
 
         # Wrong password
         rv = self.login('khanhta2001', 'Wrongpassword!')
-        assert b'Login' in rv.data
-        assert b'Username/Email' in rv.data
+        assert b'Sign in' in rv.data
+        assert b'Username or Email' in rv.data
         assert b'Password' in rv.data
         assert b'Incorrect password' in rv.data
 
         # Wrong user account
         rv = self.login('WrongUserAccount', 'Wrongpassword!')
-        assert b'Login' in rv.data
-        assert b'Username/Email' in rv.data
+        assert b'Sign in' in rv.data
+        assert b'Username or Email' in rv.data
         assert b'Password' in rv.data
         assert b'Incorrect username or email' in rv.data
 
     def test_reset_password(self):
         # register the account
         rv = self.register('khanhta2001', 'khanhta2001@gmail.com', 'testing1234!')
-        assert b'Login' in rv.data
-        assert b'Username/Email' in rv.data
+        assert b'Sign in' in rv.data
+        assert b'Username or Email' in rv.data
         assert b'Password' in rv.data
         assert b'Forgot Your Password?' in rv.data
 
         # Reset the password
         rv = self.resetpassword('khanhta2001@gmail.com', 'DifferentPassword!')
-        assert b'Login' in rv.data
-        assert b'Username/Email' in rv.data
+        assert b'Sign in' in rv.data
+        assert b'Username or Email' in rv.data
         assert b'Password' in rv.data
 
         # Try login with that new password
         rv = self.login('khanhta2001', 'DifferentPassword!')
-        assert b'<title>MyRecipe</title>' in rv.data
+        assert b'MyRecipe' in rv.data
         assert b'Recipe of the Day!' in rv.data
         assert b'Search For Recipes!' in rv.data
         assert b'Logout' in rv.data
@@ -113,7 +113,7 @@ class FlaskrTestCase(unittest.TestCase):
 
         # Log out after successfully login
         rv = self.app.get('/logout', follow_redirects=True)
-        assert b'<title>MyRecipe</title>' in rv.data
+        assert b'MyRecipe' in rv.data
         assert b'Recipe of the Day!' in rv.data
         assert b'Search For Recipes!' in rv.data
         assert b'Login' in rv.data
@@ -122,8 +122,8 @@ class FlaskrTestCase(unittest.TestCase):
     def test_useraccount(self):
         # Register an account
         rv = self.register('khanhta2001', 'khanhta2001@gmail.com', 'testing1234!')
-        assert b'Login' in rv.data
-        assert b'Username/Email' in rv.data
+        assert b'Sign in' in rv.data
+        assert b'Username or Email' in rv.data
         assert b'Password' in rv.data
 
         # Login to the account
@@ -142,13 +142,13 @@ class FlaskrTestCase(unittest.TestCase):
     def test_search_save_recipe(self):
         # Register an account
         rv = self.register('khanhta2001', 'khanhta2001@gmail.com', 'testing1234!')
-        assert b'Login' in rv.data
-        assert b'Username/Email' in rv.data
+        assert b'Sign in' in rv.data
+        assert b'Username or Email' in rv.data
         assert b'Password' in rv.data
 
         # Login to the account
         rv = self.login('khanhta2001', 'testing1234!')
-        assert b'<title>MyRecipe</title>' in rv.data
+        assert b'MyRecipe' in rv.data
         assert b'Recipe of the Day!' in rv.data
         assert b'Search For Recipes!' in rv.data
         assert b'Logout' in rv.data
@@ -183,7 +183,8 @@ class FlaskrTestCase(unittest.TestCase):
         assert b'img' in rv.data
         assert b'Save your favorite Recipe in here!' in rv.data
 
-        rv = self.app.post('/save_recipe',data=dict(title='test_title', category='test_category', content='test_content'),
+        rv = self.app.post('/save_recipe',
+                           data=dict(title='test_title', category='test_category', content='test_content'),
                            follow_redirects=True)
         assert b'test_title' in rv.data
         assert b'test_category' in rv.data
@@ -196,7 +197,6 @@ class FlaskrTestCase(unittest.TestCase):
         assert b'test_title' in rv.data
         assert b'test_category' in rv.data
         assert b'test_content' in rv.data
-
 
 
 if __name__ == '__main__':
