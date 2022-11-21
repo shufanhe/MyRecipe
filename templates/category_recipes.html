@@ -1,15 +1,27 @@
 {% extends "layout.html" %}
 {% block body %}
 <div class="container">
+        <label class="form-label">{{category}} Recipes</label>
     <label class="form-label">{{category}} Recipes</label>
 </div>
 <ul class="entries" id="entries">
-    {% for recipe in recipes %}
-e
-    {% else %}
-<div>
-Nothing in here so far
-</div>
+{% for recipe in recipes %}
+    <div class="container">
+        <div class="text-center">
+            <div class="card" style="width: 18rem;">
+                <img src="..." class="card-img" alt="...">
+                <div class="card-body">
+                    <p class="card-text">{{ recipe.title }}</p>
+                    <a href="{{ url_for ('view_recipe')}}" class="stretched-link"></a>
+                    <input type="hidden" name="clicked" value="{{ recipe.id }}">
+                </div>
+            </div>
+        </div>
+    </div>
+{% else %}
+    <div>
+    Nothing in here so far
+    </div>
 {% endfor %}
 </ul>
 {% endblock %}

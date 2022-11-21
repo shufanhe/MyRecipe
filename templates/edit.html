@@ -1,0 +1,20 @@
+{% extends "layout.html" %}
+{% block body %}
+<div class="container w-75">
+    <form action="{{ url_for('edit_recipe') }}" method="post" class="post-recipe">
+      <dl>
+         <dt><label for="titleInput" class="form-label">Title:</label>
+            <dd><input type="text" class="form-control" id="titleInput" name="title" value={{ recipe.title }}>
+
+         <dt><label for="categoryInput" class="form-label">Category:</label>
+            <dd><input type="text" size="30" class="form-control" id="categoryInput" name="category" value={{ recipe.category }}>
+
+         <dt><label for="textareaInput" class="form-label">Text:</label>
+            <dd><textarea name="content" class="form-control" id="textareaInput" rows="5" cols="40">{{ recipe.content }}</textarea>
+
+         <dt><button type="submit" class="btn btn-dark mb-3">Save</button>
+         <input type="hidden" name="id" value={{ recipe.id }} >
+      </dl>
+    </form>
+  </div>
+{% endblock %}

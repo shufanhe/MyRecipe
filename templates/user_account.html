@@ -3,7 +3,6 @@
     <h1>{{ session.user_id }}</h1>
     <img src="../static/profile_picture.png" alt="profile picture">
     <label>{{ session.user_id }}</label>
-
     <ul class="created-recipes" id="created_recipes">
         {% for recipe in created_recipes %}
             <div class="container">
@@ -31,8 +30,6 @@
         </div>
         {% endfor %}
     </ul>
-
-
     <ul class="save_recipe" id="save_recipe">
         {% for recipe in save_recipe %}
             <div class="container">
@@ -56,5 +53,4 @@
         </div>
         {% endfor %}
     </ul>
-
 {% endblock %}

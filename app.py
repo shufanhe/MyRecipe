@@ -100,7 +100,8 @@ def create_recipe():
 @app.route('/post_recipe', methods=['POST'])
 def post_recipe():
     if session['user_id'] == 'admin' or session['user_id'] is None:
-        flash("You don't have access to this function")
+        flash('Make an account to be able to add a recipe!')
+        return redirect(url_for('create_recipe'))
     db = get_db()
     user = session['user_id']
     title = request.form['title']
@@ -185,7 +186,7 @@ def post_review():
     return redirect(url_for('view_recipe', reviews=reviews, recipe_id=recipe_to_review))
 
 
-@app.route('/view_category')
+@app.route('/view_category', methods=['GET'])
 def view_category():
     """ Shows a list of recipes for whichever category was selected by user. """
     db = get_db()
@@ -354,3 +355,51 @@ def user_account():
     db = get_db()
     save_recipe = db.execute('SELECT * FROM save_recipe WHERE username = ?', (session['user_id'],)).fetchall()
     return render_template('user_account.html', save_recipe=save_recipe)
+
+
+@app.route('/delete_recipe', methods=['POST'])
+def delete_recipe():
+    """Deletes recipe only if the user is the one that posted the recipe."""
+
+    # If user does not have an account then it will redirect to HomePage and flashes message
+    if not session['user_id']:
+        flash("Unable to Delete Post!")
+        return redirect(url_for('HomePage'))
+    else:
+        # Deletes the recipe using id to delete.
+        db = get_db()
+        db.execute('DELETE FROM recipes WHERE id = ?', request.form["id"])
+        db.commit()
+        flash("Recipe was successfully deleted!")
+    return redirect(url_for('HomePage'))
+
+
+@app.route('/edit', methods=['GET'])
+def edit():
+    """Redirects to edit screen"""
+
+    # Checks if user has an account to have access to edit this post.
+    if not session['user_id']:
+        flash("Unable to Edit Post!")
+        return redirect(url_for('HomePage'))
+    else:
+        # Can edit recipe by id
+        args = request.args
+        edit_id = args.get('id')
+        db = get_db()
+        cur = db.execute('SELECT * FROM recipes WHERE id=?', [edit_id])
+        recipe = cur.fetchone()
+        return render_template('edit.html', recipe=recipe)
+
+
+@app.route('/edit_recipe', methods=['POST'])
+def edit_recipe():
+    """Allows changes to be made to recipe using ID"""
+
+    edit_id = request.form['id']
+    db = get_db()
+    db.execute('UPDATE recipes SET title = ?, category = ?, content = ? WHERE id = ?',
+               [request.form['title'], request.form['category'], request.form['content'], request.form['id']])
+    db.commit()
+    flash('Recipe Was Successfully Updated!')
+    return redirect(url_for('view_recipe', recipe_id=edit_id))
