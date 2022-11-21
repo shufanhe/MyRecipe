@@ -51,4 +51,3 @@ CREATE TABLE if not exists calendar(
     cover varbinary not null,
     FOREIGN KEY(recipe_id) REFERENCES recipes(id) ON UPDATE CASCADE ON DELETE RESTRICT
 );
-

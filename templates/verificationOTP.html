@@ -1,0 +1,20 @@
+{% extends "layout.html" %}
+{% block body %}
+<main>
+    <div class="auth-form-header">
+        <h1>OTP Verification</h1>
+    </div>
+    <div class="auth-form px-3" id="verification">
+        <div class="auth-form-body mt-3">
+            <form action="{{ url_for ('verification')}}" method="post" name="verification">
+                <label for="OTP" class="form-label">OTP Code</label>
+                <input type="text" class="form-control" name="OTP" id="OTP">
+                <button type="submit" class="btn btn-primary btn-block">Submit</button>
+                <input type="hidden" name="verification_code" value="{{ verification_code }}">
+                <input type="hidden" name="account_email" value="{{ account_email }}">
+                <input type="hidden" name="verification_type" value="{{ verification_type }}">
+            </form>
+        </div>
+    </div>
+</main>
+{% endblock %}

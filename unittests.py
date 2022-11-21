@@ -28,11 +28,38 @@ class FlaskrTestCase(unittest.TestCase):
         return self.app.post('/login', data=dict(username=username, password=password), follow_redirects=True)
 
     def resetpassword(self, email, password):
-        return self.app.post('/resetpassword', data=dict(email=email, password=password, RetypePassword=password),
+        return self.app.post('/resetpassword',
+                             data=dict(account_email=email, password=password, RetypePassword=password),
                              follow_redirects=True)
 
     def searchResults(self, searchinput):
         return self.app.post('/search', data=dict(keyword_Search=searchinput), follow_redirects=True)
+
+    def creating_user(self):
+        # verifying password (currently do not test OTP code)
+        rv = self.register('khanhta2001', 'khanhta2001@gmail.com', 'testing1234!')
+        assert b'Verification' in rv.data
+        assert b'OTP code' in rv.data
+        assert b'Submit' in rv.data
+
+        # Correct password
+        rv = self.login('khanhta2001', 'testing1234!')
+        assert b'MyRecipe' in rv.data
+        assert b'Recipe of the Day!' in rv.data
+        assert b'Search' in rv.data
+        assert b'logout' in rv.data
+        assert b'account' in rv.data
+
+        return rv
+
+    def logout(self):
+        rv = self.app.get('/logout', follow_redirects=True)
+        assert b'MyRecipe' in rv.data
+        assert b'Recipe of the Day!' in rv.data
+        assert b'Search' in rv.data
+        assert b'Login' in rv.data
+        assert b'Register' in rv.data
+        return rv
 
     def test_categories(self):
         """ Checks that categories work. """
@@ -92,35 +119,19 @@ class FlaskrTestCase(unittest.TestCase):
         assert b'account' in rv.data
 
         # assert without user login
-        rv = self.app.get('/logout', follow_redirects=True)
-        assert b'MyRecipe' in rv.data
-        assert b'Recipe of the Day!' in rv.data
-        assert b'Search' in rv.data
-        assert b'Login' in rv.data
-        assert b'Register' in rv.data
+        self.logout()
 
     def test_authentication(self):
         # Register the user to login
-        rv = self.register('khanhta2001', 'khanhta2001@gmail.com', 'testing1234!')
-        assert b'Sign in' in rv.data
-        assert b'Username or Email' in rv.data
+        rv = self.app.get('/registerPage')
+        assert b'Username' in rv.data
+        assert b'Email' in rv.data
         assert b'Password' in rv.data
-
-        # Correct password
-        rv = self.login('khanhta2001', 'testing1234!')
-        assert b'MyRecipe' in rv.data
-        assert b'Recipe of the Day!' in rv.data
-        assert b'Search' in rv.data
-        assert b'logout' in rv.data
-        assert b'account' in rv.data
-
-        # logout
-        rv = self.app.get('/logout', follow_redirects=True)
-        assert b'MyRecipe' in rv.data
-        assert b'Recipe of the Day!' in rv.data
-        assert b'Search' in rv.data
-        assert b'Login' in rv.data
+        assert b'Retype Password' in rv.data
         assert b'Register' in rv.data
+
+        self.creating_user()
+        self.logout()
 
         # Wrong password
         rv = self.login('khanhta2001', 'Wrongpassword!')
@@ -138,18 +149,36 @@ class FlaskrTestCase(unittest.TestCase):
 
     def test_reset_password(self):
         # register the account
-        rv = self.register('khanhta2001', 'khanhta2001@gmail.com', 'testing1234!')
-        assert b'Sign in' in rv.data
-        assert b'Username or Email' in rv.data
-        assert b'Password' in rv.data
-        assert b'Forgot Your Password?' in rv.data
+        # verifying password (currently do not test OTP code)
+        rv = self.app.post('/register',
+                           data=dict(username='khanhta2001', Email='khanhta2001@gmail.com', password='testing1234!',
+                                     RetypePassword='testing1234!'),
+                           follow_redirects=True)
+        assert b'Verification' in rv.data
+        assert b'OTP code' in rv.data
+        assert b'Submit' in rv.data
 
-        # Reset the password
+        rv = self.app.get('/verificationPage')
+        assert b'Reset Your Password' in rv.data
+        assert b'Email' in rv.data
+        assert b'Submit' in rv.data
+
+        rv = self.app.post('/sendingOTP', data=dict(verification_code=123456, email='khanhta2001@gmail.com',
+                                                    verification_type='ResetPassword'), follow_redirects=True)
+        assert b'verification' in rv.data
+        assert b'OTP code' in rv.data
+        assert b'Submit' in rv.data
+
+        rv = self.app.get('/resetpasswordPage', data=dict(account_email='khanhta2001@gmail.com'), follow_redirects=True)
+        assert b'Reset Your Password' in rv.data
+        assert b'Password' in rv.data
+        assert b'Retype Password' in rv.data
+        assert b'Reset Your Password' in rv.data
+
         rv = self.resetpassword('khanhta2001@gmail.com', 'DifferentPassword!')
         assert b'Sign in' in rv.data
         assert b'Username or Email' in rv.data
         assert b'Password' in rv.data
-
         # Try login with that new password
         rv = self.login('khanhta2001', 'DifferentPassword!')
         assert b'MyRecipe' in rv.data
@@ -159,47 +188,22 @@ class FlaskrTestCase(unittest.TestCase):
         assert b'account' in rv.data
 
         # Log out after successfully login
-        rv = self.app.get('/logout', follow_redirects=True)
-        assert b'MyRecipe' in rv.data
-        assert b'Recipe of the Day!' in rv.data
-        assert b'Search' in rv.data
-        assert b'Login' in rv.data
-        assert b'Register' in rv.data
+        self.logout()
 
     def test_useraccount(self):
         # Register an account
-        rv = self.register('khanhta2001', 'khanhta2001@gmail.com', 'testing1234!')
-        assert b'Sign in' in rv.data
-        assert b'Username or Email' in rv.data
-        assert b'Password' in rv.data
-
-        # Login to the account
-        rv = self.login('khanhta2001', 'testing1234!')
-        assert b'MyRecipe' in rv.data
-        assert b'Recipe of the Day!' in rv.data
-        assert b'Search' in rv.data
-        assert b'logout' in rv.data
-        assert b'account' in rv.data
+        self.creating_user()
 
         # Get to the user account
         rv = self.app.get('/user_account')
         assert b'khanhta2001' in rv.data
         assert b'img' in rv.data
 
+        self.logout()
+
     def test_search_save_recipe(self):
         # Register an account
-        rv = self.register('khanhta2001', 'khanhta2001@gmail.com', 'testing1234!')
-        assert b'Sign in' in rv.data
-        assert b'Username or Email' in rv.data
-        assert b'Password' in rv.data
-
-        # Login to the account
-        rv = self.login('khanhta2001', 'testing1234!')
-        assert b'MyRecipe' in rv.data
-        assert b'Recipe of the Day!' in rv.data
-        assert b'Search' in rv.data
-        assert b'logout' in rv.data
-        assert b'account' in rv.data
+        self.creating_user()
 
         rv = self.app.get('/create_recipe')
         assert b'title' in rv.data
@@ -245,19 +249,11 @@ class FlaskrTestCase(unittest.TestCase):
         assert b'test_category' in rv.data
         assert b'test_content' in rv.data
 
+        self.logout()
+
     def test_recipes(self):
         # Register the user to login
-        rv = self.register('khanhta2001', 'khanhta2001@gmail.com', 'testing1234!')
-        assert b'Sign in' in rv.data
-        assert b'Username or Email' in rv.data
-        assert b'Password' in rv.data
-
-        # Correct password
-        rv = self.login('khanhta2001', 'testing1234!')
-        assert b'MyRecipe' in rv.data
-        assert b'Recipe of the Day!' in rv.data
-        assert b'logout' in rv.data
-        assert b'account' in rv.data
+        self.creating_user()
 
         # go to the add recipe Page
         rv = self.app.get('/create_recipe')
@@ -325,28 +321,14 @@ class FlaskrTestCase(unittest.TestCase):
         assert b'test_review' in rv.data
 
         # logout
-        rv = self.app.get('/logout', follow_redirects=True)
-        assert b'MyRecipe' in rv.data
-        assert b'Recipe of the Day!' in rv.data
-        assert b'Login' in rv.data
-        assert b'Register' in rv.data
+        self.logout()
 
     def test_delete_edit(self):
         """ Tests delete function by adding a post and then making sure it is not shown after deleted. """
         """ Also tests edit function by adding a recipe and then making sure it is updated with edits. """
 
         # register and login test code copied from Khanh since he wrote register and log in functions.
-        rv = self.register('khanhta2001', 'khanhta2001@gmail.com', 'testing1234!')
-        assert b'Sign in' in rv.data
-        assert b'Username or Email' in rv.data
-        assert b'Password' in rv.data
-
-        # Correct password
-        rv = self.login('khanhta2001', 'testing1234!')
-        assert b'MyRecipe' in rv.data
-        assert b'Recipe of the Day!' in rv.data
-        assert b'logout' in rv.data
-        assert b'account' in rv.data
+        self.creating_user()
 
         # Added test recipe
         rv = self.app.get('/create_recipe')
@@ -402,6 +384,8 @@ class FlaskrTestCase(unittest.TestCase):
         assert b'Title Edit' not in rv.data
         assert b'MyRecipe' in rv.data
         assert b'Recipe of the Day!' in rv.data
+
+        self.logout()
 
 
 if __name__ == '__main__':
