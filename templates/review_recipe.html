@@ -1,0 +1,13 @@
+{% extends "layout.html" %}
+{% block body %}
+  <div class="container w-75">
+    <form action="{{ url_for('post_review') }}" method="post" class="post_review">
+      <dl>
+          <dt><label for="textareaInput" class="form-label">Enter your review here:</label>
+              <dd><textarea name="review" class="form-control" id="textareaInput" rows="5" cols="40"></textarea>
+          <dt><button type="submit" class="btn btn-dark mb-3">Post</button>
+          <input type="hidden" name="review_me" value={{ recipe.id }}>
+      </dl>
+    </form>
+  </div>
+{% endblock %}
