@@ -132,7 +132,6 @@ def view_recipe():
         rev = db.execute('SELECT recipe_id, review FROM reviews WHERE recipe_id=?', [int(request.args.get('recipe_id'))])
         recipe = rec.fetchone()
         reviews = rev.fetchone()
-        flash(reviews[0])
     return render_template('ViewRecipe.html', recipe=recipe, reviews=reviews, liked=whether_liked)
 
 
@@ -178,7 +177,9 @@ def post_review():
     recipe_to_review = int(request.form['review_me'])
     review = request.form['review']
     db.execute('INSERT INTO reviews (recipe_id, review) VALUES (?, ?)', [recipe_to_review, review])
-    return redirect(url_for('view_recipe'))
+    cur = db.execute('SELECT * FROM reviews WHERE recipe_id=?', [recipe_to_review])
+    reviews = cur.fetchall()
+    return redirect(url_for('view_recipe', reviews=reviews))
 
 
 @app.route('/view_category')
