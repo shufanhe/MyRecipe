@@ -91,7 +91,7 @@ def create_recipe():
     return render_template('CreateRecipe.html')
 
 
-@app.route('/post', methods=['POST'])
+@app.route('/post_recipe', methods=['POST'])
 def post_recipe():
     if not session['user_id']:
         flash('Make an account to be able to add a recipe!')
@@ -306,3 +306,32 @@ def delete_recipe():
     return redirect(url_for('HomePage'))
 
 
+@app.route('/edit', methods=['GET'])
+def edit():
+    """Redirects to edit screen"""
+
+    # Checks if user has an account to have access to edit this post.
+    if not session['user_id']:
+        flash("Unable to Edit Post!")
+        return redirect(url_for('HomePage'))
+    else:
+        # Can edit recipe by id
+        args = request.args
+        edit_id = args.get('id')
+        db = get_db()
+        cur = db.execute('SELECT * FROM recipes WHERE id=?', [edit_id])
+        recipe = cur.fetchone()
+        return render_template('edit.html', recipe=recipe)
+
+
+@app.route('/edit_recipe', methods=['POST'])
+def edit_recipe():
+    """Allows changes to be made to recipe using ID"""
+
+    edit_id = request.form['id']
+    db = get_db()
+    db.execute('UPDATE recipes SET title = ?, category = ?, content = ? WHERE id = ?',
+               [request.form['title'], request.form['category'], request.form['content'], request.form['id']])
+    db.commit()
+    flash('Recipe Was Successfully Updated!')
+    return redirect(url_for('view_recipe', recipe_id=edit_id))
