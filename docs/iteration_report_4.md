@@ -17,7 +17,7 @@ Completed Work
 ----------------
 1. Shufan:
    - Like Recipe: Changing between like and unlike, incrementing and decrementing like counts. Redirecting is still not working, needs to work on js
-   - Review Recipe ()
+   - Review Recipe 
    - New Navbar design
 2. Khanh:
    -  Save recipe
