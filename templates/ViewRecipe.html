@@ -1,5 +1,45 @@
 {% extends "layout.html" %}
 {% block body %}
+
+    <div class="container">
+        <form action="{{ url_for('view_recipe') }}" id="view_recipe">
+                <h1>{{recipe.title}}</h1>
+                <dt>{{recipe.category}}</dt>
+                <p>{{recipe.content}}</p>
+        </form>
+
+        {% if liked==1 %}
+            <form action="{{ url_for('like_recipe') }}" method="post" class="like-recipe">
+               <input type="hidden" name="action" value='unlike'>
+                <button type="submit" class="btn btn-outline-dark">Unlike</button>
+                <input type="hidden" name="unlike_me" value={{ recipe.id }}>
+                <input type="hidden" name="like_count" value={{ recipe.likes }}>
+            </form>
+        {% elif liked==0 %}
+            <form action="{{ url_for('like_recipe') }}" method="post" class="like-recipe">
+                <input type="hidden" name="action" value='like'>
+                <button id="like_button" type="submit" class="btn btn-outline-dark">Like</button>
+                <input type="hidden" name="like_me" value={{ recipe.id }}>
+                <input type="hidden" name="like_count" value={{ recipe.likes }}>
+            </form>
+        {% endif %}
+        <dt>{{recipe.likes}}</dt>
+
+        <form action="{{ url_for('review_recipe') }}" method="get" class="review-recipe">
+            <button type="submit" class="btn btn-outline-dark">Review</button>
+            <input type="hidden" name="review_me" value={{ recipe.id }}>
+        </form>
+
+        {% for each_review in reviews %}
+            <p>{{ each_review.review }}</p>
+        {% else %}
+           <div class="alert alert-dark" role="alert">
+                No reviews here so far!
+           </div>
+        {% endfor %}
+
+
+    </div>
 <div class="container">
     <form action="{{ url_for('view_recipe') }}" method="get" id="view_recipe">
         <label for="view_recipe" class="form-label">View Recipe Page</label>

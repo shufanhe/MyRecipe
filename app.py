@@ -71,12 +71,16 @@ def adminUser():
 
 @app.route('/')
 def HomePage():
-    # Connect with the homepage
+    name = None
     db = get_db()
-    # Get from db what date is today
+    # recipe of the day should show up according to the date, refering to the covers stored in calendar
     cov = db.execute('SELECT cover FROM calendar WHERE date_today=?', [date.today()])
     cover_today = cov.fetchone()
-    return render_template('HomePage.html', cover=cover_today)
+    id = db.execute('SELECT recipe_id FROM calendar WHERE date_today=?', [date.today()])
+    id_today = id.fetchone()
+    recipe = db.execute('SELECT title, category, content FROM recipes WHERE id=?', [id_today])
+    recipe_today = recipe.fetchone()
+    return render_template('HomePage.html', cover=cover_today, recipe=recipe_today)
 
 
 @app.route('/categories')
@@ -87,7 +91,9 @@ def categories():
 
 @app.route('/create_recipe')
 def create_recipe():
-    # create recipe and add it to the database
+    if session['user_id'] is None:
+        abort(401)
+    # redirect to create recipe form
     return render_template('CreateRecipe.html')
 
 
@@ -96,9 +102,14 @@ def post_recipe():
     if session['user_id'] == 'admin' or session['user_id'] is None:
         flash("You don't have access to this function")
     db = get_db()
-    # push recipe created
-    db.execute('INSERT INTO recipes (title, category, content) VALUES (?, ?, ?)',
-               [request.form['title'], request.form['category'], request.form['content']])
+    user = session['user_id']
+    title = request.form['title']
+    category = request.form['category']
+    content = request.form['content']
+    date_today = str(date.today())
+    # take user input and insert into the database
+    db.execute('INSERT INTO recipes (user_id, title, category, content, posted_date) VALUES (?, ?, ?, ?, ?)',
+               [user, title, category, content, date_today])
     db.commit()
     flash('New recipe successfully posted!')
     return redirect(url_for('HomePage'))
@@ -107,32 +118,84 @@ def post_recipe():
 @app.route('/view_recipe')
 def view_recipe():
     db = get_db()
-    # view a specific recipe or only recipe of the day
+    cur = db.execute('SELECT COUNT(1) FROM like_recipe WHERE user_id=? AND recipe_id=?',
+                       [session['user_id'], request.args.get('recipe_id')])
+    whether_liked = cur.fetchone()[0]
+    # route if the user clicked on recipe of the day, recipe should show up according to the date
     if ('recipe_of_the_day' in request.args):
-        recipe_id_today = db.execute('SELECT recipe_id FROM recipes WHERE date_today=?', [date.today()])
-        recipe_today = db.execute('SELECT title, category, content FROM recipes WHERE id=?', [recipe_id_today])
+        recipe_id_today = db.execute('SELECT recipe_id FROM calendar WHERE date_today=?', [date.today()])
+        recipe_today = db.execute('SELECT title, category, content, likes, review FROM recipes WHERE id=?', [recipe_id_today])
+        rev = db.execute('SELECT likes, review FROM reviews WHERE recipe_id=?', [recipe_id_today])
         recipe = recipe_today.fetchone()
+        reviews = rev.fetchall()
+    # route if user clicked on a recipe (not through recipe of the day)
     else:
-        rec = db.execute('SELECT id, title, category, content FROM recipes WHERE id=?',
-                         [request.args.get('recipe_id')])
+        rec = db.execute('SELECT id, title, category, content, likes FROM recipes WHERE id=?', [request.args.get('recipe_id')])
         recipe = rec.fetchone()
-    return render_template('ViewRecipe.html', recipe=recipe)
+        rev = db.execute('SELECT recipe_id, review FROM reviews WHERE recipe_id=?', [request.args.get('recipe_id')])
+        reviews = rev.fetchall()
+    return render_template('ViewRecipe.html', recipe=recipe, reviews=reviews, liked=whether_liked)
+
+
+@app.route('/like_recipe', methods=['POST'])
+def like_recipe():
+    if session['user_id'] is None:
+        abort(401)
+    db = get_db()
+    # current_user = db.execute('SELECT * FROM user WHERE id=?', [session['user_id']]).fetchone()
+    # recipe_liked = request.get_json()['to_like']
+    # recipe_to_like = request.form['like_me']
+    # print("ID", recipe_to_like)
+    action = request.form['action']
+    if action == 'like':
+        recipe_id = request.form['like_me']
+        db.execute('UPDATE recipes SET likes=likes+1 WHERE id=?', [recipe_id])
+        db.execute('INSERT INTO like_recipe (recipe_id, user_id) VALUES (?, ?)', [recipe_id, session['user_id']])
+        db.commit()
+    if action == 'unlike':
+        recipe_id = request.form['unlike_me']
+        # just check if row is in table, if no than have not liked
+        # don't need to request action from frontend
+        db.execute('UPDATE recipes SET likes=likes-1 WHERE id=?', [recipe_id])
+        db.execute('DELETE FROM like_recipe WHERE recipe_id=? AND user_id=?', [recipe_id, session['user_id']])
+        db.commit()
+    return redirect(url_for('view_recipe', recipe_id=recipe_id))
+
+
+@app.route('/review_recipe', methods=['GET'])
+def review_recipe():
+    if session['user_id'] is None:
+        abort(401)
+    db = get_db()
+    recipe_id = request.args.get('review_me')
+    cur = db.execute('SELECT * FROM recipes WHERE id=?', [recipe_id])
+    recipe = cur.fetchone()
+    return render_template('review_recipe.html', recipe=recipe)
+
+
+@app.route('/post_review', methods=['POST'])
+def post_review():
+    db = get_db()
+    recipe_to_review = int(request.form['review_me'])
+    review = request.form['review']
+    db.execute('INSERT INTO reviews (recipe_id, review) VALUES (?, ?)', [recipe_to_review, review])
+    db.commit()
+    cur = db.execute('SELECT * FROM reviews WHERE recipe_id=?', [recipe_to_review])
+    reviews = cur.fetchall()
+    return redirect(url_for('view_recipe', reviews=reviews, recipe_id=recipe_to_review))
 
 
 @app.route('/view_category')
 def view_category():
     """ Shows a list of recipes for whichever category was selected by user. """
-
     db = get_db()
-    cats = request.args.get('category')  # Gets the category user selected.
-
+    cats = request.args.get('category')
+    # Gets the category user selected.
     # Query stores the selected recipes by whichever category was selected into cur.
-    cur = db.execute('SELECT id, title, content, category FROM recipes WHERE category = ? ORDER BY id DESC',
-                     [cats])
-    category = cur.fetchall()
-
+    cur = db.execute('SELECT * FROM recipes WHERE category = ? ORDER BY id DESC', [cats])
+    recipes = cur.fetchall()
     # Shows the list of categories calling category_recipes.html
-    return render_template('category_recipes.html', category=category)
+    return render_template('category_recipes.html', recipes=recipes, category=cats)
 
 
 @app.route('/search', methods=['POST'])
@@ -285,6 +348,7 @@ def save_recipe():
 
 @app.route('/user_account')
 def user_account():
+    db = get_db()
     if session['user_id'] is None:
         abort(401)
     db = get_db()

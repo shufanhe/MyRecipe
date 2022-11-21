@@ -1,7 +1,5 @@
 import os
-
 from flask import json
-
 import app
 import unittest
 import tempfile
@@ -39,16 +37,16 @@ class FlaskrTestCase(unittest.TestCase):
         rv = self.app.get('/')
         assert b'MyRecipe' in rv.data
         assert b'Recipe of the Day!' in rv.data
-        assert b'Search For Recipes!' in rv.data
+        assert b'Search' in rv.data
         # assert with user login
-        assert b'Logout' in rv.data
-        assert b'User' in rv.data
+        assert b'logout' in rv.data
+        assert b'account' in rv.data
 
         # assert without user login
         rv = self.app.get('/logout', follow_redirects=True)
-        assert b'<title>MyRecipe</title>' in rv.data
+        assert b'MyRecipe' in rv.data
         assert b'Recipe of the Day!' in rv.data
-        assert b'Search For Recipes!' in rv.data
+        assert b'Search' in rv.data
         assert b'Login' in rv.data
         assert b'Register' in rv.data
 
@@ -63,15 +61,15 @@ class FlaskrTestCase(unittest.TestCase):
         rv = self.login('khanhta2001', 'testing1234!')
         assert b'MyRecipe' in rv.data
         assert b'Recipe of the Day!' in rv.data
-        assert b'Search For Recipes!' in rv.data
-        assert b'Logout' in rv.data
-        assert b'User' in rv.data
+        assert b'Search' in rv.data
+        assert b'logout' in rv.data
+        assert b'account' in rv.data
 
         # logout
         rv = self.app.get('/logout', follow_redirects=True)
         assert b'MyRecipe' in rv.data
         assert b'Recipe of the Day!' in rv.data
-        assert b'Search For Recipes!' in rv.data
+        assert b'Search' in rv.data
         assert b'Login' in rv.data
         assert b'Register' in rv.data
 
@@ -107,15 +105,15 @@ class FlaskrTestCase(unittest.TestCase):
         rv = self.login('khanhta2001', 'DifferentPassword!')
         assert b'MyRecipe' in rv.data
         assert b'Recipe of the Day!' in rv.data
-        assert b'Search For Recipes!' in rv.data
-        assert b'Logout' in rv.data
-        assert b'User' in rv.data
+        assert b'Search' in rv.data
+        assert b'logout' in rv.data
+        assert b'account' in rv.data
 
         # Log out after successfully login
         rv = self.app.get('/logout', follow_redirects=True)
         assert b'MyRecipe' in rv.data
         assert b'Recipe of the Day!' in rv.data
-        assert b'Search For Recipes!' in rv.data
+        assert b'Search' in rv.data
         assert b'Login' in rv.data
         assert b'Register' in rv.data
 
@@ -130,9 +128,9 @@ class FlaskrTestCase(unittest.TestCase):
         rv = self.login('khanhta2001', 'testing1234!')
         assert b'MyRecipe' in rv.data
         assert b'Recipe of the Day!' in rv.data
-        assert b'Search For Recipes!' in rv.data
-        assert b'Logout' in rv.data
-        assert b'User' in rv.data
+        assert b'Search' in rv.data
+        assert b'logout' in rv.data
+        assert b'account' in rv.data
 
         # Get to the user account
         rv = self.app.get('/user_account')
@@ -150,9 +148,9 @@ class FlaskrTestCase(unittest.TestCase):
         rv = self.login('khanhta2001', 'testing1234!')
         assert b'MyRecipe' in rv.data
         assert b'Recipe of the Day!' in rv.data
-        assert b'Search For Recipes!' in rv.data
-        assert b'Logout' in rv.data
-        assert b'User' in rv.data
+        assert b'Search' in rv.data
+        assert b'logout' in rv.data
+        assert b'account' in rv.data
 
         rv = self.app.get('/create_recipe')
         assert b'title' in rv.data
@@ -198,6 +196,93 @@ class FlaskrTestCase(unittest.TestCase):
         assert b'test_category' in rv.data
         assert b'test_content' in rv.data
 
+    def test_recipes(self):
+        # Register the user to login
+        rv = self.register('khanhta2001', 'khanhta2001@gmail.com', 'testing1234!')
+        assert b'Sign in' in rv.data
+        assert b'Username or Email' in rv.data
+        assert b'Password' in rv.data
+
+        # Correct password
+        rv = self.login('khanhta2001', 'testing1234!')
+        assert b'MyRecipe' in rv.data
+        assert b'Recipe of the Day!' in rv.data
+        assert b'logout' in rv.data
+        assert b'account' in rv.data
+
+        # go to the add recipe Page
+        rv = self.app.get('/create_recipe')
+        assert b'title' in rv.data
+        assert b'category' in rv.data
+        assert b'content' in rv.data
+        assert b'Post' in rv.data
+        # post recipe
+        rv = self.app.post('/post_recipe', data=dict(
+                                            title='test_title',
+                                            category='test_category',
+                                            content='test_content'
+                                        ), follow_redirects=True)
+        assert b'New recipe successfully posted!' in rv.data
+        assert b'MyRecipe' in rv.data
+        assert b'Recipe of the Day!' in rv.data
+
+        rv = self.app.get('/view_recipe?recipe_id=1')
+        assert b'test_title' in rv.data
+        assert b'test_category' in rv.data
+        assert b'test_content' in rv.data
+        assert b'Like' in rv.data
+        assert b'review' in rv.data
+        assert b'No reviews here so far!' in rv.data
+
+        # like recipe
+        rv = self.app.post('/like_recipe', data=dict(
+                                            action='like',
+                                            like_me=1
+                                        ), follow_redirects=True)
+        assert b'test_title' in rv.data
+        assert b'test_category' in rv.data
+        assert b'test_content' in rv.data
+        assert b'Unlike' in rv.data
+        assert b'review' in rv.data
+        assert b'No reviews here so far!' in rv.data
+
+        # unlike recipe
+        rv = self.app.post('/like_recipe', data=dict(
+                                            action='unlike',
+                                            unlike_me=1
+                                        ), follow_redirects=True)
+        assert b'test_title' in rv.data
+        assert b'test_category' in rv.data
+        assert b'test_content' in rv.data
+        assert b'Like' in rv.data
+        assert b'review' in rv.data
+        assert b'No reviews here so far!' in rv.data
+
+        # go to review recipe page
+        rv = self.app.get('/review_recipe?review_me=1')
+        assert b'Enter your review here:' in rv.data
+        assert b'Post' in rv.data
+
+        # post review
+        rv = self.app.post('/post_review', data=dict(
+                                            review='test_review',
+                                            review_me='1'
+                                        ), follow_redirects=True)
+        assert b'test_title' in rv.data
+        assert b'test_category' in rv.data
+        assert b'test_content' in rv.data
+        assert b'Like' in rv.data
+        assert b'review' in rv.data
+        assert b'test_review' in rv.data
+
+        # logout
+        rv = self.app.get('/logout', follow_redirects=True)
+        assert b'MyRecipe' in rv.data
+        assert b'Recipe of the Day!' in rv.data
+        assert b'Login' in rv.data
+        assert b'Register' in rv.data
+
 
 if __name__ == '__main__':
     unittest.main()
+
