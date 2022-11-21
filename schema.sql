@@ -1,5 +1,6 @@
 drop table if exists recipes;
 drop table if exists user;
+drop table if exists save_recipe;
 
 CREATE TABLE user (
     id INTEGER PRIMARY KEY AUTOINCREMENT,

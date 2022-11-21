@@ -1,5 +1,6 @@
 import functools
 import os
+import random
 from sqlite3 import dbapi2 as sqlite3
 from flask import Flask, flash, g, redirect, render_template, request, session, url_for, abort
 from flask_mail import Mail, Message
@@ -19,14 +20,12 @@ app.config.from_envvar('FLASKR_SETTINGS', silent=True)
 app.config['MAIL_SERVER'] = 'smtp.gmail.com'
 app.config['MAIL_PORT'] = 465
 app.config['MAIL_USERNAME'] = 'testdevappfood@gmail.com'
-app.config['MAIL_PASSWORD'] = 'kgwkcbrlcssztipt'
-app.config['MAIL_USE_TLS'] = False
+app.config['MAIL_PASSWORD'] = 'ozxbpxdxfkumqodf'
 app.config['MAIL_USE_SSL'] = True
 app.config['MAIL_DEFAULT_SENDER'] = 'testdevappfood@gmail.com'
-app.config['MAIL_ASCII_ATTACHMENTS'] = True
-app.config['DEBUG'] = True
 
 mail = Mail(app)
+
 
 def connect_db():
     """Connects to the specific database."""
@@ -191,14 +190,20 @@ def register():
             error = 'Please enter your password correctly.'
         else:
             # try to register the username, if not return error that user_id already registered
-            try:
+            user = db.execute('SELECT * FROM user WHERE username = ?', (username,)).fetchone()
+            if user is None:
                 db.execute("INSERT INTO user (username, password,email) VALUES (?, ?,?)",
                            (username, generate_password_hash(password), email), )
                 db.commit()
-            except db.IntegrityError:
-                error = f"User {username} is already registered."
+                msg = Message("Email registration for Food Recipe Account", recipients=[email])
+                OTP = random.randrange(100000, 999999)
+                msg.body = "Hi,\n\nHere is your OTP code:\n" + str(OTP) + "\n\n" + "Thank you,\nFood Recipe Admin team"
+                mail.send(msg)
+                flash('Please check your email for OTP code')
+                verification_type = "Register"
+                return render_template('verificationOTP.html', verification_code=OTP, account_email=email, verification_type=verification_type)
             else:
-                return redirect(url_for("loginPage"))
+                error = f"User {username} is already registered."
     flash(error)
     return render_template('register.html')
 
@@ -241,37 +246,70 @@ def login():
 
 @app.route('/resetpasswordPage', methods=['GET'])
 def reset_passwordPage():
-    return render_template('resetPassword.html')
+    OTP = request.args.get('verification_code')
+    email = request.args.get('account_email')
+    verification_type = request.args.get('verification_type')
+    return render_template('resetPassword.html', verification_code=OTP, account_email=email, verification_type=verification_type)
 
 
 @app.route('/resetpassword', methods=['POST'])
 def reset_password():
     # get all the required field
+    password = request.form['password']
+    retypePassword = request.form['RetypePassword']
+    email = request.form['account_email']
+    # check if the user enters any information
+    if password is None or retypePassword is None:
+        flash('Please enter the missing field')
+    elif password != retypePassword:
+        flash('Please retype your password!')
+        return redirect(url_for('reset_passwordPage'))
+    else:
+        # search in the database to give the user a new password
+        db = get_db()
+        db.execute('UPDATE user SET password = ? WHERE email = ?', (generate_password_hash(password), email))
+        db.commit()
+        # change the password of user
+    return redirect(url_for('loginPage'))
+
+
+@app.route('/verificationPage', methods=['GET'])
+def verificationPage():
+    return render_template('verificationPassword.html')
+
+
+@app.route('/verification', methods=['POST'])
+def verification():
+    verification_code = request.form['verification_code']
+    account_email = request.form['account_email']
+    verification_type = request.form['verification_type']
+    OTP = request.form['OTP']
+    if OTP != verification_code:
+        flash('Please enter the correct OTP!')
+        render_template('verificationOTP.html', verification_code=verification_code, account_email=account_email,
+                        verification_type=verification_type)
+    else:
+        if verification_type == 'Register':
+            return redirect(url_for('loginPage'))
+        else:
+            return redirect(url_for('reset_passwordPage', account_email=account_email))
+
+
+@app.route('/sendingOTP', methods=['POST'])
+def sendingOTP():
     email = request.form['email']
-    try:
-        msg = Message("Subject", recipients=[email])
-        msg.body = "Hello Flask message sent from Flask-Mail"
-        msg.html = "Yo, look how I did this even though Mark said it's impossible to do this within the time limit :)"
-        mail.send(msg)
-    except Exception as e:
-        raise e
-    # password = request.form['password']
-    # retypePassword = request.form['RetypePassword']
-    #
-    # # check if the user enters any information
-    # if email is None or password is None or retypePassword is None:
-    #     flash('Please enter the missing field')
-    # if password != retypePassword:
-    #     flash('Please retype your password!')
-    # else:
-    #     # search in the database to give the user a new password
-    #     db = get_db()
-    #     db.execute('UPDATE user SET password = ? WHERE email = ?', (generate_password_hash(password),email))
-    #     db.commit()
-    #     # change the password of user
+    verification_type = request.form['verification_type']
+    db = get_db()
+    user = db.execute('SELECT * FROM user WHERE email = ?', (email,)).fetchone()
+    if user is None:
+        flash('There is no account registered under that email')
+        return redirect(url_for('verificationPage'))
+    msg = Message("Email Verification for Food Recipe Account", recipients=[email])
+    OTP = random.randrange(100000, 999999)
+    msg.body = "Hi,\n\nHere is your OTP code:\n" + str(OTP) + "\n\n" + "Thank you,\nFood Recipe Admin team"
     mail.send(msg)
-    # return redirect(url_for('loginPage'))
-    return "Message sent!"
+    flash('Please check your email for OTP code')
+    return render_template('verificationOTP.html', verification_code=OTP, account_email=email, verification_type=verification_type)
 
 
 @app.route('/logout')

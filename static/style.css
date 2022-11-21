@@ -3,3 +3,64 @@
    right:10px;
    top:5px;
 }
+.position-absolute {
+    position: absolute !important;
+}
+.p-0 {
+    padding: 0 !important;
+}
+.top-0 {
+    top: 0 !important;
+}
+.right-0 {
+    right: 0 !important;
+}
+label {
+    cursor: default;
+}
+.btn-primary {
+    color: #ffffff;
+    background-color: #2da44e;
+}
+.btn-block {
+    display: block;
+    width: 100%;
+    text-align: center;
+}
+.auth-form-body {
+    padding: 16px;
+    font-size: 14px;
+    background-color: #f6f8fa;
+    border: 1px solid #f6f8fa;
+}
+.auth-form {
+    width: 350px;
+    margin: 0 auto;
+}
+.auth-form-header {
+    margin-bottom: 16px;
+    color: #24292f;
+    text-align: center;
+    text-shadow: none;
+    background-color: transparent;
+    border: 0;
+}
+.login-callout {
+    padding: 16px 16px;
+    text-align: center;
+    border: 1px solid #d0d7de;
+    border-radius: 6px;
+}
+
+.auth-form label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 400;
+    text-align: left;
+}
+.mt-3 {
+    margin-top: 16px !important;
+}
+.position-relative {
+    position: relative !important;
+}
