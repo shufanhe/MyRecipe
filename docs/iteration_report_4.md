@@ -22,9 +22,9 @@ Completed Work
    - Debugging past code - specifically post_recipe (recipes show up on user account after posting it), and view_recipe (made it work for user account and categories)
 2. Khanh:
    -  Save recipe
-   -  Added verification for registration and reset password - emails user a code if they forgot their password so they can update it after getting code.
+   -  Added verification for registration and reset password - you get a code to verify your account.
    -  Front-end for user account.
-   -  Updated redirect to better html page rather than give 401 page.
+   -  Helped Shufan and Diana for unit-tests since they needed help with them.
 3. Diana:
    - Delete recipe.
    - Edit recipe.
@@ -39,7 +39,7 @@ Still Needs Completion
 2. Khanh:
    - Frontend for user account page - make it user accessible.
 3. Diana:
-   - Implement user preferences - spoke with Evan and got an idea on how to do it.
+   - Implement user preferences - spoke with Evan and got an idea on how, basically give the creator options to select what the recipe is. For example if it is vegan they will select that option. Then when the user updates their account they will get the option to exclude recipes that go against their dietary restrictions.
    - Front-end categories - specifically focusing on page that lists recipes after clicking a specific category.
 
 Troubles/Issues/Roadblocks
@@ -76,7 +76,6 @@ Tasks:
    - Notifications for creators to see their likes and reviews after a viewer leaves them a like or review.
    - Creator profiles, allowing other users to see profiles.
    - Make sure to add unit-tests for stories!
-
 Assigning:
 1. Shufan:
    - Notifications for creators
@@ -84,6 +83,7 @@ Assigning:
 2. Khanh:
    - Creator profiles, allowing other users to see profiles.
    - Front-end user account
+   - Updated redirect to better html page rather than give 401 page.
 3. Diana:
    - Implement user preferences
    - Finish up front end for categories

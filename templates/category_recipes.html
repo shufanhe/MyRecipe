@@ -2,8 +2,8 @@
 {% block body %}
 <div class="container">
         <label class="form-label">{{category}} Recipes</label>
+    <label class="form-label">{{category}} Recipes</label>
 </div>
-
 <ul class="entries" id="entries">
 {% for recipe in recipes %}
     <div class="container">
@@ -20,7 +20,7 @@
     </div>
 {% else %}
     <div>
-        Nothing in here so far
+    Nothing in here so far
     </div>
 {% endfor %}
 </ul>
