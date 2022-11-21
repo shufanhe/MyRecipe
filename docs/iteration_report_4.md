@@ -22,7 +22,7 @@ Completed Work
    - Debugging past code - specifically post_recipe (recipes show up on user account after posting it), and view_recipe (made it work for user account and categories)
 2. Khanh:
    -  Save recipe
-   -  Added verification for registration and reset password - you get a code to verify your account.
+   -  Added verification for registration and reset password - you get a code to verify your account. Khanh still needs to talk to Mark to make sure that it is within boundaries before it is merge.
    -  Front-end for user account.
    -  Helped Shufan and Diana for unit-tests since they needed help with them.
 3. Diana:
