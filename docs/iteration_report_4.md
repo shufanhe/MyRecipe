@@ -24,7 +24,7 @@ Completed Work
    -  Save recipe
    -  Added verification for registration and reset password - you get a code to verify your account.
    -  Front-end for user account.
-   -  Updated redirect to better html page rather than give 401 page.
+   -  Helped Shufan and Diana for unit-tests since they needed help with them.
 3. Diana:
    - Delete recipe.
    - Edit recipe.
@@ -76,7 +76,6 @@ Tasks:
    - Notifications for creators to see their likes and reviews after a viewer leaves them a like or review.
    - Creator profiles, allowing other users to see profiles.
    - Make sure to add unit-tests for stories!
-
 Assigning:
 1. Shufan:
    - Notifications for creators
@@ -84,6 +83,7 @@ Assigning:
 2. Khanh:
    - Creator profiles, allowing other users to see profiles.
    - Front-end user account
+   - Updated redirect to better html page rather than give 401 page.
 3. Diana:
    - Implement user preferences
    - Finish up front end for categories
