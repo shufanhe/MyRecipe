@@ -16,8 +16,8 @@ Tasks Assigned
 Completed Work
 ----------------
 1. Shufan:
-   - Like Recipe: Changing between like and unlike, incrementing and decrementing like counts. Redirecting is still not working, needs to work on js
-   - Review Recipe - allowing users to leave a review on recipe after cooking it.
+   - Like Recipe: Changing between like and unlike, incrementing and decrementing like counts. Stays on the same page after like/unlike. 
+   - Review Recipe - allowing users to leave a review on recipe after cooking it, page still refreshes
    - New Navbar design
    - Debugging past code - specifically post_recipe (recipes show up on user account after posting it), and view_recipe (made it work for user account and categories)
 2. Khanh:
@@ -26,16 +26,15 @@ Completed Work
    -  Front-end for user account.
    -  Helped Shufan and Diana for unit-tests since they needed help with them.
 3. Diana:
-   - Delete recipe.
-   - Edit recipe.
-   - Added warning message for users trying to post without logging in instead of showing an error.
+   - Delete recipe. Redirects user to homepage once post is deleted.
+   - Edit recipe. Redirects user to recipe to show updates.
+   - Added warning message for users trying to post without logging in instead of showing an error. Only done on post/delete/edit recipe functions.
    - Updated categories so user can now see list of recipes in each category.
 
 Still Needs Completion
 ----------------
 1. Shufan:
-   - Fix redirecting for like and review recipe - still needs help with JavaScript to complete.
-   - Unit-tests: view recipe, like recipe
+   - Fix refreshing for like and review recipe , still need to implement delete review.
 2. Khanh:
    - Frontend for user account page - make it user accessible.
 3. Diana:
