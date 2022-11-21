@@ -6,10 +6,24 @@
     <ul class="save_recipe" id="save_recipe">
 
         {% for recipe in save_recipe %}
-
+            <div class="container">
+                <div class="text-center">
+                    <div class="card" style="width: 18rem;">
+                        <img src="..." class="card-img" alt="...">
+                        <div class="card-body">
+                            <a> {{ recipe.title }}</a>
+                            <a> {{ recipe.category }}</a>
+                            <a> {{ recipe.content }}</a>
+                            <p class="card-text">An example Recipe</p>
+                            <a href="{{ url_for ('view_recipe')}}" class="stretched-link"></a>
+                            <input type="hidden" name="clicked" value="{{ recipe.id }}">
+                        </div>
+                    </div>
+                </div>
+            </div>
         {% else %}
         <div>
-            Add your favorite Recipe in here!
+            Save your favorite Recipe in here!
         </div>
         {% endfor %}
     </ul>

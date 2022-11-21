@@ -1,17 +1,26 @@
 {% extends "layout.html" %}
 {% block body %}
-    <h1>Login</h1>
-    <form action="{{ url_for ('login')}}" method="post">
-        <div class="input-group mb-3">
-            <label for="username" class="form-label">Username/Email</label>
-            <input type="text" name="username" id="username" class="form-control" placeholder="Your username or email" aria-label="Username" aria-describedby="basic-addon1" required>
+<main>
+    <div class="auth-form px-3" id="login">
+        <div class="auth-form-header p-0">
+            <h1>Sign in</h1>
         </div>
-        <div class="input-group mb-3">
-            <label for="password" class="form-label">Password</label>
-            <input type="password" name="password" id="password" class="form-control" placeholder="Enter your password" aria-label="Password" aria-describedby="basic-addon1" required>
+        <div class="auth-form-body mt-3">
+            <form action="{{ url_for ('login')}}" method="post" name="login">
+                <label for="username" class="form-label">Username or Email</label>
+                <input type="text" class="form-control" id="username" placeholder="Your username or email" name="username">
+                <div class="position-relative">
+                    <label for="password">Password</label>
+                    <input type="password" name="password" id="password" class="form-control">
+                    <input type="submit" name="commit" value="Sign in" class="btn btn-primary btn-block">
+                    <a class="label-link position-absolute top-0 right-0" tabindex="0" href="{{ url_for ('reset_password')}}">Forgot Your Password?</a>
+                </div>
+            </form>
         </div>
-
-        <input type="submit" value="Login">
-    </form>
-    <a class="blog-header-logo text-dark" href="{{ url_for ('reset_passwordPage')}}">Forgot Your Password?</a>
+        <div class="login-callout mt-3">
+            New to Food Recipe?
+            <a href="{{ url_for ('registerPage') }}">Create an account</a>
+        </div>
+    </div>
+</main>
 {% endblock %}
