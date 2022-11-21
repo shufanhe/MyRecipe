@@ -1,15 +1,23 @@
 {% extends "layout.html" %}
 {% block body %}
-  <h1>Register</h1>
-  <form action="{{ url_for ('register')}}" method="post">
-    <label for="username">Username</label>
-        <input name="username" id="username" required>
-    <label for="Email">Email</label>
-        <input type="Email" name="Email" id="Email" required>
-    <label for="password">Password</label>
-        <input type="password" name="password" id="password" required>
-    <label for="RetypePassword">Retype Password</label>
-        <input type="password" name="RetypePassword" id="RetypePassword" required>
-    <input type="submit" value="Register">
-  </form>
+<main>
+    <div class="auth-form px-3" id="Register">
+        <div class="auth-form-header p-0">
+            <h1>Register</h1>
+        </div>
+        <div class="auth-form-body mt-3">
+            <form action="{{ url_for ('register')}}" method="post" name="login">
+                <label for="username" class="form-label">Username</label>
+                <input type="text" class="form-control" id="username" name="username">
+                <label for="Email">Email</label>
+                <input type="Email" class="form-control" name="Email" id="Email">
+                <label for="password">Password</label>
+                <input type="password" name="password" id="password" class="form-control">
+                <label for="RetypePassword">Retype Password</label>
+                <input type="password" class="form-control" name="RetypePassword" id="RetypePassword">
+                <input type="submit" name="commit" value="Register" class="btn btn-primary btn-block">
+            </form>
+        </div>
+    </div>
+</main>
 {% endblock %}

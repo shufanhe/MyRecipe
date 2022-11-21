@@ -99,6 +99,8 @@ def create_recipe():
 
 @app.route('/post_recipe', methods=['POST'])
 def post_recipe():
+    if session['user_id'] == 'admin' or session['user_id'] is None:
+        flash("You don't have access to this function")
     db = get_db()
     user = session['user_id']
     title = request.form['title']
@@ -272,7 +274,7 @@ def login():
         user = db.execute('SELECT * FROM user WHERE username = ?', (username,)).fetchone()
 
     # check to see if the username is empty or not
-    if username is None:
+    if user is None:
         error = 'Incorrect username or email.'
 
     # check to see if the password is correct or not
@@ -308,9 +310,9 @@ def reset_password():
     else:
         # search in the database to give the user a new password
         db = get_db()
-        user = db.execute('SELECT * FROM user WHERE email = ?', (email,)).fetchone()
+        db.execute('UPDATE user SET password = ? WHERE email = ?', (generate_password_hash(password), email))
+        db.commit()
         # change the password of user
-        user['password'] = generate_password_hash(password)
         return redirect(url_for('loginPage'))
 
 
@@ -321,25 +323,27 @@ def logout():
     return redirect(url_for('HomePage'))
 
 
-@app.route('/save')
+@app.route('/save_recipe', methods=['POST'])
 def save_recipe():
     if session['user_id'] is None or session['user_id'] == 'admin':
         # abort if there is the user is not logged in
         abort(401)
     # save recipe to user_id in the database
-    recipe_id = request.get_json()['recipe_id']
+    title = request.form['title']
+    content = request.form['content']
+    category = request.form['category']
     db = get_db()
 
-    # get the user database
-    user = db.execute('SELECT * FROM user WHERE username = ?', (session['user_id'],)).fetchone()
-
     # get the recipe database
-    recipe = db.execute('SELECT * FROM recipe WHERE id = ?', (recipe_id,)).fetchone()
-
+    recipe = db.execute('SELECT * FROM recipes WHERE title = ? AND content = ? AND category = ?', (title, content, category)).fetchone()
     # save the recipe in the save_recipe database
-    db.execute("INSERT INTO save_recipe (username, save_recipe) VALUES (?, ?)", (user['username'], recipe['id']), )
-    db.commit()
-    return render_template('viewRecipe.html')
+    check_save = db.execute('SELECT * FROM save_recipe WHERE title = ? AND content = ? AND category = ?', (title, content, category)).fetchone()
+    if check_save is None:
+        db.execute("INSERT INTO save_recipe (username, title, content, category) VALUES (?, ?, ?, ?)", (session['user_id'], recipe['title'], recipe['content'], recipe['category']))
+        db.commit()
+    else:
+        flash('This recipe has already been saved!')
+    return redirect(url_for('view_recipe', recipe_id=recipe['id']))
 
 
 @app.route('/user_account')
@@ -347,5 +351,6 @@ def user_account():
     db = get_db()
     if session['user_id'] is None:
         abort(401)
-    created_recipes = db.execute('SELECT * FROM recipes WHERE user_id=?', [session['user_id']]).fetchall()
-    return render_template('user_account.html', created_recipes=created_recipes)
+    db = get_db()
+    save_recipe = db.execute('SELECT * FROM save_recipe WHERE username = ?', (session['user_id'],)).fetchall()
+    return render_template('user_account.html', save_recipe=save_recipe)

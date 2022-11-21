@@ -2,6 +2,7 @@ drop table if exists recipes;
 drop table if exists user;
 drop table if exists reviews;
 drop table if exists like_recipe;
+drop table if exists save_recipe;
 
 CREATE TABLE user (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -39,8 +40,9 @@ CREATE TABLE like_recipe (
 CREATE TABLE if not exists save_recipe (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     username TEXT NOT NULL,
-    save_recipe INT,
-    recipe_link TEXT NOT NULL
+    title TEXT NOT NULL,
+    category TEXT NOT NULL,
+    content TEXT NOT NULL
 );
 
 CREATE TABLE if not exists calendar(
