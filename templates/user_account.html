@@ -4,7 +4,7 @@
     <img src="../static/profile_picture.png" alt="profile picture">
     <label>{{ session.user_id }}</label>
     <ul class="created-recipes" id="created_recipes">
-        {% for recipe in created_recipes %}
+        {% for recipe in recipes %}
             <div class="container">
                 <div class="text-center">
                     <div class="card" style="width: 18rem;">

@@ -417,7 +417,8 @@ def user_account():
         abort(401)
     db = get_db()
     save_recipe = db.execute('SELECT * FROM save_recipe WHERE username = ?', (session['user_id'],)).fetchall()
-    return render_template('user_account.html', save_recipe=save_recipe)
+    created_recipes = db.execute('SELECT * FROM recipes WHERE user_id=?', [session['user_id']]).fetchall()
+    return render_template('user_account.html', save_recipe=save_recipe,created_recipes=created_recipes)
 
 
 @app.route('/delete_recipe', methods=['POST'])
