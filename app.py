@@ -416,9 +416,11 @@ def user_account():
     if session['user_id'] is None:
         abort(401)
     db = get_db()
-    save_recipe = db.execute('SELECT * FROM save_recipe WHERE username = ?', (session['user_id'],)).fetchall()
-    created_recipes = db.execute('SELECT * FROM recipes WHERE user_id=?', [session['user_id']]).fetchall()
-    return render_template('user_account.html', save_recipe=save_recipe,created_recipes=created_recipes)
+    cur = db.execute('SELECT * FROM save_recipe WHERE username = ?', [session['user_id']])
+    saved_recipe = cur.fetchall()
+    cur2 = db.execute('SELECT * FROM recipes WHERE user_id=?', [session['user_id']])
+    created_recipes = cur2.fetchall()
+    return render_template('user_account.html', save_recipe=saved_recipe, created_recipes=created_recipes)
 
 
 @app.route('/delete_recipe', methods=['POST'])

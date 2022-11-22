@@ -22,6 +22,23 @@
             </form>
         {% endif %}
         <dt>{{recipe.likes}}</dt>
+
+        <form action="{{ url_for('delete_recipe') }}" method="post">
+            <input type="hidden" name="id" value= "{{ recipe.id }}">
+            <button type="submit" class="btn btn-outline-dark">Delete</button>
+        </form>
+        <form action="{{ url_for('edit') }}" method="get">
+            <input type="hidden" name="id" value= "{{ recipe.id }}">
+            <button type="submit" class="btn btn-outline-dark">Edit</button>
+        </form>
+        <form action="{{ url_for('save_recipe') }}" method="post" id="save_recipe">
+            {#<button onclick ="save_recipe(`{{ recipe.title }}`, `{{ recipe.category }}`, `{{ recipe.content }}`)">Save</button>#}
+            <button>Save</button>
+            <input type="hidden" name="title" value="{{ recipe.title }}" class="title">
+            <input type="hidden" name="category" value="{{ recipe.category }}" class="category">
+            <input type="hidden" name="content" value="{{ recipe.content }}" class="content">
+        </form>
+
         <form action="{{ url_for('review_recipe') }}" method="get" class="review-recipe">
             <button type="submit" class="btn btn-outline-dark">Review</button>
             <input type="hidden" name="review_me" value={{ recipe.id }}>
@@ -34,19 +51,4 @@
            </div>
         {% endfor %}
     </div>
-    <form action="{{ url_for('delete_recipe') }}" method="post">
-            <input type="hidden" name="id" value= "{{ recipe.id }}">
-            <button type="submit" class="btn btn-outline-dark">Delete</button>
-    </form>
-    <form action="{{ url_for('edit') }}" method="get">
-            <input type="hidden" name="id" value= "{{ recipe.id }}">
-            <button type="submit" class="btn btn-outline-dark">Edit</button>
-    </form>
-    <form action="{{ url_for('save_recipe') }}" method="post" id="save_recipe">
-{#        <button onclick ="save_recipe(`{{ recipe.title }}`, `{{ recipe.category }}`, `{{ recipe.content }}`)">Save</button>#}
-        <button class="btn btn-outline-dark">Save</button>
-        <input type="hidden" name="title" value="{{ recipe.title }}" class="title">
-        <input type="hidden" name="category" value="{{ recipe.category }}" class="category">
-        <input type="hidden" name="content" value="{{ recipe.content }}" class="content">
-    </form>
 {% endblock %}
