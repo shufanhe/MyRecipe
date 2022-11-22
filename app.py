@@ -436,6 +436,8 @@ def delete_recipe():
         db = get_db()
         db.execute('DELETE FROM recipes WHERE id = ?', request.form["id"])
         db.commit()
+        db.execute('DELETE FROM save_recipe WHERE recipe_id = ?', request.form['id'])
+        db.commit()
         flash("Recipe was successfully deleted!")
     return redirect(url_for('HomePage'))
 
