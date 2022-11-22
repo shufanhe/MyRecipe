@@ -42,7 +42,8 @@ CREATE TABLE if not exists save_recipe (
     username TEXT NOT NULL,
     title TEXT NOT NULL,
     category TEXT NOT NULL,
-    content TEXT NOT NULL
+    content TEXT NOT NULL,
+    recipe_id INTEGER NOT NULL
 );
 
 CREATE TABLE if not exists calendar(

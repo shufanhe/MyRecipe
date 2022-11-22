@@ -79,6 +79,9 @@ def adminUser():
     db.execute('INSERT INTO user (username, password, email) VALUES (?, ?, ?)', (user, generate_password_hash(password), email))
     db.commit()
 
+def recipe():
+    db = get_db()
+
 
 @app.route('/')
 def HomePage():
@@ -130,6 +133,7 @@ def post_recipe():
 @app.route('/view_recipe')
 def view_recipe():
     db = get_db()
+    test1 = request.args.get('recipe_id')
     cur = db.execute('SELECT COUNT(1) FROM like_recipe WHERE user_id=? AND recipe_id=?',
                        [session['user_id'], request.args.get('recipe_id')])
     whether_liked = cur.fetchone()[0]
@@ -395,15 +399,15 @@ def save_recipe():
     db = get_db()
 
     # get the recipe database
-    recipe = db.execute('SELECT * FROM recipes WHERE title = ? AND content = ? AND category = ?', (title, content, category)).fetchone()
+    recipe_element = db.execute('SELECT * FROM recipes WHERE title = ? AND content = ? AND category = ?', (title, content, category)).fetchone()
     # save the recipe in the save_recipe database
     check_save = db.execute('SELECT * FROM save_recipe WHERE title = ? AND content = ? AND category = ?', (title, content, category)).fetchone()
     if check_save is None:
-        db.execute("INSERT INTO save_recipe (username, title, content, category) VALUES (?, ?, ?, ?)", (session['user_id'], recipe['title'], recipe['content'], recipe['category']))
+        db.execute("INSERT INTO save_recipe (username, title, content, category, recipe_id) VALUES (?, ?, ?, ?, ?)", (session['user_id'], recipe_element['title'], recipe_element['content'], recipe_element['category'],recipe_element['id']))
         db.commit()
     else:
         flash('This recipe has already been saved!')
-    return redirect(url_for('view_recipe', recipe_id=recipe['id']))
+    return redirect(url_for('view_recipe', recipe_id=recipe_element['id']))
 
 
 @app.route('/user_account')

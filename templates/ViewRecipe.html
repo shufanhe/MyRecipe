@@ -34,15 +34,6 @@
            </div>
         {% endfor %}
     </div>
-<div class="container">
-    <form action="{{ url_for('view_recipe') }}" method="get" id="view_recipe">
-        <label for="view_recipe" class="form-label">View Recipe Page</label>
-        <dl>
-            <h1>{{recipe.title}}</h1>
-            <dt>{{recipe.category}}</dt>
-            <p>{{recipe.content}}</p>
-        </dl>
-    </form>
     <form action="{{ url_for('delete_recipe') }}" method="post">
             <input type="hidden" name="id" value= "{{ recipe.id }}">
             <button type="submit" class="btn btn-outline-dark">Delete</button>
@@ -50,12 +41,12 @@
     <form action="{{ url_for('edit') }}" method="get">
             <input type="hidden" name="id" value= "{{ recipe.id }}">
             <button type="submit" class="btn btn-outline-dark">Edit</button>
+    </form>
     <form action="{{ url_for('save_recipe') }}" method="post" id="save_recipe">
 {#        <button onclick ="save_recipe(`{{ recipe.title }}`, `{{ recipe.category }}`, `{{ recipe.content }}`)">Save</button>#}
-        <button>Save</button>
+        <button class="btn btn-outline-dark">Save</button>
         <input type="hidden" name="title" value="{{ recipe.title }}" class="title">
         <input type="hidden" name="category" value="{{ recipe.category }}" class="category">
         <input type="hidden" name="content" value="{{ recipe.content }}" class="content">
     </form>
-</div>
 {% endblock %}
