@@ -28,10 +28,11 @@
             <button type="submit" class="btn btn-outline-dark">Delete</button>
         </form>
         <form action="{{ url_for('edit') }}" method="get">
-                <input type="hidden" name="id" value= "{{ recipe.id }}">
-                <button type="submit" class="btn btn-outline-dark">Edit</button>
+            <input type="hidden" name="id" value= "{{ recipe.id }}">
+            <button type="submit" class="btn btn-outline-dark">Edit</button>
+        </form>
         <form action="{{ url_for('save_recipe') }}" method="post" id="save_recipe">
-        {#  <button onclick ="save_recipe(`{{ recipe.title }}`, `{{ recipe.category }}`, `{{ recipe.content }}`)">Save</button>#}
+            {#<button onclick ="save_recipe(`{{ recipe.title }}`, `{{ recipe.category }}`, `{{ recipe.content }}`)">Save</button>#}
             <button>Save</button>
             <input type="hidden" name="title" value="{{ recipe.title }}" class="title">
             <input type="hidden" name="category" value="{{ recipe.category }}" class="category">
@@ -50,7 +51,4 @@
            </div>
         {% endfor %}
     </div>
-
-
-
 {% endblock %}
