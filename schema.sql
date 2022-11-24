@@ -25,8 +25,10 @@ create table recipes (
 
 CREATE TABLE reviews (
     recipe_id INTEGER NOT NULL,
+    user_id INTEGER NOT NULL,
     review TEXT,
-    FOREIGN KEY(recipe_id) REFERENCES recipes(id) ON UPDATE CASCADE ON DELETE RESTRICT
+    FOREIGN KEY(recipe_id) REFERENCES recipes(id) ON UPDATE CASCADE ON DELETE RESTRICT,
+    FOREIGN KEY(user_id) REFERENCES user(id) ON UPDATE CASCADE ON DELETE RESTRICT
 );
 
 CREATE TABLE like_recipe (

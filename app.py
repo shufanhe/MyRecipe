@@ -133,7 +133,7 @@ def post_recipe():
 @app.route('/view_recipe')
 def view_recipe():
     db = get_db()
-    test1 = request.args.get('recipe_id')
+    current_user = session['user_id']
     cur = db.execute('SELECT COUNT(1) FROM like_recipe WHERE user_id=? AND recipe_id=?',
                        [session['user_id'], request.args.get('recipe_id')])
     whether_liked = cur.fetchone()[0]
@@ -148,9 +148,9 @@ def view_recipe():
     else:
         rec = db.execute('SELECT id, title, category, content, likes FROM recipes WHERE id=?', [request.args.get('recipe_id')])
         recipe = rec.fetchone()
-        rev = db.execute('SELECT recipe_id, review FROM reviews WHERE recipe_id=?', [request.args.get('recipe_id')])
+        rev = db.execute('SELECT recipe_id, user_id, review FROM reviews WHERE recipe_id=?', [request.args.get('recipe_id')])
         reviews = rev.fetchall()
-    return render_template('ViewRecipe.html', recipe=recipe, reviews=reviews, liked=whether_liked)
+    return render_template('ViewRecipe.html', recipe=recipe, reviews=reviews, liked=whether_liked, current_user=current_user)
 
 
 @app.route('/like_recipe', methods=['POST'])
@@ -184,9 +184,14 @@ def review_recipe():
         abort(401)
     db = get_db()
     recipe_id = request.args.get('review_me')
-    cur = db.execute('SELECT * FROM recipes WHERE id=?', [recipe_id])
-    recipe = cur.fetchone()
-    return render_template('review_recipe.html', recipe=recipe)
+    cur1 = db.execute('SELECT * FROM reviews WHERE recipe_id=? AND user_id=?', [recipe_id, session['user_id']])
+    if cur1.fetchone() is not None:
+        flash('You have already reviewed this recipe')
+        return redirect(url_for('view_recipe', recipe_id=recipe_id))
+    else:
+        cur2 = db.execute('SELECT * FROM recipes WHERE id=?', [recipe_id])
+        recipe = cur2.fetchone()
+        return render_template('review_recipe.html', recipe=recipe)
 
 
 @app.route('/post_review', methods=['POST'])
@@ -194,11 +199,21 @@ def post_review():
     db = get_db()
     recipe_to_review = int(request.form['review_me'])
     review = request.form['review']
-    db.execute('INSERT INTO reviews (recipe_id, review) VALUES (?, ?)', [recipe_to_review, review])
+    db.execute('INSERT INTO reviews (recipe_id, user_id, review) VALUES (?, ?, ?)',
+               [recipe_to_review, session['user_id'], review])
     db.commit()
     cur = db.execute('SELECT * FROM reviews WHERE recipe_id=?', [recipe_to_review])
     reviews = cur.fetchall()
     return redirect(url_for('view_recipe', reviews=reviews, recipe_id=recipe_to_review))
+
+
+@app.route('/delete_review', methods=['POST'])
+def delete_review():
+    db = get_db()
+    db.execute('DELETE FROM reviews WHERE user_id=?', [session['user_id']])
+    db.commit()
+    flash("Review was successfully deleted!")
+    return redirect(url_for('view_recipe'))
 
 
 @app.route('/view_category', methods=['GET'])
