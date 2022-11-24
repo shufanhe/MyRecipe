@@ -210,10 +210,11 @@ def post_review():
 @app.route('/delete_review', methods=['POST'])
 def delete_review():
     db = get_db()
-    db.execute('DELETE FROM reviews WHERE user_id=?', [session['user_id']])
+    recipe_id = request.form['recipe_id']
+    db.execute('DELETE FROM reviews WHERE user_id=? AND recipe_id=?', [session['user_id'], recipe_id])
     db.commit()
     flash("Review was successfully deleted!")
-    return redirect(url_for('view_recipe'))
+    return redirect(url_for('view_recipe', recipe_id=recipe_id))
 
 
 @app.route('/view_category', methods=['GET'])

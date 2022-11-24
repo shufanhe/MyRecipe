@@ -48,6 +48,7 @@
             {% if each_review.user_id == current_user %}
                 <form action="{{ url_for('delete_review') }}" method="post">
                     <button type="submit" class="btn btn-outline-dark">Delete</button>
+                    <input type="hidden" name="recipe_id" value={{ recipe.id }}>
                 </form>
             {% endif %}
         {% else %}
