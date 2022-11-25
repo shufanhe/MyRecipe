@@ -217,6 +217,26 @@ def delete_review():
     return redirect(url_for('view_recipe', recipe_id=recipe_id))
 
 
+@app.route('/edit_review', methods=['GET'])
+def edit_review():
+    db = get_db()
+    recipe_id = request.args.get('recipe_id')
+    cur = db.execute('SELECT * FROM reviews WHERE user_id=? AND recipe_id=?', [session['user_id'], recipe_id])
+    review = cur.fetchone()
+    return render_template('edit_review.html', review=review)
+
+
+@app.route('/post_review_edit', methods=['POST'])
+def post_review_edit():
+    recipe_id = request.form['recipe_id']
+    db = get_db()
+    db.execute('UPDATE reviews SET review=? WHERE user_id=? AND recipe_id=?',
+               [request.form['review'], session['user_id'], recipe_id])
+    db.commit()
+    flash('Review Was Successfully Updated!')
+    return redirect(url_for('view_recipe', recipe_id=recipe_id))
+
+
 @app.route('/view_category', methods=['GET'])
 def view_category():
     """ Shows a list of recipes for whichever category was selected by user. """

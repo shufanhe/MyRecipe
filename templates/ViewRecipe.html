@@ -50,6 +50,10 @@
                     <button type="submit" class="btn btn-outline-dark">Delete</button>
                     <input type="hidden" name="recipe_id" value={{ recipe.id }}>
                 </form>
+                <form action="{{ url_for('edit_review') }}" method="get">
+                    <button type="submit" class="btn btn-outline-dark">Edit</button>
+                    <input type="hidden" name="recipe_id" value={{ recipe.id }}>
+                </form>
             {% endif %}
         {% else %}
            <div class="alert alert-dark" role="alert">
