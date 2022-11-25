@@ -1,21 +1,57 @@
 {% extends "layout.html" %}
 {% block body %}
-<div class="container">
-    <div class="text-center fs-3">
-      <p>Recipe of the Day!</p>
-      <a href="{{ url_for ('view_recipe', recipe_id=recipe.recipe_id)}}">
-          <img src={{cover.cover}} class="rounded" alt="..." id="recipe_of_the_day">
-      </a>
-    </div>
-    <div class="container w-50">
-        <form action="{{ url_for('keyword_search') }}" method="post" class="add-entry" id="keyword_Search">
-            <div class="container w-75">
-                <div class="input-group rounded">
-                  <input type="text" name="keyword_Search" class="form-control rounded" placeholder="Type in a keyword" aria-label="Search" aria-describedby="search-addon" />
-                  <button class="btn btn-outline-dark" type="submit">Search</button>
+<div class="container text-center m-0 p-0">
+
+    <div class="row align-items-center">
+        <div class="col-7">
+            <div id="carouselExampleInterval" class="carousel slide" data-bs-ride="carousel">
+              <div class="carousel-inner">
+                <div class="carousel-item active" data-bs-interval="10000">
+                    <a href="{{ url_for ('view_recipe', recipe_id=recipe.recipe_id)}}">
+                        <img src="../static/spiral-vegetable-tart.png" class="d-block w-100" alt="spiral-vegetable-tart">
+                    </a>
                 </div>
+                <div class="carousel-item" data-bs-interval="2000">
+                    <a href="{{ url_for ('view_recipe', recipe_id=recipe.recipe_id)}}">
+                        <img src="../static/spiral-vegetable-tart.png" class="d-block w-100" alt="spiral-vegetable-tart">
+                    </a>
+                </div>
+                <div class="carousel-item">
+                    <a href="{{ url_for ('view_recipe', recipe_id=recipe.recipe_id)}}">
+                        <img src="../static/spiral-vegetable-tart.png" class="d-block w-100" alt="spiral-vegetable-tart">
+                    </a>
+                </div>
+              </div>
+              <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleInterval" data-bs-slide="prev">
+                <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                <span class="visually-hidden">Previous</span>
+              </button>
+              <button class="carousel-control-next" type="button" data-bs-target="#carouselExampleInterval" data-bs-slide="next">
+                <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                <span class="visually-hidden">Next</span>
+              </button>
             </div>
-        </form>
+        </div>
+
+        <div class="col">
+            <img src="../static/upper_frame.png" class="img-fluid" alt="upper frame">
+            <div class="text-center fs-3">
+              <p>Recipe of the Day</p>
+              <a href="{{ url_for ('view_recipe', recipe_id=recipe.recipe_id)}}">
+                  <img src="../static/closed_tray.png" class="img-fluid" alt="recipe_of_the_day" id="recipe_of_the_day">
+              </a>
+            </div>
+            <form action="{{ url_for('keyword_search') }}" method="post" class="add-entry" id="keyword_Search">
+                <div class="container w-75">
+                    <div class="input-group rounded">
+                      <input type="text" name="keyword_Search" class="form-control rounded" placeholder="Type in a keyword" aria-label="Search" aria-describedby="search-addon" />
+                      <button class="btn btn-outline-dark" type="submit">Search</button>
+                    </div>
+                </div>
+            </form>
+            <img src="../static/lower_frame.png" class="img-fluid" alt="lower frame">
+        </div>
     </div>
+
 </div>
 {% endblock %}
