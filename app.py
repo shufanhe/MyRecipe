@@ -154,16 +154,13 @@ def view_recipe():
 
 @app.route('/like_recipe', methods=['POST'])
 def like_recipe():
-    if session['user_id'] is None:
-        abort(401)
     db = get_db()
-    # current_user = db.execute('SELECT * FROM user WHERE id=?', [session['user_id']]).fetchone()
-    # recipe_liked = request.get_json()['to_like']
-    # recipe_to_like = request.form['like_me']
-    # print("ID", recipe_to_like)
     action = request.form['action']
     if action == 'like':
         recipe_id = request.form['like_me']
+        if session['user_id'] is None:
+            return redirect(url_for('view_recipe', recipe_id=recipe_id))
+
         db.execute('UPDATE recipes SET likes=likes+1 WHERE id=?', [recipe_id])
         db.execute('INSERT INTO like_recipe (recipe_id, user_id) VALUES (?, ?)', [recipe_id, session['user_id']])
         db.commit()
@@ -171,6 +168,9 @@ def like_recipe():
         recipe_id = request.form['unlike_me']
         # just check if row is in table, if no than have not liked
         # don't need to request action from frontend
+        if session['user_id'] is None:
+            return redirect(url_for('view_recipe', recipe_id=recipe_id))
+
         db.execute('UPDATE recipes SET likes=likes-1 WHERE id=?', [recipe_id])
         db.execute('DELETE FROM like_recipe WHERE recipe_id=? AND user_id=?', [recipe_id, session['user_id']])
         db.commit()
