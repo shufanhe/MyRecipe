@@ -76,7 +76,7 @@ def adminUser():
     user = 'admin'
     password = 'verysecurepassword'
     email = 'food@gmail.com'
-    db.execute('INSERT INTO user (username, password, email) VALUES (?, ?, ?)', (user, generate_password_hash(password), email))
+    db.execute('INSERT INTO user (username, password, email,verified) VALUES (?, ?,?,?)', (user, generate_password_hash(password), email, 'verified'))
     db.commit()
 
 def recipe():
@@ -258,8 +258,8 @@ def register():
             # try to register the username, if not return error that user_id already registered
             user = db.execute('SELECT * FROM user WHERE username = ?', (username,)).fetchone()
             if user is None:
-                db.execute("INSERT INTO user (username, password,email) VALUES (?, ?,?)",
-                           (username, generate_password_hash(password), email), )
+                db.execute("INSERT INTO user (username, password,email, verified) VALUES (?,?,?,?)",
+                           (username, generate_password_hash(password), email, 'unverified'))
                 db.commit()
                 msg = Message("Email registration for Food Recipe Account", recipients=[email])
                 OTP = random.randrange(100000, 999999)
@@ -300,6 +300,8 @@ def login():
     # check to see if the password is correct or not
     elif not check_password_hash(user['password'], password):
         error = 'Incorrect password'
+    elif user['verified'] == 'unverified':
+        error = 'Please check your email for your verification code'
     if error is None:
         session.clear()
         # login with session being username

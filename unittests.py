@@ -3,6 +3,7 @@ from flask import json
 import app
 import unittest
 import tempfile
+from flask_mail import Mail, Message
 
 
 class FlaskrTestCase(unittest.TestCase):
@@ -10,6 +11,7 @@ class FlaskrTestCase(unittest.TestCase):
     def setUp(self):
         self.db_fd, app.app.config['DATABASE'] = tempfile.mkstemp()
         app.app.testing = True
+        Mail(app.app)
         self.app = app.app.test_client()
         with app.app.app_context():
             app.init_db()
@@ -37,7 +39,7 @@ class FlaskrTestCase(unittest.TestCase):
 
     def creating_user(self):
         # verifying password (currently do not test OTP code)
-        rv = self.register('khanhta2001', 'khanhta2001@gmail.com', 'testing1234!')
+        rv = self.register('khanhta2001', 'khanhta2002@gmail.com', 'testing1234!')
         assert b'Verification' in rv.data
         assert b'OTP code' in rv.data
         assert b'Submit' in rv.data
@@ -110,6 +112,7 @@ class FlaskrTestCase(unittest.TestCase):
         assert b'French Recipes' in rv.data
 
     def test_homePage(self):
+        assert app.app.config['TESTING']
         rv = self.app.get('/')
         assert b'MyRecipe' in rv.data
         assert b'Recipe of the Day!' in rv.data
