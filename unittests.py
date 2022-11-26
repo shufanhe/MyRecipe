@@ -3,7 +3,7 @@ from flask import json
 import app
 import unittest
 import tempfile
-from flask_mail import Mail, Message
+from flask_mail import Mail
 
 
 class FlaskrTestCase(unittest.TestCase):
@@ -11,7 +11,7 @@ class FlaskrTestCase(unittest.TestCase):
     def setUp(self):
         self.db_fd, app.app.config['DATABASE'] = tempfile.mkstemp()
         app.app.testing = True
-        Mail(app.app)
+        self.mail = Mail(app.app)
         self.app = app.app.test_client()
         with app.app.app_context():
             app.init_db()
@@ -39,11 +39,22 @@ class FlaskrTestCase(unittest.TestCase):
 
     def creating_user(self):
         # verifying password (currently do not test OTP code)
-        rv = self.register('khanhta2001', 'khanhta2002@gmail.com', 'testing1234!')
-        assert b'Verification' in rv.data
-        assert b'OTP code' in rv.data
-        assert b'Submit' in rv.data
-
+        with self.mail.record_messages() as outbox:
+            rv = self.register('khanhta2001', 'khanhta2002@gmail.com', 'testing1234!')
+            assert b'Verification' in rv.data
+            assert b'verification code' in rv.data
+            assert b'Submit' in rv.data
+            assert "Hi,\n\nHere is your verification code:" in outbox[0].body
+            verification_code = outbox[0].body[28:40]
+            rv = self.app.post('/verification', data=dict(verification_code=verification_code, OTP=verification_code,
+                                                          account_email='khanhta2002@gmail.com',
+                                                          verification_type='Register'), follow_redirects=True)
+            assert b'Sign in' in rv.data
+            assert b'Username or Email' in rv.data
+            assert b'Password' in rv.data
+            assert b'Forgot Your Password' in rv.data
+            assert b'New to Food Recipe?'
+            assert b'Create an account' in rv.data
         # Correct password
         rv = self.login('khanhta2001', 'testing1234!')
         assert b'MyRecipe' in rv.data
@@ -112,7 +123,6 @@ class FlaskrTestCase(unittest.TestCase):
         assert b'French Recipes' in rv.data
 
     def test_homePage(self):
-        assert app.app.config['TESTING']
         rv = self.app.get('/')
         assert b'MyRecipe' in rv.data
         assert b'Recipe of the Day!' in rv.data
@@ -150,48 +160,83 @@ class FlaskrTestCase(unittest.TestCase):
         assert b'Password' in rv.data
         assert b'Incorrect username or email' in rv.data
 
+    def test_register(self):
+        # Register the user to login
+        rv = self.app.get('/registerPage')
+        assert b'Username' in rv.data
+        assert b'Email' in rv.data
+        assert b'Password' in rv.data
+        assert b'Retype Password' in rv.data
+        assert b'Register' in rv.data
+
+        # register an account without verification
+        rv = self.register('khanhta2001', 'khanhta2002@gmail.com', 'testing1234!')
+        assert b'Verification' in rv.data
+        assert b'verification code' in rv.data
+        assert b'Submit' in rv.data
+
+        # try to test to register the account again with with the same email and different username
+        rv = self.register('test1', 'khanhta2002@gmail.com', 'testing1234!')
+        assert b'khanhta2002@gmail.com is already registered.' in rv.data
+
+        # try to test to register the account again with different email and same username
+        rv = self.register('khanhta2001', 'test@gmail.com', 'testing1234!')
+        assert b'User khanhta2001 is already registered.' in rv.data
+
+        # try to test to register the account again with with the same email and username
+        rv = self.register('khanhta2001', 'khanhta2002@gmail.com', 'testing1234!')
+        assert b'User khanhta2001 and khanhta2002@gmail.com are already registered.' in rv.data
+
     def test_reset_password(self):
         # register the account
-        # verifying password (currently do not test OTP code)
-        rv = self.app.post('/register',
-                           data=dict(username='khanhta2001', Email='khanhta2001@gmail.com', password='testing1234!',
-                                     RetypePassword='testing1234!'),
-                           follow_redirects=True)
-        assert b'Verification' in rv.data
-        assert b'OTP code' in rv.data
-        assert b'Submit' in rv.data
+        rv = self.creating_user()
+        rv = self.logout()
+
+        rv = self.app.get('loginPage')
+        assert b'Username or Email' in rv.data
+        assert b'Password' in rv.data
+        assert b'Forgot Your Password' in rv.data
 
         rv = self.app.get('/verificationPage')
         assert b'Reset Your Password' in rv.data
         assert b'Email' in rv.data
         assert b'Submit' in rv.data
 
-        rv = self.app.post('/sendingOTP', data=dict(verification_code=123456, email='khanhta2001@gmail.com',
-                                                    verification_type='ResetPassword'), follow_redirects=True)
-        assert b'verification' in rv.data
-        assert b'OTP code' in rv.data
-        assert b'Submit' in rv.data
+        with self.mail.record_messages() as outbox:
+            rv = self.app.post('/sendingOTP', data=dict(email='khanhta2002@gmail.com',
+                                                        verification_type='ResetPassword'), follow_redirects=True)
+            assert b'verification' in rv.data
+            assert b'Verification Code' in rv.data
+            assert b'Submit' in rv.data
+            assert "Hi,\n\nHere is your verification code:" in outbox[0].body
 
-        rv = self.app.get('/resetpasswordPage', data=dict(account_email='khanhta2001@gmail.com'), follow_redirects=True)
-        assert b'Reset Your Password' in rv.data
-        assert b'Password' in rv.data
-        assert b'Retype Password' in rv.data
-        assert b'Reset Your Password' in rv.data
+            verification_code = outbox[0].body[28:40]
+            rv = self.app.post('/verification', data=dict(verification_code=verification_code, OTP=verification_code,
+                                                          account_email='khanhta2002@gmail.com',
+                                                          verification_type='ResetPassword'), follow_redirects=True)
 
-        rv = self.resetpassword('khanhta2001@gmail.com', 'DifferentPassword!')
-        assert b'Sign in' in rv.data
-        assert b'Username or Email' in rv.data
-        assert b'Password' in rv.data
-        # Try login with that new password
-        rv = self.login('khanhta2001', 'DifferentPassword!')
-        assert b'MyRecipe' in rv.data
-        assert b'Recipe of the Day!' in rv.data
-        assert b'Search' in rv.data
-        assert b'logout' in rv.data
-        assert b'account' in rv.data
+            rv = self.app.get('/resetpasswordPage', data=dict(account_email='khanhta2002@gmail.com'), follow_redirects=True)
+            assert b'Reset Your Password' in rv.data
+            assert b'Password' in rv.data
+            assert b'Retype Password' in rv.data
+            assert b'Reset Your Password' in rv.data
 
-        # Log out after successfully login
-        self.logout()
+            # set a new password
+            rv = self.resetpassword('khanhta2002@gmail.com', 'DifferentPassword!')
+            assert b'Sign in' in rv.data
+            assert b'Username or Email' in rv.data
+            assert b'Password' in rv.data
+
+            # Try login with that new password
+            rv = self.login('khanhta2001', 'DifferentPassword!')
+            assert b'MyRecipe' in rv.data
+            assert b'Recipe of the Day!' in rv.data
+            assert b'Search' in rv.data
+            assert b'logout' in rv.data
+            assert b'account' in rv.data
+
+            # Log out after successfully login
+            self.logout()
 
     def test_useraccount(self):
         # Register an account

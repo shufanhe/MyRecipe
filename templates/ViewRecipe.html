@@ -48,5 +48,8 @@
                 No reviews here so far!
            </div>
         {% endfor %}
+        <div>
+            <p>Created by <a href="{{ url_for('user_account', recipe_id = recipe.user_id) }}">{{ recipe.user_id}}</a></p>
+        </div>
     </div>
 {% endblock %}

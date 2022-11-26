@@ -1,6 +1,6 @@
 {% extends "layout.html" %}
 {% block body %}
-    <h1>{{ session.user_id }}</h1>
+    <h1>{{ user }}</h1>
     <img src="../static/profile_picture.png" alt="profile picture">
     <ul class="created-recipes" id="created_recipes">
         {% for recipe in created_recipes %}
