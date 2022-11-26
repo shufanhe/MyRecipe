@@ -388,17 +388,20 @@ def logout():
 
 @app.route('/save_recipe', methods=['POST'])
 def save_recipe():
-    if session['user_id'] is None or session['user_id'] == 'admin':
-        # abort if there is the user is not logged in
-        abort(401)
-    # save recipe to user_id in the database
     title = request.form['title']
     content = request.form['content']
     category = request.form['category']
     db = get_db()
 
     # get the recipe database
-    recipe_element = db.execute('SELECT * FROM recipes WHERE title = ? AND content = ? AND category = ?', (title, content, category)).fetchone()
+    recipe_element = db.execute('SELECT * FROM recipes WHERE title = ? AND content = ? AND category = ?',
+                                (title, content, category)).fetchone()
+    #check if the user is authorized or not
+    if session['user_id'] is None or session['user_id'] == 'admin':
+        # abort if there is the user is not logged in
+        flash('Please create an account before you can save the recipe')
+        return redirect(url_for('view_recipe', recipe_id=recipe_element['id']))
+    # save recipe to user_id in the database
     # save the recipe in the save_recipe database
     check_save = db.execute('SELECT * FROM save_recipe WHERE title = ? AND content = ? AND category = ?', (title, content, category)).fetchone()
     if check_save is None:
@@ -413,7 +416,8 @@ def save_recipe():
 def user_account():
     db = get_db()
     if session['user_id'] is None:
-        abort(401)
+        flash('You are not log in to see this page!')
+        return redirect(url_for('HomePage'))
     db = get_db()
     cur = db.execute('SELECT * FROM save_recipe WHERE username = ?', [session['user_id']])
     saved_recipe = cur.fetchall()
