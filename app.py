@@ -6,6 +6,7 @@ from flask import Flask, flash, g, redirect, render_template, request, session, 
 from flask_mail import Mail, Message
 from werkzeug.security import check_password_hash, generate_password_hash
 from datetime import date
+from datetime import datetime
 
 app = Flask(__name__)
 
@@ -165,8 +166,12 @@ def like_recipe():
     action = request.form['action']
     if action == 'like':
         recipe_id = request.form['like_me']
+        cur = db.execute('SELECT user_id FROM recipes WHERE id=?', [recipe_id])
+        to_user = cur.fetchone()[0]
         db.execute('UPDATE recipes SET likes=likes+1 WHERE id=?', [recipe_id])
         db.execute('INSERT INTO like_recipe (recipe_id, user_id) VALUES (?, ?)', [recipe_id, session['user_id']])
+        db.execute('INSERT INTO notifications (recipe_id, to_user, from_user, action_type, action_time) VALUES (?, ?, ?, ?, ?)',
+                   [recipe_id, to_user, session['user_id'], 'liked', datetime.now()])
         db.commit()
     if action == 'unlike':
         recipe_id = request.form['unlike_me']
@@ -201,6 +206,10 @@ def post_review():
     review = request.form['review']
     db.execute('INSERT INTO reviews (recipe_id, user_id, review) VALUES (?, ?, ?)',
                [recipe_to_review, session['user_id'], review])
+    cur = ('SELECT user_id FROM recipes WHERE id=?', [recipe_to_review])
+    to_user = cur.festchone()[0]
+    db.execute('INSERT INTO notifications (recipe_id, to_user, from_user, action_type, action_time) VALUES (?, ?, ?, ?, ?)',
+                [recipe_to_review, to_user, session['user_id'], 'reviewed', datetime.now()])
     db.commit()
     cur = db.execute('SELECT * FROM reviews WHERE recipe_id=?', [recipe_to_review])
     reviews = cur.fetchall()
@@ -446,9 +455,10 @@ def save_recipe():
     return redirect(url_for('view_recipe', recipe_id=recipe_element['id']))
 
 
+
+
 @app.route('/user_account')
 def user_account():
-    db = get_db()
     if session['user_id'] is None:
         abort(401)
     db = get_db()
@@ -457,6 +467,14 @@ def user_account():
     cur2 = db.execute('SELECT * FROM recipes WHERE user_id=?', [session['user_id']])
     created_recipes = cur2.fetchall()
     return render_template('user_account.html', save_recipe=saved_recipe, created_recipes=created_recipes)
+
+
+@app.route('/notifications', methods=['GET'])
+def notifications():
+    db = get_db()
+    cur = db.execute('SELECT * FROM notifications WHERE to_user=?', [session['user_id']])
+    my_notifications = cur.fetchall()
+    return render_template('notifications.html', my_notifications=my_notifications)
 
 
 @app.route('/delete_recipe', methods=['POST'])

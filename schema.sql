@@ -19,7 +19,7 @@ create table recipes (
   content text not null,
   posted_date text not null,
   likes INTEGER DEFAULT 0 NOT NULL,
-  review text,
+  image blob,
   FOREIGN KEY(user_id) REFERENCES user(id) ON UPDATE CASCADE ON DELETE CASCADE
 );
 
@@ -46,6 +46,17 @@ CREATE TABLE if not exists save_recipe (
     category TEXT NOT NULL,
     content TEXT NOT NULL,
     recipe_id INTEGER NOT NULL
+);
+
+CREATE TABLE if not exists notifications (
+    to_user TEXT NOT NULL,
+    from_user TEXT NOT NULL,
+    action_type TEXT NOT NULL,
+    action_time TEXT NOT NULL,
+    recipe_id INTEGER NOT NULL,
+    FOREIGN KEY(to_user) REFERENCES user(username) ON UPDATE CASCADE ON DELETE RESTRICT,
+    FOREIGN KEY(from_user) REFERENCES user(username) ON UPDATE CASCADE ON DELETE RESTRICT,
+    FOREIGN KEY(recipe_id) REFERENCES recipes(id) ON UPDATE CASCADE ON DELETE RESTRICT
 );
 
 CREATE TABLE if not exists calendar(
