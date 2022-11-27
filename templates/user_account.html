@@ -3,6 +3,9 @@
     <h1>{{ session.user_id }}</h1>
     <img src="../static/profile_picture.png" alt="profile picture">
     <label>{{ session.user_id }}</label>
+    <a href="{{ url_for ('logout') }}">
+        <img src="../static/logout.png" class="img-fluid" alt="logout">
+    </a>
     <ul class="created-recipes" id="created_recipes">
         {% for recipe in created_recipes %}
             <div class="container">
