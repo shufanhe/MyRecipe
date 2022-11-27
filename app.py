@@ -455,6 +455,14 @@ def save_recipe():
     return redirect(url_for('view_recipe', recipe_id=recipe_element['id']))
 
 
+@app.route('/saved_recipes', methods=['GET'])
+def saved_recipes():
+    if session['user_id'] is None:
+        abort(401)
+    db = get_db()
+    cur = db.execute('SELECT * FROM save_recipe WHERE username = ?', [session['user_id']])
+    saved = cur.fetchall()
+    return render_template('saved_recipes.html', saved_recipes=saved)
 
 
 @app.route('/user_account')
@@ -462,11 +470,9 @@ def user_account():
     if session['user_id'] is None:
         abort(401)
     db = get_db()
-    cur = db.execute('SELECT * FROM save_recipe WHERE username = ?', [session['user_id']])
-    saved_recipe = cur.fetchall()
-    cur2 = db.execute('SELECT * FROM recipes WHERE user_id=?', [session['user_id']])
-    created_recipes = cur2.fetchall()
-    return render_template('user_account.html', save_recipe=saved_recipe, created_recipes=created_recipes)
+    cur = db.execute('SELECT * FROM recipes WHERE user_id=?', [session['user_id']])
+    created_recipes = cur.fetchall()
+    return render_template('user_account.html', created_recipes=created_recipes)
 
 
 @app.route('/notifications', methods=['GET'])
