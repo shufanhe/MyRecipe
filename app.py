@@ -437,7 +437,7 @@ def verification():
     OTP = request.form['OTP']
     if OTP != verification_code:
         flash('Please enter the correct verification code')
-        render_template('verificationOTP.html', verification_code=verification_code, account_email=account_email,
+        return render_template('verificationOTP.html', verification_code=verification_code, account_email=account_email,
                         verification_type=verification_type)
     else:
         if verification_type == 'Register':
