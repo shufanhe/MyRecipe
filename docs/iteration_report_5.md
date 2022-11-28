@@ -36,7 +36,7 @@ Still Needs Completion
 2. Khanh:
    - Frontend for user account page - make it user accessible and friendly. Will add a profile picture so that the user can upload their own. 
    - Some buttons need to work without reloading the pages
-   - unit tests, more coverage than now as currently unit tests are only testing the basic of the page made from the right template
+   - unit tests, more coverage than now as currently unit tests are only testing the basic of the page made from the right template (currently only 77% of codes in app.py are covered - we should bring this up to 100% as close as possible)
 3. Diana:
    - Implement user preferences - decided to go with the tag route. Having issues with the schema and how to structure it in the database. I will go to office hours this week to get help with this.
    - Front-end for categories page - having issues with how to format the recipes since we are using a for loop to add them.
