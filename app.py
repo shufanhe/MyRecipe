@@ -2,7 +2,7 @@ import functools
 import os
 import random
 from sqlite3 import dbapi2 as sqlite3
-from flask import Flask, flash, g, redirect, render_template, request, session, url_for, abort
+from flask import Flask, flash, g, redirect, render_template, request, session, url_for
 from flask_mail import Mail, Message
 from werkzeug.security import check_password_hash, generate_password_hash
 from datetime import date
@@ -118,7 +118,7 @@ def create_recipe():
 def post_recipe():
     if session['user_id'] == 'admin' or session['user_id'] is None:
         flash('Make an account to be able to add a recipe!')
-        return redirect(url_for('create_recipe'))
+        return redirect(url_for('HomePage'))
     db = get_db()
     user = session['user_id']
     title = request.form['title']
@@ -162,8 +162,6 @@ def view_recipe():
 
 @app.route('/like_recipe', methods=['POST'])
 def like_recipe():
-    if session['user_id'] is None:
-        abort(401)
     db = get_db()
     # current_user = db.execute('SELECT * FROM user WHERE id=?', [session['user_id']]).fetchone()
     # recipe_liked = request.get_json()['to_like']
@@ -172,6 +170,9 @@ def like_recipe():
     action = request.form['action']
     if action == 'like':
         recipe_id = request.form['like_me']
+        if session['user_id'] is None:
+            flash('You need to login to like recipe')
+            return redirect(url_for('view_recipe', recipe_id=recipe_id))
         cur = db.execute('SELECT user_id FROM recipes WHERE id=?', [recipe_id])
         to_user = cur.fetchone()[0]
         db.execute('UPDATE recipes SET likes=likes+1 WHERE id=?', [recipe_id])
@@ -192,10 +193,11 @@ def like_recipe():
 
 @app.route('/review_recipe', methods=['GET'])
 def review_recipe():
-    if session['user_id'] is None:
-        abort(401)
     db = get_db()
     recipe_id = request.args.get('review_me')
+    if session['user_id'] is None:
+        flash('You need to login to review')
+        return redirect(url_for('view_recipe', recipe_id=recipe_id))
     cur1 = db.execute('SELECT * FROM reviews WHERE recipe_id=? AND user_id=?', [recipe_id, session['user_id']])
     if cur1.fetchone() is not None:
         flash('You have already reviewed this recipe')
@@ -463,9 +465,6 @@ def logout():
 
 @app.route('/save_recipe', methods=['POST'])
 def save_recipe():
-    if session['user_id'] is None or session['user_id'] == 'admin':
-        # abort if there is the user is not logged in
-        abort(401)
     # save recipe to user_id in the database
     title = request.form['title']
     content = request.form['content']
@@ -478,6 +477,11 @@ def save_recipe():
     # save the recipe in the save_recipe database
     check_save = db.execute('SELECT * FROM save_recipe WHERE title = ? AND content = ? AND category = ?',
                             (title, content, category)).fetchone()
+
+    if session['user_id'] is None or session['user_id'] == 'admin':
+        # abort if there is the user is not logged in
+        flash('You need to login to save recipe')
+        return redirect(url_for('view_recipe', recipe_id=recipe_element['id']))
     if check_save is None:
         db.execute("INSERT INTO save_recipe (username, title, content, category, recipe_id) VALUES (?, ?, ?, ?, ?)", (
         session['user_id'], recipe_element['title'], recipe_element['content'], recipe_element['category'],
@@ -491,7 +495,8 @@ def save_recipe():
 @app.route('/saved_recipes', methods=['GET'])
 def saved_recipes():
     if session['user_id'] is None:
-        abort(401)
+        flash('You need to login to see save recipes')
+        return redirect(url_for('HomePage'))
     db = get_db()
     cur = db.execute('SELECT * FROM save_recipe WHERE username = ?', [session['user_id']])
     saved = cur.fetchall()
@@ -522,7 +527,8 @@ def user_account():
     if user is None:
         user = session['user_id']
     if session['user_id'] is None:
-        abort(401)
+        flash('You need to login to see the account')
+        return redirect(url_for('HomePage'))
     cur2 = db.execute('SELECT * FROM recipes WHERE user_id=?', [user])
     created_recipes = cur2.fetchall()
     author_followed = db.execute('SELECT * FROM save_author WHERE user = ?',[session['user_id']])
