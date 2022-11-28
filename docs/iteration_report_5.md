@@ -75,17 +75,14 @@ Assigning:
    - Incorporate a seperate table for ingredients in the database 
    - Front-end for view recipe
    - Unit tests for edit/delete reviews, and notifications.
+   - Upload/set recipes of the day through admin account.
    - Keep trying to implement JavaScript for like/review
 2. Khanh:
    - Upload images for recipes
+   - Allow users to change their profile pictures
    - Warning message to tell useres they need an account in order to post/like etc. (instead of giving 401 page).
    - Try to finish before Tuesday: Fix bug in delete/recipe: users should only be able to make changes to their own posts
 3. Diana:
    - Finish implementing user preferences.
    - Restrict creator to only select from the given categories when they create a recipe.
 
-Week 7
-----------------
-1. Allow users to change their profile pictures.
-2. Finsh refining frontend for all pages.
-3. Put in recipes for recipe of the day through admin account.
