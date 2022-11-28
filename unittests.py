@@ -199,22 +199,21 @@ class FlaskrTestCase(unittest.TestCase):
         assert b'Register' in rv.data
 
         # register an account without verification
-        rv = self.register('test1', 'test1@gmail.com', 'testing1234!')
-        assert b'Verification' in rv.data
-        assert b'verification code' in rv.data
-        assert b'Submit' in rv.data
+        rv = self.creating_user_one()
+        rv = self.logout()
 
         # try to test to register the account again with with the same email and different username
         rv = self.register('different', 'test1@gmail.com', 'testing1234!')
-        assert b'test1@gmail.com is already registered.' in rv.data
+        assert b'test1@gmail.com is already registered' in rv.data
 
         # try to test to register the account again with different email and same username
         rv = self.register('test1', 'test@gmail.com', 'testing1234!')
-        assert b'User test1 is already registered.' in rv.data
+        assert b'User test1 is already registered' in rv.data
 
         # try to test to register the account again with the same email and username
         rv = self.register('test1', 'test1@gmail.com', 'testing1234!')
-        assert b'User test1 and test1@gmail.com are already registered.' in rv.data
+        print(rv.data)
+        assert b'User test1 and test1@gmail.com are already registered' in rv.data
 
     def test_reset_password(self):
         # register the account
@@ -300,7 +299,7 @@ class FlaskrTestCase(unittest.TestCase):
         assert b'test_title' in rv.data
         assert b'test_category' in rv.data
         assert b'test_content' in rv.data
-        assert b'save' in rv.data
+
         self.logout()
 
         self.creating_user_two()

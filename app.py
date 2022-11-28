@@ -318,7 +318,7 @@ def register():
             check_email = check_email.fetchall()
             registration = db.execute('SELECT * FROM user WHERE username = ? AND email = ?', [username, email])
             registration = registration.fetchone()
-            if len(user) == 0 and len(check_email) == 0:
+            if len(user) == 0 and len(check_email) == 0 and registration is None:
                 db.execute("INSERT INTO user (username, password,email, verified) VALUES (?,?,?,?)",
                            (username, generate_password_hash(password), email.lower(), 'unverified'))
                 db.commit()
@@ -342,11 +342,13 @@ def register():
                     verification_type = "Register"
                     return render_template('verificationOTP.html', verification_code=OTP, account_email=email,
                                            verification_type=verification_type)
+                else:
+                    error = f"User {username} and {email} are already registered"
             else:
                 if len(check_email) != 0:
-                    error = f"{email} is already registered."
+                    error = f"{email} is already registered"
                 elif len(user) != 0 :
-                    error = f"User {username} is already registered."
+                    error = f"User {username} is already registered"
     flash(error)
     return render_template('register.html')
 
