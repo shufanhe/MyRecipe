@@ -80,8 +80,9 @@ class FlaskrTestCase(unittest.TestCase):
 
         rv = self.app.get('/')
         assert b'MyRecipe' in rv.data
-        assert b'Recipe of the Day!' in rv.data
+        assert b'Recipe of the Day' in rv.data
         assert b'Search' in rv.data
+        assert b'Type in a keyword' in rv.data
         assert b'categories' in rv.data
 
         rv = self.app.get('/categories')

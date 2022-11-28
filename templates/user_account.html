@@ -12,12 +12,25 @@
                     </div>
                     <div>
                         <h1 class="vcard-names">
-                            <span class="p-name vcard-fullname d-block overflow-hidden" itemprop="name"> {{ user }}</span>
+                            <span> {{ user }}</span>
                         </h1>
                     </div>
                     <div>
                         {% if session.user_id != user %}
-                          <a>Click to follow the author </a>
+                            <a>Click to follow the author </a>
+                            {% if follow_author == None %}
+                                <form action="{{ url_for('save_author') }}" method="post" class="save-author">
+                                    <button type="submit" class="btn btn-outline-dark">Follow</button>
+                                    <input type="hidden" name="author" value={{ user }}>
+                                    <input type="hidden" name="action" value='follow'>
+                                </form>
+                            {% elif follow_author != None %}
+                                <form action="{{ url_for('save_author') }}" method="post" class="save-author">
+                                    <button type="submit" class="btn btn-outline-dark">Unfollow</button>
+                                    <input type="hidden" name="author" value={{ user }}>
+                                    <input type="hidden" name="action" value='unfollow'>
+                                </form>
+                            {% endif %}
                         {% endif %}
                     </div>
                 </div>
@@ -53,53 +66,8 @@
                         </div>
                         <div class="mt-4">
                             <ul class="created-recipes" id="created_recipes">
-                                {% for recipe in save_recipe %}
-                                    <div class="container">
-                                        <div class="text-center">
-                                            <div class="card" style="width: 18rem;">
-                                                <img src="..." class="card-img" alt="...">
-                                                <div class="card-body">
-                                                    <a> {{ recipe.title }}</a>
-                                                    <a> {{ recipe.category }}</a>
-                                                    <a> {{ recipe.content }}</a>
-                                                </div>
-                                                <div class="card-footer">
-                                                    <form action="{{ url_for ('view_recipe')}}" method="get" class="view_recipe">
-                                                        <input type="hidden" name="recipe_id" value={{ recipe.recipe_id }}>
-                                                        <button type="submit" style="margin-left:100px" class="btn btn-sm">Details</button>
-                                                    </form>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                {% else %}
-                                <div>
-                                    Save your favorite Recipe in here!
-                                </div>
-                                {% endfor %}
-                            </ul>
-                        </div>
-                        <div class="mt-4">
-                            <ul class="created-recipes" id="created_recipes">
-                                {% for recipe in save_recipe %}
-                                    <div class="container">
-                                        <div class="text-center">
-                                            <div class="card" style="width: 18rem;">
-                                                <img src="..." class="card-img" alt="...">
-                                                <div class="card-body">
-                                                    <a> {{ recipe.title }}</a>
-                                                    <a> {{ recipe.category }}</a>
-                                                    <a> {{ recipe.content }}</a>
-                                                </div>
-                                                <div class="card-footer">
-                                                    <form action="{{ url_for ('view_recipe')}}" method="get" class="view_recipe">
-                                                        <input type="hidden" name="recipe_id" value={{ recipe.recipe_id }}>
-                                                        <button type="submit" style="margin-left:100px" class="btn btn-sm">Details</button>
-                                                    </form>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
+                                {% for author in author_followed %}
+                                    <a href="{{ url_for('user_account', author = author.author) }}"> {{ author.author }}</a>
                                 {% else %}
                                 <div>
                                     Add your favorite author!

@@ -8,7 +8,7 @@
         </form>
         {% if liked==1 %}
             <form action="{{ url_for('like_recipe') }}" method="post" class="like-recipe">
-               <input type="hidden" name="action" value='unlike'>
+                <input type="hidden" name="action" value='unlike'>
                 <button type="submit" class="btn btn-outline-dark">Unlike</button>
                 <input type="hidden" name="unlike_me" value={{ recipe.id }}>
                 <input type="hidden" name="like_count" value={{ recipe.likes }}>
@@ -30,26 +30,39 @@
             <input type="hidden" name="id" value= "{{ recipe.id }}">
             <button type="submit" class="btn btn-outline-dark">Edit</button>
         </form>
-        <form action="{{ url_for('save_recipe') }}" method="post" id="save_recipe">
-            {#<button onclick ="save_recipe(`{{ recipe.title }}`, `{{ recipe.category }}`, `{{ recipe.content }}`)">Save</button>#}
-            <button type="submit" class="btn btn-outline-dark">Save</button>
-            <input type="hidden" name="title" value="{{ recipe.title }}" class="title">
-            <input type="hidden" name="category" value="{{ recipe.category }}" class="category">
-            <input type="hidden" name="content" value="{{ recipe.content }}" class="content">
-        </form>
+        {% if recipe.user_id != session.user_id %}
+            <form action="{{ url_for('save_recipe') }}" method="post" id="save_recipe">
+                {#<button onclick ="save_recipe(`{{ recipe.title }}`, `{{ recipe.category }}`, `{{ recipe.content }}`)">Save</button>#}
+                <button type="submit" class="btn btn-outline-dark">Save</button>
+                <input type="hidden" name="title" value="{{ recipe.title }}" class="title">
+                <input type="hidden" name="category" value="{{ recipe.category }}" class="category">
+                <input type="hidden" name="content" value="{{ recipe.content }}" class="content">
+                <input type="hidden" name="author" value="{{ recipe.user_id }}" class="author">
+            </form>
+        {% endif %}
         <form action="{{ url_for('review_recipe') }}" method="get" class="review-recipe">
             <button type="submit" class="btn btn-outline-dark">Review</button>
             <input type="hidden" name="review_me" value={{ recipe.id }}>
         </form>
         {% for each_review in reviews %}
             <p>{{ each_review.review }}</p>
+            {% if each_review.user_id == current_user %}
+                <form action="{{ url_for('delete_review') }}" method="post">
+                    <button type="submit" class="btn btn-outline-dark">Delete</button>
+                    <input type="hidden" name="recipe_id" value={{ recipe.id }}>
+                </form>
+                <form action="{{ url_for('edit_review') }}" method="get">
+                    <button type="submit" class="btn btn-outline-dark">Edit</button>
+                    <input type="hidden" name="recipe_id" value={{ recipe.id }}>
+                </form>
+            {% endif %}
         {% else %}
            <div class="alert alert-dark" role="alert">
                 No reviews here so far!
            </div>
         {% endfor %}
         <div>
-            <p>Created by <a href="{{ url_for('user_account', recipe_id = recipe.user_id) }}">{{ recipe.user_id}}</a></p>
+            <p>Created by <a href="{{ url_for('user_account', author = recipe.user_id) }}">{{ recipe.user_id}}</a></p>
         </div>
     </div>
 {% endblock %}
