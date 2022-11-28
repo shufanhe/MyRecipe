@@ -9,7 +9,7 @@ Tasks Assigned
 2. Khanh:
    - Allowing users to see each others' profiles.
    - Front-end for user account
-   - Warning message to tell useres they need an account in order to post/like etc. (instead of giving 401 page).
+   - Warning message to tell users they need an account in order to post/like etc. (instead of giving 401 page).
 3. Diana:
    - Implement user preferences: users can enter allergies and dietary restrictions so that the posts that contain those ingredients will not show up when the user searches for recipes.
    - Finish up front end for categories
@@ -18,22 +18,25 @@ Completed Work
 ----------------
 1. Shufan:
    - Front-end for homepage: Changed buttons to icons on the navbar, slideshow, redisigned recipe of the day, added footer
-   - Edit reviews
-   - Delete reviews
+   - Edit and Delete reviews in view_recipe
    - Notifications for users when someone likes/reviews their recipe
 2. Khanh:
-   -  Allowing users to see eachothers' profiles
+   -  Allowing users to see eachothers' profile. When the user see the recipe, they can see who created it and go to that person's profile
+   -  Made changes to verification process for registration so that users can no longer login when their accounts is not verified
+   -  When users forget to verify their accounts, they can register again to verify their account
+   -  Made changes so that the author of the recipe cannot save their own recipes
 3. Diana:
    - No tasks completed, still in progress.
 
 Still Needs Completion
 ----------------
 1. Shufan:
-   - Refine creator notifications: red dot on icon should only show up if there is unread notifications; Make sure users can view the accont of the user who liked/reviewed their recipe by clicking on the user name and view the recipe by clicking on the image, after those tasks are done.
+   - Refine creator notifications: red dot on icon should only show up if there is unread notifications; Make sure users can view the account of the user who liked/reviewed their recipe by clicking on the user name and view the recipe by clicking on the image, after those tasks are done.
    - Unit tests for edit/delete reviews, and notifications.
 2. Khanh:
-   - Frontend for user account page - make it user accessible.
-   - Warning message to tell useres they need an account in order to post/like etc. (instead of giving 401 page).
+   - Frontend for user account page - make it user accessible and friendly. Will add a profile picture so that the user can upload their own. 
+   - Some buttons need to work without reloading the pages
+   - unit tests, more coverage than now as currently unit tests are only testing the basic of the page made from the right template (currently only 77% of codes in app.py are covered - we should bring this up to 100% as close as possible)
 3. Diana:
    - Implement user preferences - decided to go with the tag route. Having issues with the schema and how to structure it in the database. I will go to office hours this week to get help with this.
    - Front-end for categories page - having issues with how to format the recipes since we are using a for loop to add them.
@@ -79,10 +82,12 @@ Assigning:
    - Keep trying to implement JavaScript for like/review
 2. Khanh:
    - Upload images for recipes
-   - Allow users to change their profile pictures
-   - Warning message to tell useres they need an account in order to post/like etc. (instead of giving 401 page).
-   - Try to finish before Tuesday: Fix bug in delete/recipe: users should only be able to make changes to their own posts
+   - Allow users to change their profile pictures, name as well as emails
+   - Allow other users to follow each other accounts so that they can know when a user create a new recipe
+   - More concrete and coverage for unit tests
 3. Diana:
    - Finish implementing user preferences.
    - Restrict creator to only select from the given categories when they create a recipe.
+   - Front-end for pages.
+   - Add more unit-tests.
 
