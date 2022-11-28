@@ -1,0 +1,20 @@
+{% extends "layout.html" %}
+{% block body %}
+
+<div class="container w-50">
+     {% for notification in my_notifications %}
+        <div class="text-center">
+            <a> {{ notification.from_user }} </a>
+            <a> {{ notification.action_type }} your post</a>
+            <a> {{ notification.action_time }}</a>
+        </div>
+
+  {% else %}
+      <div>
+        Nothing in here so far
+      </div>
+  {% endfor %}
+</div>
+
+
+{% endblock %}

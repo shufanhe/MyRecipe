@@ -3,6 +3,7 @@ from flask import json
 import app
 import unittest
 import tempfile
+from flask_mail import Mail
 
 
 class FlaskrTestCase(unittest.TestCase):
@@ -10,6 +11,7 @@ class FlaskrTestCase(unittest.TestCase):
     def setUp(self):
         self.db_fd, app.app.config['DATABASE'] = tempfile.mkstemp()
         app.app.testing = True
+        self.mail = Mail(app.app)
         self.app = app.app.test_client()
         with app.app.app_context():
             app.init_db()
@@ -35,17 +37,56 @@ class FlaskrTestCase(unittest.TestCase):
     def searchResults(self, searchinput):
         return self.app.post('/search', data=dict(keyword_Search=searchinput), follow_redirects=True)
 
-    def creating_user(self):
+    def creating_user_one(self):
         # verifying password (currently do not test OTP code)
-        rv = self.register('khanhta2001', 'khanhta2001@gmail.com', 'testing1234!')
-        assert b'Verification' in rv.data
-        assert b'OTP code' in rv.data
-        assert b'Submit' in rv.data
-
+        with self.mail.record_messages() as outbox:
+            rv = self.register('test1', 'test1@gmail.com', 'testing1234!')
+            assert b'Verification' in rv.data
+            assert b'verification code' in rv.data
+            assert b'Submit' in rv.data
+            assert "Hi,\n\nHere is your verification code:" in outbox[0].body
+            verification_code = outbox[0].body[28:40]
+            rv = self.app.post('/verification', data=dict(verification_code=verification_code, OTP=verification_code,
+                                                          account_email='test1@gmail.com',
+                                                          verification_type='Register'), follow_redirects=True)
+            assert b'Sign in' in rv.data
+            assert b'Username or Email' in rv.data
+            assert b'Password' in rv.data
+            assert b'Forgot Your Password' in rv.data
+            assert b'New to Food Recipe?'
+            assert b'Create an account' in rv.data
         # Correct password
-        rv = self.login('khanhta2001', 'testing1234!')
+        rv = self.login('test1', 'testing1234!')
         assert b'MyRecipe' in rv.data
-        assert b'Recipe of the Day!' in rv.data
+        assert b'Recipe of the Day' in rv.data
+        assert b'Search' in rv.data
+        assert b'logout' in rv.data
+        assert b'account' in rv.data
+
+        return rv
+
+    def creating_user_two(self):
+        # verifying password (currently do not test OTP code)
+        with self.mail.record_messages() as outbox:
+            rv = self.register('test2', 'test2@gmail.com', 'testing1234!')
+            assert b'Verification' in rv.data
+            assert b'verification code' in rv.data
+            assert b'Submit' in rv.data
+            assert "Hi,\n\nHere is your verification code:" in outbox[0].body
+            verification_code = outbox[0].body[28:40]
+            rv = self.app.post('/verification', data=dict(verification_code=verification_code, OTP=verification_code,
+                                                          account_email='test2@gmail.com',
+                                                          verification_type='Register'), follow_redirects=True)
+            assert b'Sign in' in rv.data
+            assert b'Username or Email' in rv.data
+            assert b'Password' in rv.data
+            assert b'Forgot Your Password' in rv.data
+            assert b'New to Food Recipe?'
+            assert b'Create an account' in rv.data
+        # Correct password
+        rv = self.login('test2', 'testing1234!')
+        assert b'MyRecipe' in rv.data
+        assert b'Recipe of the Day' in rv.data
         assert b'Search' in rv.data
         assert b'logout' in rv.data
         assert b'account' in rv.data
@@ -55,7 +96,7 @@ class FlaskrTestCase(unittest.TestCase):
     def logout(self):
         rv = self.app.get('/logout', follow_redirects=True)
         assert b'MyRecipe' in rv.data
-        assert b'Recipe of the Day!' in rv.data
+        assert b'Recipe of the Day' in rv.data
         assert b'Search' in rv.data
         assert b'Login' in rv.data
         assert b'Register' in rv.data
@@ -67,8 +108,9 @@ class FlaskrTestCase(unittest.TestCase):
 
         rv = self.app.get('/')
         assert b'MyRecipe' in rv.data
-        assert b'Recipe of the Day!' in rv.data
+        assert b'Recipe of the Day' in rv.data
         assert b'Search' in rv.data
+        assert b'Type in a keyword' in rv.data
         assert b'categories' in rv.data
 
         rv = self.app.get('/categories')
@@ -112,7 +154,7 @@ class FlaskrTestCase(unittest.TestCase):
     def test_homePage(self):
         rv = self.app.get('/')
         assert b'MyRecipe' in rv.data
-        assert b'Recipe of the Day!' in rv.data
+        assert b'Recipe of the Day' in rv.data
         assert b'Search' in rv.data
         # assert with user login
         assert b'logout' in rv.data
@@ -121,7 +163,7 @@ class FlaskrTestCase(unittest.TestCase):
         # assert without user login
         self.logout()
 
-    def test_authentication(self):
+    def test_login(self):
         # Register the user to login
         rv = self.app.get('/registerPage')
         assert b'Username' in rv.data
@@ -130,11 +172,11 @@ class FlaskrTestCase(unittest.TestCase):
         assert b'Retype Password' in rv.data
         assert b'Register' in rv.data
 
-        self.creating_user()
+        self.creating_user_one()
         self.logout()
 
         # Wrong password
-        rv = self.login('khanhta2001', 'Wrongpassword!')
+        rv = self.login('test1', 'Wrongpassword!')
         assert b'Sign in' in rv.data
         assert b'Username or Email' in rv.data
         assert b'Password' in rv.data
@@ -147,63 +189,98 @@ class FlaskrTestCase(unittest.TestCase):
         assert b'Password' in rv.data
         assert b'Incorrect username or email' in rv.data
 
+    def test_register(self):
+        # Register the user to login
+        rv = self.app.get('/registerPage')
+        assert b'Username' in rv.data
+        assert b'Email' in rv.data
+        assert b'Password' in rv.data
+        assert b'Retype Password' in rv.data
+        assert b'Register' in rv.data
+
+        # register an account without verification
+        rv = self.creating_user_one()
+        rv = self.logout()
+
+        # try to test to register the account again with with the same email and different username
+        rv = self.register('different', 'test1@gmail.com', 'testing1234!')
+        assert b'test1@gmail.com is already registered' in rv.data
+
+        # try to test to register the account again with different email and same username
+        rv = self.register('test1', 'test@gmail.com', 'testing1234!')
+        assert b'User test1 is already registered' in rv.data
+
+        # try to test to register the account again with the same email and username
+        rv = self.register('test1', 'test1@gmail.com', 'testing1234!')
+        print(rv.data)
+        assert b'User test1 and test1@gmail.com are already registered' in rv.data
+
     def test_reset_password(self):
         # register the account
-        # verifying password (currently do not test OTP code)
-        rv = self.app.post('/register',
-                           data=dict(username='khanhta2001', Email='khanhta2001@gmail.com', password='testing1234!',
-                                     RetypePassword='testing1234!'),
-                           follow_redirects=True)
-        assert b'Verification' in rv.data
-        assert b'OTP code' in rv.data
-        assert b'Submit' in rv.data
+        rv = self.creating_user_one()
+        rv = self.logout()
+
+        rv = self.app.get('loginPage')
+        assert b'Username or Email' in rv.data
+        assert b'Password' in rv.data
+        assert b'Forgot Your Password' in rv.data
 
         rv = self.app.get('/verificationPage')
         assert b'Reset Your Password' in rv.data
         assert b'Email' in rv.data
         assert b'Submit' in rv.data
 
-        rv = self.app.post('/sendingOTP', data=dict(verification_code=123456, email='khanhta2001@gmail.com',
-                                                    verification_type='ResetPassword'), follow_redirects=True)
-        assert b'verification' in rv.data
-        assert b'OTP code' in rv.data
-        assert b'Submit' in rv.data
+        with self.mail.record_messages() as outbox:
+            rv = self.app.post('/sendingOTP', data=dict(email='test1@gmail.com',
+                                                        verification_type='ResetPassword'), follow_redirects=True)
+            assert b'verification' in rv.data
+            assert b'Verification Code' in rv.data
+            assert b'Submit' in rv.data
+            assert "Hi,\n\nHere is your verification code:" in outbox[0].body
 
-        rv = self.app.get('/resetpasswordPage', data=dict(account_email='khanhta2001@gmail.com'), follow_redirects=True)
-        assert b'Reset Your Password' in rv.data
-        assert b'Password' in rv.data
-        assert b'Retype Password' in rv.data
-        assert b'Reset Your Password' in rv.data
+            verification_code = outbox[0].body[28:40]
+            rv = self.app.post('/verification', data=dict(verification_code=verification_code, OTP=verification_code,
+                                                          account_email='test1@gmail.com',
+                                                          verification_type='ResetPassword'), follow_redirects=True)
 
-        rv = self.resetpassword('khanhta2001@gmail.com', 'DifferentPassword!')
-        assert b'Sign in' in rv.data
-        assert b'Username or Email' in rv.data
-        assert b'Password' in rv.data
-        # Try login with that new password
-        rv = self.login('khanhta2001', 'DifferentPassword!')
-        assert b'MyRecipe' in rv.data
-        assert b'Recipe of the Day!' in rv.data
-        assert b'Search' in rv.data
-        assert b'logout' in rv.data
-        assert b'account' in rv.data
+            rv = self.app.get('/resetpasswordPage', data=dict(account_email='test1@gmail.com'),
+                              follow_redirects=True)
+            assert b'Reset Your Password' in rv.data
+            assert b'Password' in rv.data
+            assert b'Retype Password' in rv.data
+            assert b'Reset Your Password' in rv.data
 
-        # Log out after successfully login
-        self.logout()
+            # set a new password
+            rv = self.resetpassword('test1@gmail.com', 'DifferentPassword!')
+            assert b'Sign in' in rv.data
+            assert b'Username or Email' in rv.data
+            assert b'Password' in rv.data
+
+            # Try login with that new password
+            rv = self.login('test1', 'DifferentPassword!')
+            assert b'MyRecipe' in rv.data
+            assert b'Recipe of the Day' in rv.data
+            assert b'Search' in rv.data
+            assert b'logout' in rv.data
+            assert b'account' in rv.data
+
+            # Log out after successfully login
+            self.logout()
 
     def test_useraccount(self):
         # Register an account
-        self.creating_user()
+        self.creating_user_one()
 
         # Get to the user account
         rv = self.app.get('/user_account')
-        assert b'khanhta2001' in rv.data
+        assert b'test1' in rv.data
         assert b'img' in rv.data
-
+        assert b'Add your created Recipe in here!' in rv.data
         self.logout()
 
     def test_search_save_recipe(self):
         # Register an account
-        self.creating_user()
+        self.creating_user_one()
 
         rv = self.app.get('/create_recipe')
         assert b'title' in rv.data
@@ -216,7 +293,16 @@ class FlaskrTestCase(unittest.TestCase):
                            follow_redirects=True)
         assert b'New recipe successfully posted!' in rv.data
         assert b'MyRecipe' in rv.data
-        assert b'Recipe of the Day!' in rv.data
+        assert b'Recipe of the Day' in rv.data
+
+        rv = self.app.get('/view_recipe?recipe_id=1')
+        assert b'test_title' in rv.data
+        assert b'test_category' in rv.data
+        assert b'test_content' in rv.data
+
+        self.logout()
+
+        self.creating_user_two()
         # search for a specific recipe
         rv = self.searchResults('test')
         assert b'test_title' in rv.data
@@ -229,14 +315,6 @@ class FlaskrTestCase(unittest.TestCase):
         assert b'test_content' in rv.data
         assert b'save' in rv.data
 
-        rv = self.app.get('/user_account')
-        assert b'khanhta2001' in rv.data
-        assert b'img' in rv.data
-        assert b'test_title' in rv.data
-        assert b'test_category' in rv.data
-        assert b'test_content' in rv.data
-        assert b'Save your favorite Recipe in here!' in rv.data
-
         rv = self.app.post('/save_recipe',
                            data=dict(title='test_title', category='test_category', content='test_content'),
                            follow_redirects=True)
@@ -245,9 +323,7 @@ class FlaskrTestCase(unittest.TestCase):
         assert b'test_content' in rv.data
         assert b'save' in rv.data
 
-        rv = self.app.get('/user_account')
-        assert b'khanhta2001' in rv.data
-        assert b'img' in rv.data
+        rv = self.app.get('/saved_recipes')
         assert b'test_title' in rv.data
         assert b'test_category' in rv.data
         assert b'test_content' in rv.data
@@ -256,7 +332,7 @@ class FlaskrTestCase(unittest.TestCase):
 
     def test_recipes(self):
         # Register the user to login
-        self.creating_user()
+        self.creating_user_one()
 
         # go to the add recipe Page
         rv = self.app.get('/create_recipe')
@@ -272,7 +348,7 @@ class FlaskrTestCase(unittest.TestCase):
         ), follow_redirects=True)
         assert b'New recipe successfully posted!' in rv.data
         assert b'MyRecipe' in rv.data
-        assert b'Recipe of the Day!' in rv.data
+        assert b'Recipe of the Day' in rv.data
 
         rv = self.app.get('/view_recipe?recipe_id=1')
         assert b'test_title' in rv.data
@@ -280,6 +356,8 @@ class FlaskrTestCase(unittest.TestCase):
         assert b'test_content' in rv.data
         assert b'Like' in rv.data
         assert b'review' in rv.data
+        assert b'delete' in rv.data
+        assert b'edit' in rv.data
         assert b'No reviews here so far!' in rv.data
 
         # like recipe
@@ -292,6 +370,8 @@ class FlaskrTestCase(unittest.TestCase):
         assert b'test_content' in rv.data
         assert b'Unlike' in rv.data
         assert b'review' in rv.data
+        assert b'delete' in rv.data
+        assert b'edit' in rv.data
         assert b'No reviews here so far!' in rv.data
 
         # unlike recipe
@@ -304,6 +384,8 @@ class FlaskrTestCase(unittest.TestCase):
         assert b'test_content' in rv.data
         assert b'Like' in rv.data
         assert b'review' in rv.data
+        assert b'delete' in rv.data
+        assert b'edit' in rv.data
         assert b'No reviews here so far!' in rv.data
 
         # go to review recipe page
@@ -331,7 +413,7 @@ class FlaskrTestCase(unittest.TestCase):
         """ Also tests edit function by adding a recipe and then making sure it is updated with edits. """
 
         # register and login test code copied from Khanh since he wrote register and log in functions.
-        self.creating_user()
+        self.creating_user_one()
 
         # Added test recipe
         rv = self.app.get('/create_recipe')
@@ -348,7 +430,7 @@ class FlaskrTestCase(unittest.TestCase):
 
         assert b'New recipe successfully posted!' in rv.data
         assert b'MyRecipe' in rv.data
-        assert b'Recipe of the Day!' in rv.data
+        assert b'Recipe of the Day' in rv.data
 
         # Testing edit function
         rv = self.app.get('/view_recipe?recipe_id=1')
@@ -386,7 +468,7 @@ class FlaskrTestCase(unittest.TestCase):
         assert b'Recipe was successfully deleted!' in rv.data
         assert b'Title Edit' not in rv.data
         assert b'MyRecipe' in rv.data
-        assert b'Recipe of the Day!' in rv.data
+        assert b'Recipe of the Day' in rv.data
 
         self.logout()
 

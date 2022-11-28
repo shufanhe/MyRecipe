@@ -1,0 +1,10 @@
+{% extends "layout.html" %}
+{% block body %}
+  <div class="container w-75">
+    <form action="{{ url_for('post_review_edit') }}" method="post" class="post-review-edit">
+        <textarea name="review" class="form-control" id="textareaInput" rows="5" cols="40">{{ review.review|safe }}</textarea>
+        <button type="submit" class="btn btn-dark mb-3">Update</button>
+        <input type="hidden" name="recipe_id" value={{ review.recipe_id }}>
+    </form>
+  </div>
+{% endblock %}

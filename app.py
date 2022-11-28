@@ -2,10 +2,11 @@ import functools
 import os
 import random
 from sqlite3 import dbapi2 as sqlite3
-from flask import Flask, flash, g, redirect, render_template, request, session, url_for, abort
+from flask import Flask, flash, g, redirect, render_template, request, session, url_for
 from flask_mail import Mail, Message
 from werkzeug.security import check_password_hash, generate_password_hash
 from datetime import date
+from datetime import datetime
 
 app = Flask(__name__)
 
@@ -76,8 +77,10 @@ def adminUser():
     user = 'admin'
     password = 'verysecurepassword'
     email = 'food@gmail.com'
-    db.execute('INSERT INTO user (username, password, email) VALUES (?, ?, ?)', (user, generate_password_hash(password), email))
+    db.execute('INSERT INTO user (username, password, email,verified) VALUES (?, ?,?,?)',
+               (user, generate_password_hash(password), email, 'verified'))
     db.commit()
+
 
 def recipe():
     db = get_db()
@@ -115,7 +118,7 @@ def create_recipe():
 def post_recipe():
     if session['user_id'] == 'admin' or session['user_id'] is None:
         flash('Make an account to be able to add a recipe!')
-        return redirect(url_for('create_recipe'))
+        return redirect(url_for('HomePage'))
     db = get_db()
     user = session['user_id']
     title = request.form['title']
@@ -133,29 +136,32 @@ def post_recipe():
 @app.route('/view_recipe')
 def view_recipe():
     db = get_db()
+    current_user = session['user_id']
     cur = db.execute('SELECT COUNT(1) FROM like_recipe WHERE user_id=? AND recipe_id=?',
-                       [session['user_id'], request.args.get('recipe_id')])
+                     [session['user_id'], request.args.get('recipe_id')])
     whether_liked = cur.fetchone()[0]
     # route if the user clicked on recipe of the day, recipe should show up according to the date
-    if ('recipe_of_the_day' in request.args):
+    if 'recipe_of_the_day' in request.args:
         recipe_id_today = db.execute('SELECT recipe_id FROM calendar WHERE date_today=?', [date.today()])
-        recipe_today = db.execute('SELECT title, category, content, likes, review FROM recipes WHERE id=?', [recipe_id_today])
+        recipe_today = db.execute('SELECT title, category, content, likes, review FROM recipes WHERE id=?',
+                                  [recipe_id_today])
         rev = db.execute('SELECT likes, review FROM reviews WHERE recipe_id=?', [recipe_id_today])
         recipe = recipe_today.fetchone()
         reviews = rev.fetchall()
     # route if user clicked on a recipe (not through recipe of the day)
     else:
-        rec = db.execute('SELECT id, title, category, content, likes FROM recipes WHERE id=?', [request.args.get('recipe_id')])
+        rec = db.execute('SELECT id, title, category, content, likes, user_id FROM recipes WHERE id=?',
+                         [request.args.get('recipe_id')])
         recipe = rec.fetchone()
-        rev = db.execute('SELECT recipe_id, review FROM reviews WHERE recipe_id=?', [request.args.get('recipe_id')])
+        rev = db.execute('SELECT recipe_id, user_id, review FROM reviews WHERE recipe_id=?',
+                         [request.args.get('recipe_id')])
         reviews = rev.fetchall()
-    return render_template('ViewRecipe.html', recipe=recipe, reviews=reviews, liked=whether_liked)
+    return render_template('ViewRecipe.html', recipe=recipe, reviews=reviews, liked=whether_liked,
+                           current_user=current_user)
 
 
 @app.route('/like_recipe', methods=['POST'])
 def like_recipe():
-    if session['user_id'] is None:
-        abort(401)
     db = get_db()
     # current_user = db.execute('SELECT * FROM user WHERE id=?', [session['user_id']]).fetchone()
     # recipe_liked = request.get_json()['to_like']
@@ -164,8 +170,16 @@ def like_recipe():
     action = request.form['action']
     if action == 'like':
         recipe_id = request.form['like_me']
+        if session['user_id'] is None:
+            flash('You need to login to like recipe')
+            return redirect(url_for('view_recipe', recipe_id=recipe_id))
+        cur = db.execute('SELECT user_id FROM recipes WHERE id=?', [recipe_id])
+        to_user = cur.fetchone()[0]
         db.execute('UPDATE recipes SET likes=likes+1 WHERE id=?', [recipe_id])
         db.execute('INSERT INTO like_recipe (recipe_id, user_id) VALUES (?, ?)', [recipe_id, session['user_id']])
+        db.execute(
+            'INSERT INTO notifications (recipe_id, to_user, from_user, action_type, action_time) VALUES (?, ?, ?, ?, ?)',
+            [recipe_id, to_user, session['user_id'], 'liked', datetime.now()])
         db.commit()
     if action == 'unlike':
         recipe_id = request.form['unlike_me']
@@ -179,13 +193,19 @@ def like_recipe():
 
 @app.route('/review_recipe', methods=['GET'])
 def review_recipe():
-    if session['user_id'] is None:
-        abort(401)
     db = get_db()
     recipe_id = request.args.get('review_me')
-    cur = db.execute('SELECT * FROM recipes WHERE id=?', [recipe_id])
-    recipe = cur.fetchone()
-    return render_template('review_recipe.html', recipe=recipe)
+    if session['user_id'] is None:
+        flash('You need to login to review')
+        return redirect(url_for('view_recipe', recipe_id=recipe_id))
+    cur1 = db.execute('SELECT * FROM reviews WHERE recipe_id=? AND user_id=?', [recipe_id, session['user_id']])
+    if cur1.fetchone() is not None:
+        flash('You have already reviewed this recipe')
+        return redirect(url_for('view_recipe', recipe_id=recipe_id))
+    else:
+        cur2 = db.execute('SELECT * FROM recipes WHERE id=?', [recipe_id])
+        recipe = cur2.fetchone()
+        return render_template('review_recipe.html', recipe=recipe)
 
 
 @app.route('/post_review', methods=['POST'])
@@ -193,11 +213,47 @@ def post_review():
     db = get_db()
     recipe_to_review = int(request.form['review_me'])
     review = request.form['review']
-    db.execute('INSERT INTO reviews (recipe_id, review) VALUES (?, ?)', [recipe_to_review, review])
+    db.execute('INSERT INTO reviews (recipe_id, user_id, review) VALUES (?, ?, ?)',
+               [recipe_to_review, session['user_id'], review])
+    cur = db.execute('SELECT user_id FROM recipes WHERE id=?', [recipe_to_review])
+    to_user = cur.fetchone()[0]
+    db.execute(
+        'INSERT INTO notifications (recipe_id, to_user, from_user, action_type, action_time) VALUES (?, ?, ?, ?, ?)',
+        [recipe_to_review, to_user, session['user_id'], 'reviewed', datetime.now()])
     db.commit()
     cur = db.execute('SELECT * FROM reviews WHERE recipe_id=?', [recipe_to_review])
     reviews = cur.fetchall()
     return redirect(url_for('view_recipe', reviews=reviews, recipe_id=recipe_to_review))
+
+
+@app.route('/delete_review', methods=['POST'])
+def delete_review():
+    db = get_db()
+    recipe_id = request.form['recipe_id']
+    db.execute('DELETE FROM reviews WHERE user_id=? AND recipe_id=?', [session['user_id'], recipe_id])
+    db.commit()
+    flash("Review was successfully deleted!")
+    return redirect(url_for('view_recipe', recipe_id=recipe_id))
+
+
+@app.route('/edit_review', methods=['GET'])
+def edit_review():
+    db = get_db()
+    recipe_id = request.args.get('recipe_id')
+    cur = db.execute('SELECT * FROM reviews WHERE user_id=? AND recipe_id=?', [session['user_id'], recipe_id])
+    review = cur.fetchone()
+    return render_template('edit_review.html', review=review)
+
+
+@app.route('/post_review_edit', methods=['POST'])
+def post_review_edit():
+    recipe_id = request.form['recipe_id']
+    db = get_db()
+    db.execute('UPDATE reviews SET review=? WHERE user_id=? AND recipe_id=?',
+               [request.form['review'], session['user_id'], recipe_id])
+    db.commit()
+    flash('Review Was Successfully Updated!')
+    return redirect(url_for('view_recipe', recipe_id=recipe_id))
 
 
 @app.route('/view_category', methods=['GET'])
@@ -255,21 +311,44 @@ def register():
         if password != retypepassword:
             error = 'Please enter your password correctly.'
         else:
-            # try to register the username, if not return error that user_id already registered
-            user = db.execute('SELECT * FROM user WHERE username = ?', (username,)).fetchone()
-            if user is None:
-                db.execute("INSERT INTO user (username, password,email) VALUES (?, ?,?)",
-                           (username, generate_password_hash(password), email), )
+            # Check username and email to see if they are already registered
+            user = db.execute('SELECT * FROM user WHERE username = ? and email != ?', [username,email])
+            user = user.fetchall()
+            check_email = db.execute('SELECT * FROM user where email = ? and username != ?', [email, username])
+            check_email = check_email.fetchall()
+            registration = db.execute('SELECT * FROM user WHERE username = ? AND email = ?', [username, email])
+            registration = registration.fetchone()
+            if len(user) == 0 and len(check_email) == 0 and registration is None:
+                db.execute("INSERT INTO user (username, password,email, verified) VALUES (?,?,?,?)",
+                           (username, generate_password_hash(password), email.lower(), 'unverified'))
                 db.commit()
                 msg = Message("Email registration for Food Recipe Account", recipients=[email])
                 OTP = random.randrange(100000, 999999)
-                msg.body = "Hi,\n\nHere is your OTP code:\n" + str(OTP) + "\n\n" + "Thank you,\nFood Recipe Admin team"
+                msg.body = "Hi,\n\nHere is your verification code:\n" + str(
+                    OTP) + "\n\n" + "Thank you,\nFood Recipe Admin team"
                 mail.send(msg)
-                flash('Please check your email for OTP code')
+                flash('Please check your email for verification code')
                 verification_type = "Register"
-                return render_template('verificationOTP.html', verification_code=OTP, account_email=email, verification_type=verification_type)
+                return render_template('verificationOTP.html', verification_code=OTP, account_email=email,
+                                       verification_type=verification_type)
+            elif registration is not None:
+                if registration['verified'] == 'unverified':
+                    msg = Message("Email registration for Food Recipe Account", recipients=[email])
+                    OTP = random.randrange(100000, 999999)
+                    msg.body = "Hi,\n\nHere is your verification code:\n" + str(
+                        OTP) + "\n\n" + "Thank you,\nFood Recipe Admin team"
+                    mail.send(msg)
+                    flash('Please check your email for verification code again')
+                    verification_type = "Register"
+                    return render_template('verificationOTP.html', verification_code=OTP, account_email=email,
+                                           verification_type=verification_type)
+                else:
+                    error = f"User {username} and {email} are already registered"
             else:
-                error = f"User {username} is already registered."
+                if len(check_email) != 0:
+                    error = f"{email} is already registered"
+                elif len(user) != 0 :
+                    error = f"User {username} is already registered"
     flash(error)
     return render_template('register.html')
 
@@ -290,9 +369,11 @@ def login():
 
     # check if the user wants to use email or user_id to login
     if "@" in username:
-        user = db.execute('SELECT * FROM user WHERE email = ?', (username,)).fetchone()
+        user = db.execute('SELECT * FROM user WHERE email = ?', [username.lower()])
+        user = user.fetchone()
     else:
-        user = db.execute('SELECT * FROM user WHERE username = ?', (username,)).fetchone()
+        user = db.execute('SELECT * FROM user WHERE username = ?', [username])
+        user = user.fetchone()
     # check to see if the username is empty or not
     if user is None or username is None:
         error = 'Incorrect username or email'
@@ -300,6 +381,8 @@ def login():
     # check to see if the password is correct or not
     elif not check_password_hash(user['password'], password):
         error = 'Incorrect password'
+    elif user['verified'] == 'unverified':
+        error = 'Please check your email for your verification code'
     if error is None:
         session.clear()
         # login with session being username
@@ -315,7 +398,8 @@ def reset_passwordPage():
     OTP = request.args.get('verification_code')
     email = request.args.get('account_email')
     verification_type = request.args.get('verification_type')
-    return render_template('resetPassword.html', verification_code=OTP, account_email=email, verification_type=verification_type)
+    return render_template('resetPassword.html', verification_code=OTP, account_email=email,
+                           verification_type=verification_type)
 
 
 @app.route('/resetpassword', methods=['POST'])
@@ -352,11 +436,15 @@ def verification():
     verification_type = request.form['verification_type']
     OTP = request.form['OTP']
     if OTP != verification_code:
-        flash('Please enter the correct OTP!')
-        render_template('verificationOTP.html', verification_code=verification_code, account_email=account_email,
+        flash('Please enter the correct verification code')
+        return render_template('verificationOTP.html', verification_code=verification_code, account_email=account_email,
                         verification_type=verification_type)
     else:
         if verification_type == 'Register':
+            db = get_db()
+            db.execute('UPDATE user SET verified = ? WHERE email = ?',
+                       ['verified', account_email])
+            db.commit()
             return redirect(url_for('loginPage'))
         else:
             return redirect(url_for('reset_passwordPage', account_email=account_email))
@@ -367,16 +455,18 @@ def sendingOTP():
     email = request.form['email']
     verification_type = request.form['verification_type']
     db = get_db()
-    user = db.execute('SELECT * FROM user WHERE email = ?', (email,)).fetchone()
+    user = db.execute('SELECT * FROM user WHERE email = ?', [email])
+    user = user.fetchone()
     if user is None:
         flash('There is no account registered under that email')
         return redirect(url_for('verificationPage'))
     msg = Message("Email Verification for Food Recipe Account", recipients=[email])
     OTP = random.randrange(100000, 999999)
-    msg.body = "Hi,\n\nHere is your OTP code:\n" + str(OTP) + "\n\n" + "Thank you,\nFood Recipe Admin team"
+    msg.body = "Hi,\n\nHere is your verification code:\n" + str(OTP) + "\n\n" + "Thank you,\nFood Recipe Admin team"
     mail.send(msg)
     flash('Please check your email for OTP code')
-    return render_template('verificationOTP.html', verification_code=OTP, account_email=email, verification_type=verification_type)
+    return render_template('verificationOTP.html', verification_code=OTP, account_email=email,
+                           verification_type=verification_type)
 
 
 @app.route('/logout')
@@ -388,9 +478,6 @@ def logout():
 
 @app.route('/save_recipe', methods=['POST'])
 def save_recipe():
-    if session['user_id'] is None or session['user_id'] == 'admin':
-        # abort if there is the user is not logged in
-        abort(401)
     # save recipe to user_id in the database
     title = request.form['title']
     content = request.form['content']
@@ -398,28 +485,82 @@ def save_recipe():
     db = get_db()
 
     # get the recipe database
-    recipe_element = db.execute('SELECT * FROM recipes WHERE title = ? AND content = ? AND category = ?', (title, content, category)).fetchone()
+    recipe_element = db.execute('SELECT * FROM recipes WHERE title = ? AND content = ? AND category = ?',
+                                (title, content, category)).fetchone()
     # save the recipe in the save_recipe database
-    check_save = db.execute('SELECT * FROM save_recipe WHERE title = ? AND content = ? AND category = ?', (title, content, category)).fetchone()
+    check_save = db.execute('SELECT * FROM save_recipe WHERE username = ? AND title = ? AND content = ? AND category = ?',
+                            (session['user_id'], title, content, category)).fetchone()
+
+    if session['user_id'] is None or session['user_id'] == 'admin':
+        # abort if there is the user is not logged in
+        flash('You need to login to save recipe')
+        return redirect(url_for('view_recipe', recipe_id=recipe_element['id']))
     if check_save is None:
-        db.execute("INSERT INTO save_recipe (username, title, content, category, recipe_id) VALUES (?, ?, ?, ?, ?)", (session['user_id'], recipe_element['title'], recipe_element['content'], recipe_element['category'],recipe_element['id']))
+        db.execute("INSERT INTO save_recipe (username, title, content, category, recipe_id) VALUES (?, ?, ?, ?, ?)", (
+        session['user_id'], recipe_element['title'], recipe_element['content'], recipe_element['category'],
+        recipe_element['id']))
         db.commit()
-    else:
+    elif check_save is not None:
         flash('This recipe has already been saved!')
     return redirect(url_for('view_recipe', recipe_id=recipe_element['id']))
+
+
+@app.route('/saved_recipes', methods=['GET'])
+def saved_recipes():
+    if session['user_id'] is None:
+        flash('You need to login to see save recipes')
+        return redirect(url_for('HomePage'))
+    db = get_db()
+    cur = db.execute('SELECT * FROM save_recipe WHERE username = ?', [session['user_id']])
+    saved = cur.fetchall()
+    return render_template('saved_recipes.html', saved_recipes=saved)
+
+
+@app.route('/save_author', methods=['POST'])
+def save_author():
+    db = get_db()
+    action = request.form['action']
+    if action == 'follow':
+        user = request.form['author']
+        current_user = session['user_id']
+        db.execute('INSERT INTO save_author (author, user) VALUES (?,?)', (user, current_user))
+        db.commit()
+        return redirect(url_for('user_account', author=user))
+    elif action == 'unfollow':
+        user = request.form['author']
+        current_user = session['user_id']
+        cur = db.execute('INSERT INTO save_author (author, user) VALUES (?,?)', [user, current_user])
+        return redirect(url_for('user_account', author = user))
 
 
 @app.route('/user_account')
 def user_account():
     db = get_db()
+    user = request.args.get('author')
+    if user is None:
+        user = session['user_id']
     if session['user_id'] is None:
-        abort(401)
-    db = get_db()
-    cur = db.execute('SELECT * FROM save_recipe WHERE username = ?', [session['user_id']])
-    saved_recipe = cur.fetchall()
-    cur2 = db.execute('SELECT * FROM recipes WHERE user_id=?', [session['user_id']])
+        flash('You need to login to see the account')
+        return redirect(url_for('HomePage'))
+    cur2 = db.execute('SELECT * FROM recipes WHERE user_id=?', [user])
     created_recipes = cur2.fetchall()
-    return render_template('user_account.html', save_recipe=saved_recipe, created_recipes=created_recipes)
+    return render_template('user_account.html', user=user, created_recipes=created_recipes)
+    # author_followed = db.execute('SELECT * FROM save_author WHERE user = ?',[session['user_id']])
+    # author_followed = author_followed.fetchall()
+    # if user != session['user_id']:
+    #     follow_author = db.execute('SELECT * FROM save_author WHERE user = ? and author = ?', [session['user_id'], user])
+    #     follow_author = follow_author.fetchone()
+    #     author_followed = db.execute('SELECT * FROM save_author WHERE user = ?', [user])
+    #     author_followed = author_followed.fetchall()
+    #     return render_template('user_account.html', user=user, created_recipes=created_recipes, follow_author=follow_author, author_followed=author_followed)
+    # return render_template('user_account.html', user=user, created_recipes=created_recipes,author_followed=author_followed)
+
+@app.route('/notifications', methods=['GET'])
+def notifications():
+    db = get_db()
+    cur = db.execute('SELECT * FROM notifications WHERE to_user=?', [session['user_id']])
+    my_notifications = cur.fetchall()
+    return render_template('notifications.html', my_notifications=my_notifications)
 
 
 @app.route('/delete_recipe', methods=['POST'])

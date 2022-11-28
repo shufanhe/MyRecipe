@@ -2,12 +2,12 @@
 {% block body %}
 <main>
     <div class="auth-form-header">
-        <h1>OTP Verification</h1>
+        <h1>Email Verification</h1>
     </div>
     <div class="auth-form px-3" id="verification">
         <div class="auth-form-body mt-3">
             <form action="{{ url_for ('verification')}}" method="post" name="verification">
-                <label for="OTP" class="form-label">OTP Code</label>
+                <label for="OTP" class="form-label">Verification Code</label>
                 <input type="text" class="form-control" name="OTP" id="OTP">
                 <button type="submit" class="btn btn-primary btn-block">Submit</button>
                 <input type="hidden" name="verification_code" value="{{ verification_code }}">
