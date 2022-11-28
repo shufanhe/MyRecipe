@@ -31,7 +31,7 @@ Completed Work
 Still Needs Completion
 ----------------
 1. Shufan:
-   - Refine creator notifications: red dot on icon should only show up if there is unread notifications; Make sure users can view the accont of the user who liked/reviewed their recipe by clicking on the user name and view the recipe by clicking on the image, after those tasks are done.
+   - Refine creator notifications: red dot on icon should only show up if there is unread notifications; Make sure users can view the account of the user who liked/reviewed their recipe by clicking on the user name and view the recipe by clicking on the image, after those tasks are done.
    - Unit tests for edit/delete reviews, and notifications.
 2. Khanh:
    - Frontend for user account page - make it user accessible and friendly. Will add a profile picture so that the user can upload their own. 
@@ -88,4 +88,6 @@ Assigning:
 3. Diana:
    - Finish implementing user preferences.
    - Restrict creator to only select from the given categories when they create a recipe.
+   - Front-end for pages.
+   - Add more unit-tests.
 
