@@ -16,22 +16,22 @@
                         </h1>
                     </div>
                     <div>
-                        {% if session.user_id != user %}
-                            <a>Click to follow the author </a>
-                            {% if follow_author == None %}
-                                <form action="{{ url_for('save_author') }}" method="post" class="save-author">
-                                    <button type="submit" class="btn btn-outline-dark">Follow</button>
-                                    <input type="hidden" name="author" value={{ user }}>
-                                    <input type="hidden" name="action" value='follow'>
-                                </form>
-                            {% elif follow_author != None %}
-                                <form action="{{ url_for('save_author') }}" method="post" class="save-author">
-                                    <button type="submit" class="btn btn-outline-dark">Unfollow</button>
-                                    <input type="hidden" name="author" value={{ user }}>
-                                    <input type="hidden" name="action" value='unfollow'>
-                                </form>
-                            {% endif %}
-                        {% endif %}
+{#                        {% if session.user_id != user %}#}
+{#                            <a>Click to follow the author </a>#}
+{#                            {% if follow_author == None %}#}
+{#                                <form action="{{ url_for('save_author') }}" method="post" class="save-author">#}
+{#                                    <button type="submit" class="btn btn-outline-dark">Follow</button>#}
+{#                                    <input type="hidden" name="author" value={{ user }}>#}
+{#                                    <input type="hidden" name="action" value='follow'>#}
+{#                                </form>#}
+{#                            {% elif follow_author != None %}#}
+{#                                <form action="{{ url_for('save_author') }}" method="post" class="save-author">#}
+{#                                    <button type="submit" class="btn btn-outline-dark">Unfollow</button>#}
+{#                                    <input type="hidden" name="author" value={{ user }}>#}
+{#                                    <input type="hidden" name="action" value='unfollow'>#}
+{#                                </form>#}
+{#                            {% endif %}#}
+{#                        {% endif %}#}
                     </div>
                 </div>
                 <div class="col">
@@ -64,17 +64,17 @@
                                 {% endfor %}
                             </ul>
                         </div>
-                        <div class="mt-4">
-                            <ul class="created-recipes" id="created_recipes">
-                                {% for author in author_followed %}
-                                    <a href="{{ url_for('user_account', author = author.author) }}"> {{ author.author }}</a>
-                                {% else %}
-                                <div>
-                                    Add your favorite author!
-                                </div>
-                                {% endfor %}
-                            </ul>
-                        </div>
+{#                        <div class="mt-4">#}
+{#                            <ul class="created-recipes" id="created_recipes">#}
+{#                                {% for author in author_followed %}#}
+{#                                    <a href="{{ url_for('user_account', author = author.author) }}"> {{ author.author }}</a>#}
+{#                                {% else %}#}
+{#                                <div>#}
+{#                                    Add your favorite author!#}
+{#                                </div>#}
+{#                                {% endfor %}#}
+{#                            </ul>#}
+{#                        </div>#}
                     </div>
                 </div>
             </div>

@@ -312,11 +312,13 @@ def register():
             error = 'Please enter your password correctly.'
         else:
             # Check username and email to see if they are already registered
-            user = db.execute('SELECT * FROM user WHERE username = ?', [username])
-            user = user.fetchone()
-            check_email = db.execute('SELECT * FROM user where email = ?', [email])
-            check_email = check_email.fetchone()
-            if user is None and check_email is None:
+            user = db.execute('SELECT * FROM user WHERE username = ? and email != ?', [username,email])
+            user = user.fetchall()
+            check_email = db.execute('SELECT * FROM user where email = ? and username != ?', [email, username])
+            check_email = check_email.fetchall()
+            registration = db.execute('SELECT * FROM user WHERE username = ? AND email = ?', [username, email])
+            registration = registration.fetchone()
+            if len(user) == 0 and len(check_email) == 0:
                 db.execute("INSERT INTO user (username, password,email, verified) VALUES (?,?,?,?)",
                            (username, generate_password_hash(password), email.lower(), 'unverified'))
                 db.commit()
@@ -329,12 +331,21 @@ def register():
                 verification_type = "Register"
                 return render_template('verificationOTP.html', verification_code=OTP, account_email=email,
                                        verification_type=verification_type)
+            elif registration is not None:
+                if registration['verified'] == 'unverified':
+                    msg = Message("Email registration for Food Recipe Account", recipients=[email])
+                    OTP = random.randrange(100000, 999999)
+                    msg.body = "Hi,\n\nHere is your verification code:\n" + str(
+                        OTP) + "\n\n" + "Thank you,\nFood Recipe Admin team"
+                    mail.send(msg)
+                    flash('Please check your email for verification code again')
+                    verification_type = "Register"
+                    return render_template('verificationOTP.html', verification_code=OTP, account_email=email,
+                                           verification_type=verification_type)
             else:
-                if user is not None and check_email is not None:
-                    error = f"User {username} and {email} are already registered."
-                elif check_email is not None:
+                if len(check_email) != 0:
                     error = f"{email} is already registered."
-                elif user is not None:
+                elif len(user) != 0 :
                     error = f"User {username} is already registered."
     flash(error)
     return render_template('register.html')
@@ -475,8 +486,8 @@ def save_recipe():
     recipe_element = db.execute('SELECT * FROM recipes WHERE title = ? AND content = ? AND category = ?',
                                 (title, content, category)).fetchone()
     # save the recipe in the save_recipe database
-    check_save = db.execute('SELECT * FROM save_recipe WHERE title = ? AND content = ? AND category = ?',
-                            (title, content, category)).fetchone()
+    check_save = db.execute('SELECT * FROM save_recipe WHERE username = ? AND title = ? AND content = ? AND category = ?',
+                            (session['user_id'], title, content, category)).fetchone()
 
     if session['user_id'] is None or session['user_id'] == 'admin':
         # abort if there is the user is not logged in
@@ -531,16 +542,16 @@ def user_account():
         return redirect(url_for('HomePage'))
     cur2 = db.execute('SELECT * FROM recipes WHERE user_id=?', [user])
     created_recipes = cur2.fetchall()
-    author_followed = db.execute('SELECT * FROM save_author WHERE user = ?',[session['user_id']])
-    author_followed = author_followed.fetchall()
-    if user != session['user_id']:
-        follow_author = db.execute('SELECT * FROM save_author WHERE user = ? and author = ?', [session['user_id'], user])
-        follow_author = follow_author.fetchone()
-        author_followed = db.execute('SELECT * FROM save_author WHERE user = ?', [user])
-        author_followed = author_followed.fetchall()
-        return render_template('user_account.html', user=user, created_recipes=created_recipes, follow_author=follow_author, author_followed=author_followed)
-    return render_template('user_account.html', user=user, created_recipes=created_recipes,author_followed=author_followed)
-
+    return render_template('user_account.html', user=user, created_recipes=created_recipes)
+    # author_followed = db.execute('SELECT * FROM save_author WHERE user = ?',[session['user_id']])
+    # author_followed = author_followed.fetchall()
+    # if user != session['user_id']:
+    #     follow_author = db.execute('SELECT * FROM save_author WHERE user = ? and author = ?', [session['user_id'], user])
+    #     follow_author = follow_author.fetchone()
+    #     author_followed = db.execute('SELECT * FROM save_author WHERE user = ?', [user])
+    #     author_followed = author_followed.fetchall()
+    #     return render_template('user_account.html', user=user, created_recipes=created_recipes, follow_author=follow_author, author_followed=author_followed)
+    # return render_template('user_account.html', user=user, created_recipes=created_recipes,author_followed=author_followed)
 
 @app.route('/notifications', methods=['GET'])
 def notifications():

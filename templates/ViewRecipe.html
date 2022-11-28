@@ -22,14 +22,16 @@
             </form>
         {% endif %}
         <dt>{{recipe.likes}}</dt>
-        <form action="{{ url_for('delete_recipe') }}" method="post">
-            <input type="hidden" name="id" value= "{{ recipe.id }}">
-            <button type="submit" class="btn btn-outline-dark">Delete</button>
-        </form>
-        <form action="{{ url_for('edit') }}" method="get">
-            <input type="hidden" name="id" value= "{{ recipe.id }}">
-            <button type="submit" class="btn btn-outline-dark">Edit</button>
-        </form>
+        {% if recipe.user_id == session.user_id %}
+            <form action="{{ url_for('delete_recipe') }}" method="post">
+                <input type="hidden" name="id" value= "{{ recipe.id }}">
+                <button type="submit" class="btn btn-outline-dark">Delete</button>
+            </form>
+            <form action="{{ url_for('edit') }}" method="get">
+                <input type="hidden" name="id" value= "{{ recipe.id }}">
+                <button type="submit" class="btn btn-outline-dark">Edit</button>
+            </form>
+        {% endif %}
         {% if recipe.user_id != session.user_id %}
             <form action="{{ url_for('save_recipe') }}" method="post" id="save_recipe">
                 {#<button onclick ="save_recipe(`{{ recipe.title }}`, `{{ recipe.category }}`, `{{ recipe.content }}`)">Save</button>#}
