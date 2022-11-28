@@ -232,6 +232,9 @@ class FlaskrTestCase(unittest.TestCase):
         rv = self.app.get('/user_account')
         assert b'khanhta2001' in rv.data
         assert b'img' in rv.data
+        assert b'test_title' in rv.data
+        assert b'test_category' in rv.data
+        assert b'test_content' in rv.data
         assert b'Save your favorite Recipe in here!' in rv.data
 
         rv = self.app.post('/save_recipe',

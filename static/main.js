@@ -1,5 +1,3 @@
-
-
 function like_recipe(recipe_id){
     const data = {like_me : recipe_id };
     return fetch("/like_recipe",

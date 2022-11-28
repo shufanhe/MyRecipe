@@ -2,9 +2,9 @@
 {% block body %}
     <div class="container">
         <form action="{{ url_for('view_recipe') }}" id="view_recipe">
-                <h1>{{recipe.title}}</h1>
-                <dt>{{recipe.category}}</dt>
-                <p>{{recipe.content}}</p>
+            <h1>{{recipe.title}}</h1>
+            <dt>{{recipe.category}}</dt>
+            <p>{{recipe.content}}</p>
         </form>
         {% if liked==1 %}
             <form action="{{ url_for('like_recipe') }}" method="post" class="like-recipe">
@@ -22,7 +22,6 @@
             </form>
         {% endif %}
         <dt>{{recipe.likes}}</dt>
-
         <form action="{{ url_for('delete_recipe') }}" method="post">
             <input type="hidden" name="id" value= "{{ recipe.id }}">
             <button type="submit" class="btn btn-outline-dark">Delete</button>
@@ -33,12 +32,11 @@
         </form>
         <form action="{{ url_for('save_recipe') }}" method="post" id="save_recipe">
             {#<button onclick ="save_recipe(`{{ recipe.title }}`, `{{ recipe.category }}`, `{{ recipe.content }}`)">Save</button>#}
-            <button>Save</button>
+            <button type="submit" class="btn btn-outline-dark">Save</button>
             <input type="hidden" name="title" value="{{ recipe.title }}" class="title">
             <input type="hidden" name="category" value="{{ recipe.category }}" class="category">
             <input type="hidden" name="content" value="{{ recipe.content }}" class="content">
         </form>
-
         <form action="{{ url_for('review_recipe') }}" method="get" class="review-recipe">
             <button type="submit" class="btn btn-outline-dark">Review</button>
             <input type="hidden" name="review_me" value={{ recipe.id }}>
