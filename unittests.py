@@ -31,7 +31,7 @@ class FlaskrTestCase(unittest.TestCase):
 
     def resetpassword(self, email, password):
         return self.app.post('/resetpassword',
-                             data=dict(account_email=email, password=password, RetypePassword=password),
+                             data=dict(account_email=email, Password=password, RetypePassword=password),
                              follow_redirects=True)
 
     def searchResults(self, searchinput):
@@ -226,7 +226,7 @@ class FlaskrTestCase(unittest.TestCase):
         assert b'Forgot Your Password' in rv.data
 
         rv = self.app.get('/verificationPage')
-        assert b'Reset Your Password' in rv.data
+        assert b'Enter Your Email' in rv.data
         assert b'Email' in rv.data
         assert b'Submit' in rv.data
 
