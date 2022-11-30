@@ -6,34 +6,34 @@
             <h3>{{recipe.category}}</h3>
             <p class="fs-5">{{recipe.content}}</p>
         </form>
-
         <div class="container btn-group">
-        {% if recipe.user_id == session.user_id %}
-            <form action="{{ url_for('delete_recipe') }}" method="post">
-                <input type="hidden" name="id" value= "{{ recipe.id }}">
-                <button type="submit" class="btn btn-outline-dark">Delete</button>
-            </form>
-            <form action="{{ url_for('edit') }}" method="get">
-                <input type="hidden" name="id" value= "{{ recipe.id }}">
-                <button type="submit" class="btn btn-outline-dark" id="edit">Edit</button>
-            </form>
+        {% if session.user_id != None %}
+            {% if recipe.user_id == session.user_id or session.user_id == 'admin' %}
+                <form action="{{ url_for('delete_recipe') }}" method="post">
+                    <input type="hidden" name="id" value= "{{ recipe.id }}">
+                    <button type="submit" class="btn btn-outline-dark">Delete</button>
+                </form>
+                <form action="{{ url_for('edit') }}" method="get">
+                    <input type="hidden" name="id" value= "{{ recipe.id }}">
+                    <button type="submit" class="btn btn-outline-dark" id="edit">Edit</button>
+                </form>
+            {% endif %}
         {% endif %}
         </div>
-
-
         <div class="btn-group">
-            {% if recipe.user_id != session.user_id %}
-            <form action="{{ url_for('save_recipe') }}" method="post" id="save_recipe">
-                {#<button onclick ="save_recipe(`{{ recipe.title }}`, `{{ recipe.category }}`, `{{ recipe.content }}`)">Save</button>#}
-                <button type="submit" class="btn btn-outline-dark">Save</button>
-                <input type="hidden" name="title" value="{{ recipe.title }}" class="title">
-                <input type="hidden" name="category" value="{{ recipe.category }}" class="category">
-                <input type="hidden" name="content" value="{{ recipe.content }}" class="content">
-                <input type="hidden" name="author" value="{{ recipe.user_id }}" class="author">
-            </form>
+            {% if session.user_id != None %}
+                {% if recipe.user_id != session.user_id %}
+                <form action="{{ url_for('save_recipe') }}" method="post" id="save_recipe">
+                    {#<button onclick ="save_recipe(`{{ recipe.title }}`, `{{ recipe.category }}`, `{{ recipe.content }}`)">Save</button>#}
+                    <button type="submit" class="btn btn-outline-dark">Save</button>
+                    <input type="hidden" name="title" value="{{ recipe.title }}" class="title">
+                    <input type="hidden" name="category" value="{{ recipe.category }}" class="category">
+                    <input type="hidden" name="content" value="{{ recipe.content }}" class="content">
+                    <input type="hidden" name="author" value="{{ recipe.user_id }}" class="author">
+                </form>
+                {% endif %}
             {% endif %}
         </div>
-
         <div class="container btn-group">
             {% if liked==1 %}
                 <form action="{{ url_for('like_recipe') }}" method="post" class="like-recipe">
@@ -51,16 +51,14 @@
                 </form>
             {% endif %}
             <dt>{{recipe.likes}}</dt>
-
             <form action="{{ url_for('review_recipe') }}" method="get" class="review-recipe">
                 <button type="submit" class="btn btn-outline-dark">Review</button>
                 <input type="hidden" name="review_me" value={{ recipe.id }}>
             </form>
         </div>
-
         {% for each_review in reviews %}
             <p>{{ each_review.review }}</p>
-            {% if each_review.user_id == current_user %}
+            {% if each_review.user_id == current_user or session.user_id == 'admin' %}
                 <form action="{{ url_for('delete_review') }}" method="post">
                     <button type="submit" class="btn btn-outline-dark">Delete</button>
                     <input type="hidden" name="recipe_id" value={{ recipe.id }}>

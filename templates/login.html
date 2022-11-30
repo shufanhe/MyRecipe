@@ -13,13 +13,17 @@
                     <label for="password">Password</label>
                     <input type="password" name="password" id="password" class="form-control">
                     <input type="submit" name="commit" value="Sign in" class="btn btn-primary btn-block">
-                    <a class="label-link position-absolute top-0 right-0" tabindex="0" href="{{ url_for ('verificationPage')}}">Forgot Your Password?</a>
+                    <a class="label-link position-absolute top-0 right-0" tabindex="0" href="{{ url_for ('verificationPage', verification_type='forgotPassword')}}">Forgot Your Password?</a>
                 </div>
             </form>
         </div>
         <div class="login-callout mt-3">
             New to Food Recipe?
             <a href="{{ url_for ('registerPage') }}">Create an account</a>
+        </div>
+        <div class="login-callout mt-3">
+            Need to verify your account?
+            <a href="{{ url_for ('verificationPage', verification_type='Verify') }}">Click Here</a>
         </div>
     </div>
 </main>
