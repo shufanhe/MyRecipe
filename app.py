@@ -306,50 +306,50 @@ def register():
         error = 'Please retype your password.'
     elif not email:
         error = 'Email is required.'
-
+    elif '@' not in email or '.' not in email:
+        error = 'Please enter the correct email domain'
+    elif password != retypepassword:
+        error = 'Please enter your password correctly.'
     if error is None:
-        if password != retypepassword:
-            error = 'Please enter your password correctly.'
-        else:
-            # Check username and email to see if they are already registered
-            user = db.execute('SELECT * FROM user WHERE username = ? and email != ?', [username,email])
-            user = user.fetchall()
-            check_email = db.execute('SELECT * FROM user where email = ? and username != ?', [email, username])
-            check_email = check_email.fetchall()
-            registration = db.execute('SELECT * FROM user WHERE username = ? AND email = ?', [username, email])
-            registration = registration.fetchone()
-            if len(user) == 0 and len(check_email) == 0 and registration is None:
+        # Check username and email to see if they are already registered
+        user = db.execute('SELECT * FROM user WHERE username = ? and email != ?', [username,email])
+        user = user.fetchall()
+        check_email = db.execute('SELECT * FROM user where email = ? and username != ?', [email, username])
+        check_email = check_email.fetchall()
+        registration = db.execute('SELECT * FROM user WHERE username = ? AND email = ?', [username, email])
+        registration = registration.fetchone()
+        if len(user) == 0 and len(check_email) == 0 and registration is None:
+            msg = Message("Email registration for Food Recipe Account", recipients=[email])
+            OTP = random.randrange(100000, 999999)
+            msg.body = "Hi,\n\nHere is your verification code:\n" + str(
+                OTP) + "\n\n" + "Thank you,\nFood Recipe Admin team"
+            mail.send(msg)
+            flash('Please check your email for verification code')
+            verification_type = "Register"
+            db.execute("INSERT INTO user (username,password,email,verified,OTP_code) VALUES (?,?,?,?,?)",
+                       (username, generate_password_hash(password), email.lower(), 'unverified',generate_password_hash(str(OTP))))
+            db.commit()
+            return render_template('verificationOTP.html', verification_code=OTP, account_email=email,
+                                   verification_type=verification_type)
+        elif registration is not None:
+            if registration['verified'] == 'unverified':
                 msg = Message("Email registration for Food Recipe Account", recipients=[email])
                 OTP = random.randrange(100000, 999999)
                 msg.body = "Hi,\n\nHere is your verification code:\n" + str(
                     OTP) + "\n\n" + "Thank you,\nFood Recipe Admin team"
                 mail.send(msg)
-                flash('Please check your email for verification code')
+                flash('Please check your email for verification code again')
                 verification_type = "Register"
-                db.execute("INSERT INTO user (username,password,email,verified,OTP_code) VALUES (?,?,?,?,?)",
-                           (username, generate_password_hash(password), email.lower(), 'unverified',generate_password_hash(str(OTP))))
+                db.execute('UPDATE user SET OTP_code = ? WHERE email = ?',(generate_password_hash(str(OTP)), email))
                 db.commit()
-                return render_template('verificationOTP.html', verification_code=OTP, account_email=email,
-                                       verification_type=verification_type)
-            elif registration is not None:
-                if registration['verified'] == 'unverified':
-                    msg = Message("Email registration for Food Recipe Account", recipients=[email])
-                    OTP = random.randrange(100000, 999999)
-                    msg.body = "Hi,\n\nHere is your verification code:\n" + str(
-                        OTP) + "\n\n" + "Thank you,\nFood Recipe Admin team"
-                    mail.send(msg)
-                    flash('Please check your email for verification code again')
-                    verification_type = "Register"
-                    db.execute('UPDATE user SET OTP_code = ? WHERE email = ?',(generate_password_hash(str(OTP)), email))
-                    db.commit()
-                    return render_template('verificationOTP.html', account_email=email,verification_type=verification_type)
-                else:
-                    error = f"User {username} and {email} are already registered"
+                return render_template('verificationOTP.html', account_email=email,verification_type=verification_type)
             else:
-                if len(check_email) != 0:
-                    error = f"{email} is already registered"
-                elif len(user) != 0 :
-                    error = f"User {username} is already registered"
+                error = f"User {username} and {email} are already registered"
+        else:
+            if len(check_email) != 0:
+                error = f"{email} is already registered"
+            elif len(user) != 0 :
+                error = f"User {username} is already registered"
     flash(error)
     return render_template('register.html')
 
@@ -383,7 +383,7 @@ def login():
     elif not check_password_hash(user['password'], password):
         error = 'Incorrect password'
     elif user['verified'] == 'unverified':
-        error = 'Please check your email for your verification code'
+        error = 'Please verify your account by registering again.'
     if error is None:
         session.clear()
         # login with session being username
@@ -427,7 +427,8 @@ def reset_password():
 
 @app.route('/verificationPage', methods=['GET'])
 def verificationPage():
-    return render_template('verificationPassword.html')
+    verification_type = request.args.get('verification_type')
+    return render_template('verificationPage.html',verification_type=verification_type)
 
 
 @app.route('/verification', methods=['POST'])
@@ -447,6 +448,7 @@ def verification():
             db = get_db()
             db.execute('UPDATE user SET verified = ? WHERE email = ?',['verified', account_email])
             db.commit()
+            flash('Your account has been verified. You can log in now')
             return redirect(url_for('loginPage'))
         else:
             return redirect(url_for('reset_passwordPage', account_email=account_email))
@@ -491,8 +493,9 @@ def save_recipe():
     recipe_element = db.execute('SELECT * FROM recipes WHERE title = ? AND content = ? AND category = ?',
                                 (title, content, category)).fetchone()
     # save the recipe in the save_recipe database
-    check_save = db.execute('SELECT * FROM save_recipe WHERE username = ? AND title = ? AND content = ? AND category = ?',
-                            (session['user_id'], title, content, category)).fetchone()
+    check_save = db.execute(
+        'SELECT * FROM save_recipe WHERE username = ? AND title = ? AND content = ? AND category = ?',
+        (session['user_id'], title, content, category)).fetchone()
 
     if session['user_id'] is None or session['user_id'] == 'admin':
         # abort if there is the user is not logged in
@@ -500,8 +503,8 @@ def save_recipe():
         return redirect(url_for('view_recipe', recipe_id=recipe_element['id']))
     if check_save is None:
         db.execute("INSERT INTO save_recipe (username, title, content, category, recipe_id) VALUES (?, ?, ?, ?, ?)", (
-        session['user_id'], recipe_element['title'], recipe_element['content'], recipe_element['category'],
-        recipe_element['id']))
+            session['user_id'], recipe_element['title'], recipe_element['content'], recipe_element['category'],
+            recipe_element['id']))
         db.commit()
     elif check_save is not None:
         flash('This recipe has already been saved!')
@@ -533,7 +536,7 @@ def save_author():
         user = request.form['author']
         current_user = session['user_id']
         cur = db.execute('INSERT INTO save_author (author, user) VALUES (?,?)', [user, current_user])
-        return redirect(url_for('user_account', author = user))
+        return redirect(url_for('user_account', author=user))
 
 
 @app.route('/user_account')
@@ -557,6 +560,7 @@ def user_account():
     #     author_followed = author_followed.fetchall()
     #     return render_template('user_account.html', user=user, created_recipes=created_recipes, follow_author=follow_author, author_followed=author_followed)
     # return render_template('user_account.html', user=user, created_recipes=created_recipes,author_followed=author_followed)
+
 
 @app.route('/notifications', methods=['GET'])
 def notifications():
