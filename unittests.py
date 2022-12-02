@@ -405,6 +405,52 @@ class FlaskrTestCase(unittest.TestCase):
         assert b'review' in rv.data
         assert b'test_review' in rv.data
 
+        # edit review
+        rv = self.app.get('/view_recipe?recipe_id=1')
+        assert b'test_title' in rv.data
+        assert b'test_category' in rv.data
+        assert b'test_content' in rv.data
+        assert b'Like' in rv.data
+        assert b'edit' in rv.data
+        assert b'delete' in rv.data
+        assert b'review' in rv.data
+        assert b'test_review' in rv.data
+
+        rv = self.app.get('/edit_review?recipe_id=1')
+        assert b'test_review' in rv.data
+        assert b'Update' in rv.data
+
+        # post edited review
+        rv = self.app.post('/post_review_edit', data=dict(
+            review='edited review',
+            recipe_id='1'
+        ), follow_redirects=True)
+
+        assert b'Review Was Successfully Updated!' in rv.data
+        assert b'test_title' in rv.data
+        assert b'test_category' in rv.data
+        assert b'test_content' in rv.data
+        assert b'Like' in rv.data
+        assert b'edit' in rv.data
+        assert b'delete' in rv.data
+        assert b'review' in rv.data
+        assert b'test_review' not in rv.data
+        assert b'edited review' in rv.data
+
+        # delete review
+        rv = self.app.post('/delete_review', data=dict(
+            recipe_id='1'
+        ), follow_redirects=True)
+        assert b'Review was successfully deleted!' in rv.data
+        assert b'edited review' not in rv.data
+        assert b'test_title' in rv.data
+        assert b'test_category' in rv.data
+        assert b'test_content' in rv.data
+        assert b'Like' in rv.data
+        assert b'edit' in rv.data
+        assert b'delete' in rv.data
+        assert b'review' in rv.data
+
         # logout
         self.logout()
 
