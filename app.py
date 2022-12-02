@@ -77,8 +77,8 @@ def adminUser():
     user = 'admin'
     password = 'verysecurepassword'
     email = 'food@gmail.com'
-    db.execute('INSERT INTO user (username, password, email,verified) VALUES (?, ?,?,?)',
-               (user, generate_password_hash(password), email, 'verified'))
+    db.execute('INSERT INTO user (username, password, email,verified,OTP_code) VALUES (?,?,?,?,?)',
+               (user, generate_password_hash(password), email, 'verified',0))
     db.commit()
 
 
@@ -319,9 +319,6 @@ def register():
             registration = db.execute('SELECT * FROM user WHERE username = ? AND email = ?', [username, email])
             registration = registration.fetchone()
             if len(user) == 0 and len(check_email) == 0 and registration is None:
-                db.execute("INSERT INTO user (username, password,email, verified) VALUES (?,?,?,?)",
-                           (username, generate_password_hash(password), email.lower(), 'unverified'))
-                db.commit()
                 msg = Message("Email registration for Food Recipe Account", recipients=[email])
                 OTP = random.randrange(100000, 999999)
                 msg.body = "Hi,\n\nHere is your verification code:\n" + str(
@@ -329,6 +326,9 @@ def register():
                 mail.send(msg)
                 flash('Please check your email for verification code')
                 verification_type = "Register"
+                db.execute("INSERT INTO user (username,password,email,verified,OTP_code) VALUES (?,?,?,?,?)",
+                           (username, generate_password_hash(password), email.lower(), 'unverified',generate_password_hash(str(OTP))))
+                db.commit()
                 return render_template('verificationOTP.html', verification_code=OTP, account_email=email,
                                        verification_type=verification_type)
             elif registration is not None:
@@ -340,8 +340,9 @@ def register():
                     mail.send(msg)
                     flash('Please check your email for verification code again')
                     verification_type = "Register"
-                    return render_template('verificationOTP.html', verification_code=OTP, account_email=email,
-                                           verification_type=verification_type)
+                    db.execute('UPDATE user SET OTP_code = ? WHERE email = ?',(generate_password_hash(str(OTP)), email))
+                    db.commit()
+                    return render_template('verificationOTP.html', account_email=email,verification_type=verification_type)
                 else:
                     error = f"User {username} and {email} are already registered"
             else:
@@ -395,17 +396,16 @@ def login():
 
 @app.route('/resetpasswordPage', methods=['GET'])
 def reset_passwordPage():
-    OTP = request.args.get('verification_code')
     email = request.args.get('account_email')
     verification_type = request.args.get('verification_type')
-    return render_template('resetPassword.html', verification_code=OTP, account_email=email,
+    return render_template('resetPassword.html', account_email=email,
                            verification_type=verification_type)
 
 
 @app.route('/resetpassword', methods=['POST'])
 def reset_password():
     # get all the required field
-    password = request.form['password']
+    password = request.form['Password']
     retypePassword = request.form['RetypePassword']
     email = request.form['account_email']
     # check if the user enters any information
@@ -421,6 +421,7 @@ def reset_password():
         db.execute('UPDATE user SET password = ? WHERE email = ?', (generate_password_hash(password), email))
         db.commit()
         # change the password of user
+        flash('Your password has been reset. Please log in with your new password!')
         return redirect(url_for('loginPage'))
 
 
@@ -431,19 +432,20 @@ def verificationPage():
 
 @app.route('/verification', methods=['POST'])
 def verification():
-    verification_code = request.form['verification_code']
+    db = get_db()
     account_email = request.form['account_email']
     verification_type = request.form['verification_type']
     OTP = request.form['OTP']
-    if OTP != verification_code:
+    user = db.execute("SELECT * FROM user WHERE email == ?", [account_email])
+    user = user.fetchone()
+    verification_code = user['OTP_code']
+    if not check_password_hash(verification_code, OTP):
         flash('Please enter the correct verification code')
-        return render_template('verificationOTP.html', verification_code=verification_code, account_email=account_email,
-                        verification_type=verification_type)
+        return render_template('verificationOTP.html', account_email=account_email, verification_type=verification_type)
     else:
         if verification_type == 'Register':
             db = get_db()
-            db.execute('UPDATE user SET verified = ? WHERE email = ?',
-                       ['verified', account_email])
+            db.execute('UPDATE user SET verified = ? WHERE email = ?',['verified', account_email])
             db.commit()
             return redirect(url_for('loginPage'))
         else:
@@ -465,8 +467,9 @@ def sendingOTP():
     msg.body = "Hi,\n\nHere is your verification code:\n" + str(OTP) + "\n\n" + "Thank you,\nFood Recipe Admin team"
     mail.send(msg)
     flash('Please check your email for OTP code')
-    return render_template('verificationOTP.html', verification_code=OTP, account_email=email,
-                           verification_type=verification_type)
+    db.execute('UPDATE user SET OTP_code = ? WHERE email = ?', [generate_password_hash(str(OTP)), email])
+    db.commit()
+    return render_template('verificationOTP.html', account_email=email,verification_type=verification_type)
 
 
 @app.route('/logout')
