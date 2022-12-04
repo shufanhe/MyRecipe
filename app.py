@@ -148,16 +148,25 @@ def view_recipe():
         rev = db.execute('SELECT likes, review FROM reviews WHERE recipe_id=?', [recipe_id_today])
         recipe = recipe_today.fetchone()
         reviews = rev.fetchall()
+        return render_template('ViewRecipe.html', recipe=recipe, reviews=reviews, liked=whether_liked,
+                               current_user=current_user)
     # route if user clicked on a recipe (not through recipe of the day)
     else:
-        rec = db.execute('SELECT id, title, category, content, likes, user_id FROM recipes WHERE id=?',
+        cur2 = db.execute('SELECT COUNT(1) FROM recipes WHERE id=?',
                          [request.args.get('recipe_id')])
-        recipe = rec.fetchone()
-        rev = db.execute('SELECT recipe_id, user_id, review FROM reviews WHERE recipe_id=?',
-                         [request.args.get('recipe_id')])
-        reviews = rev.fetchall()
-    return render_template('ViewRecipe.html', recipe=recipe, reviews=reviews, liked=whether_liked,
-                           current_user=current_user)
+        whether_exist = cur2.fetchone()[0]
+        if whether_exist == 0:
+            flash('The recipe has been deleted.')
+            return redirect(url_for('notifications'))
+        else:
+            rec = db.execute('SELECT id, title, category, content, likes, user_id FROM recipes WHERE id=?',
+                             [request.args.get('recipe_id')])
+            recipe = rec.fetchone()
+            rev = db.execute('SELECT recipe_id, user_id, review FROM reviews WHERE recipe_id=?',
+                             [request.args.get('recipe_id')])
+            reviews = rev.fetchall()
+            return render_template('ViewRecipe.html', recipe=recipe, reviews=reviews, liked=whether_liked,
+                               current_user=current_user)
 
 
 @app.route('/like_recipe', methods=['POST'])
@@ -177,9 +186,11 @@ def like_recipe():
         to_user = cur.fetchone()[0]
         db.execute('UPDATE recipes SET likes=likes+1 WHERE id=?', [recipe_id])
         db.execute('INSERT INTO like_recipe (recipe_id, user_id) VALUES (?, ?)', [recipe_id, session['user_id']])
+        current_date = date.today()
+        current_time = datetime.now().strftime("%H:%M")
         db.execute(
-            'INSERT INTO notifications (recipe_id, to_user, from_user, action_type, action_time) VALUES (?, ?, ?, ?, ?)',
-            [recipe_id, to_user, session['user_id'], 'liked', datetime.now()])
+            'INSERT INTO notifications (recipe_id, to_user, from_user, action_type, action_date, action_time) VALUES (?, ?, ?, ?, ?, ?)',
+            [recipe_id, to_user, session['user_id'], 'liked', current_date, current_time])
         db.commit()
     if action == 'unlike':
         recipe_id = request.form['unlike_me']
@@ -217,9 +228,11 @@ def post_review():
                [recipe_to_review, session['user_id'], review])
     cur = db.execute('SELECT user_id FROM recipes WHERE id=?', [recipe_to_review])
     to_user = cur.fetchone()[0]
+    current_date = date.today()
+    current_time = datetime.now().strftime("%H:%M")
     db.execute(
-        'INSERT INTO notifications (recipe_id, to_user, from_user, action_type, action_time) VALUES (?, ?, ?, ?, ?)',
-        [recipe_to_review, to_user, session['user_id'], 'reviewed', datetime.now()])
+        'INSERT INTO notifications (recipe_id, to_user, from_user, action_type, action_date, action_time) VALUES (?, ?, ?, ?, ?, ?)',
+        [recipe_to_review, to_user, session['user_id'], 'reviewed', current_date, current_time])
     db.commit()
     cur = db.execute('SELECT * FROM reviews WHERE recipe_id=?', [recipe_to_review])
     reviews = cur.fetchall()

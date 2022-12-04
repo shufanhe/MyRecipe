@@ -1,13 +1,13 @@
 {% extends "layout.html" %}
 {% block body %}
     <div class="container">
+
         <form action="{{ url_for('view_recipe') }}" id="view_recipe">
             <h1>{{recipe.title}}</h1>
             <p>Category: {{recipe.category}}</p>
-            <p>Created by <a href="{{ url_for('user_account', author = recipe.user_id) }}">{{ recipe.user_id}}</a></p>
+            <p>Created by <a href="{{ url_for('user_account', author = recipe.user_id) }}">{{recipe.user_id}}</a></p>
             <p class="fs-5">{{recipe.content}}</p>
         </form>
-
 
         <div class="btn-group">
             {% if recipe.user_id != session.user_id %}
