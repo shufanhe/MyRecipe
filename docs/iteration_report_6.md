@@ -7,7 +7,6 @@ Tasks Assigned
    - Front-end for view recipe
    - Unit tests for edit/delete reviews, and notifications.
    - Upload/set recipes of the day through admin account.
-   - Keep trying to implement JavaScript for like/review
 2. Khanh:
    - Upload images for recipes
    - Allow users to change their profile pictures, name and emails.
@@ -22,7 +21,10 @@ Tasks Assigned
 Completed Work
 ----------------
 1. Shufan:
-
+   - Front-end for view recipe: changed the location and font of several things, changed word buttons to icon buttons, added accordion for reviews
+   - Unit tests for edit/delete reviews
+   - Improved notifications: Users can click on embedded links to see the profile of the person that liked/reviewed their post and the post itself. If a post is deleted and the user tries to click on it, user is redirected back to notifications and flashed a warning message. Changed format of datetime, got rid of the decimals and seconds and seperated date and time into two attributes.
+   - Fixed homepage slidehow cover
 2. Khanh:
 
 3. Diana: No tasks completed, still working on tags and front-end.
@@ -31,7 +33,8 @@ Completed Work
 Still Needs Completion
 ----------------
 1. Shufan:
-
+   - Incorporate a seperate table for ingredients in the database 
+   - Unit tests for edit/delete reviews, and notifications.
 2. Khanh:
 
 3. Diana: Tags need to be completed, figured out a way to get the input from the user. Need to work on getting the recipes to show up with the respective diet tag. Once, I am able to implement this, I think categories will be implemented similarly and get that done. Cards on categories are still not aligning as they should, working on being able to align them.
@@ -39,29 +42,29 @@ Still Needs Completion
 
 Troubles/Issues/Roadblocks
 ----------------
-1. Had some troubles with bootstrap, formating the cards that we are using for recipes. Formating things in the correct position. Sizing of pictures and icons.
+1. Shufan - Figuring out dependencies among tables, for example if a recipe is deleted what happends to the notification related to it, and where will people be redirected to if they try to click on a recipe that is deleted (notification about the recipe remains even if recipe itself is deleted, people will get a warning message saying that the recipe has been deleted)
 2. Diana - Schema/database, working with queries for tags was a little challenging since I do not have enough experience.
-3. Shufan tried to work on uploading image for recipes but didn't end up working, did not have enough time so prioritized the assigned tasks.
+
 
 
 Adjustments to Overall Design
 ----------------
-1. Trying to make sure slideshow and recipe of the day work on homepage.
+1. We are going to add recipes to slideshow and recipe of the day work on homepage before the presentation because they would get deleted when we reinitilize the database.
+
 
 Helpful Tools & Approaches
 ----------------
 1. Stackoverflow.
 2. Bootstrap documentation.
-3. Reddit.
+3. Shufan - inspecting frontend code for other websites
+
 
 One Important Thing Learned
 ----------------
-1. Look at original documentation before searching for example code, provides better solutions and might save some time.
-2. Be very detailed with everything.
-3. Be careful to not lose code when merging things.
-4. Ask for help.
+1. Shufan learned how to use icons with for post methods (inside a button, and use a form to specify the method as 'post')
+2. Diana learned to trust herself
 
-Week 6
+Week 7
 ----------------
 Tasks:
 1. User Stories:
@@ -88,3 +91,10 @@ Assigning:
    - Front-end for pages.
    - Add more unit-tests.
 
+
+Week 8
+----------------
+Tasks:
+1. User Stories:
+
+Assigning:
