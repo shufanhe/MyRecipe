@@ -24,8 +24,12 @@ Completed Work
    - Front-end for view recipe: changed the location and font of several things, changed word buttons to icon buttons, added accordion for reviews
    - Unit tests for edit/delete reviews
    - Improved notifications: Users can click on embedded links to see the profile of the person that liked/reviewed their post and the post itself. If a post is deleted and the user tries to click on it, user is redirected back to notifications and flashed a warning message. Changed format of datetime, got rid of the decimals and seconds and seperated date and time into two attributes.
-   - Fixed homepage slidehow cover
+   - Fixed homepage slideshow cover
 2. Khanh:
+   - Finished upload images for recipes, and profile pictures
+   - Changed user interface in user account
+   - Added follow other user so that people can follow author of a recipe, which will be shown in the user account
+   - Unit tests
 
 3. Diana: No tasks completed, still working on tags and front-end.
 
@@ -33,9 +37,10 @@ Completed Work
 Still Needs Completion
 ----------------
 1. Shufan:
-   - Incorporate a seperate table for ingredients in the database 
+   - Incorporate a separate table for ingredients in the database 
    - Unit tests for edit/delete reviews, and notifications.
 2. Khanh:
+   - unit tests
 
 3. Diana: Tags need to be completed, figured out a way to get the input from the user. Need to work on getting the recipes to show up with the respective diet tag. Once, I am able to implement this, I think categories will be implemented similarly and get that done. Cards on categories are still not aligning as they should, working on being able to align them.
 
@@ -44,12 +49,12 @@ Troubles/Issues/Roadblocks
 ----------------
 1. Shufan - Figuring out dependencies among tables, for example if a recipe is deleted what happends to the notification related to it, and where will people be redirected to if they try to click on a recipe that is deleted (notification about the recipe remains even if recipe itself is deleted, people will get a warning message saying that the recipe has been deleted)
 2. Diana - Schema/database, working with queries for tags was a little challenging since I do not have enough experience.
-
+3. Khanh
 
 
 Adjustments to Overall Design
 ----------------
-1. We are going to add recipes to slideshow and recipe of the day work on homepage before the presentation because they would get deleted when we reinitilize the database.
+1. We are going to add recipes to slideshow and recipe of the day work on homepage before the presentation because they would get deleted when we reinitialize the database.
 
 
 Helpful Tools & Approaches
@@ -63,27 +68,29 @@ One Important Thing Learned
 ----------------
 1. Shufan learned how to use icons with for post methods (inside a button, and use a form to specify the method as 'post')
 2. Diana learned to trust herself
+3. Khanh learned time management, and leadership
 
 Week 7
 ----------------
 Tasks:
 1. User Stories:
-   - Incorporate a seperate table for ingredients in the database 
+   - Incorporate a separate table for ingredients in the database 
    - Restrict creator to only select from the given categories when they create a recipe.
    - Upload images for recipes
    - Finish off front-end for all pages.
-   - Finish/refine unit-tests to check edgecases.
+   - Finish/refine unit-tests to check edge-cases.
+
 Assigning:
+------------------
 1. Shufan:
-   - Incorporate a seperate table for ingredients in the database 
+   - Incorporate a separate table for ingredients in the database 
    - Front-end for view recipe
    - Unit tests for edit/delete reviews, and notifications.
    - Upload/set recipes of the day through admin account.
    - Keep trying to implement JavaScript for like/review
 2. Khanh:
    - Upload images for recipes
-   - Allow users to change their profile pictures, name and emails.
-   - Allow other users to follow each other accounts so that they can know when a user create a new recipe
+   - Allow users to change name and emails.
    - Check edge-cases to make more comprehensive unit-tests.
 3. Diana:
    - Finish implementing user preferences.
