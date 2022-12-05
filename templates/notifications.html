@@ -4,9 +4,10 @@
 <div class="container w-50">
      {% for notification in my_notifications %}
         <div class="text-center">
-            <a> {{ notification.from_user }} </a>
-            <a> {{ notification.action_type }} your post</a>
-            <a> {{ notification.action_time }}</a>
+            <a href="{{ url_for('user_account', author = notification.from_user) }}"> {{ notification.from_user }} </a>
+            <a> {{ notification.action_type }} your</a>
+            <a href="{{ url_for('view_recipe', recipe_id = notification.recipe_id) }}">post</a>
+            <a> on {{ notification.action_date }} at {{ notification.action_time }}</a>
         </div>
 
   {% else %}
