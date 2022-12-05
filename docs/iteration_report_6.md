@@ -32,7 +32,6 @@ Completed Work
 
 3. Diana: No tasks completed, still working on tags and front-end.
 
-
 Still Needs Completion
 ----------------
 1. Shufan:
@@ -42,7 +41,6 @@ Still Needs Completion
    - Unit tests 
    - Allow users to change their profile pictures, name and emails.
 3. Diana: Tags need to be completed, figured out a way to get the input from the user. Need to work on getting the recipes to show up with the respective diet tag. Once, I am able to implement this, I think categories will be implemented similarly and get that done. Cards on categories are still not aligning as they should, working on being able to align them.
-
 
 Troubles/Issues/Roadblocks
 ----------------
@@ -61,7 +59,6 @@ Helpful Tools & Approaches
 2. Bootstrap documentation.
 3. Shufan - inspecting frontend code for other websites
 
-
 One Important Thing Learned
 ----------------
 1. Shufan learned how to use icons with for post methods (inside a button, and use a form to specify the method as 'post')
@@ -71,12 +68,16 @@ One Important Thing Learned
 Week 7
 ----------------
 Tasks:
-1. User Stories:
-   - Incorporate a separate table for ingredients in the database 
-   - Restrict creator to only select from the given categories when they create a recipe.
-   - Upload images for recipes
-   - Finish off front-end for all pages.
-   - Finish/refine unit-tests to check edge-cases.
+1. Shufan:
+   - Update homepage layout so it is responsive in different sizes of screen.
+   - Tasks that still need completion from last week.
+
+2. Khanh:
+   - Improve uploading image in post recipe.
+   - Improving search recipe so it does not show all results at once.
+
+3. Diana
+   - Finish tasks from last week.
 
 Assigning:
 ------------------
@@ -96,10 +97,8 @@ Assigning:
    - Front-end for pages.
    - Add more unit-tests.
 
-
 Week 8
 ----------------
 Tasks:
-1. User Stories:
-
-Assigning:
+1. Refining application.
+2. Finish anything we have not completed.
