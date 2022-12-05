@@ -297,8 +297,8 @@ class FlaskrTestCase(unittest.TestCase):
 
         rv = self.app.get('/view_recipe?recipe_id=1')
         assert b'test_title' in rv.data
-        assert b'test_category' in rv.data
         assert b'test_content' in rv.data
+        assert b'Category: test_category' in rv.data
 
         self.logout()
 
@@ -306,27 +306,21 @@ class FlaskrTestCase(unittest.TestCase):
         # search for a specific recipe
         rv = self.searchResults('test')
         assert b'test_title' in rv.data
-        assert b'test_category' in rv.data
-        assert b'test_content' in rv.data
 
         rv = self.app.get('/view_recipe?recipe_id=1')
         assert b'test_title' in rv.data
-        assert b'test_category' in rv.data
-        assert b'test_content' in rv.data
         assert b'save' in rv.data
 
         rv = self.app.post('/save_recipe',
                            data=dict(title='test_title', category='test_category', content='test_content'),
                            follow_redirects=True)
         assert b'test_title' in rv.data
-        assert b'test_category' in rv.data
+        assert b'Category: test_category' in rv.data
         assert b'test_content' in rv.data
         assert b'save' in rv.data
 
         rv = self.app.get('/saved_recipes')
         assert b'test_title' in rv.data
-        assert b'test_category' in rv.data
-        assert b'test_content' in rv.data
 
         self.logout()
 
