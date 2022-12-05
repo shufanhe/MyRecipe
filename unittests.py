@@ -45,8 +45,8 @@ class FlaskrTestCase(unittest.TestCase):
             assert b'verification code' in rv.data
             assert b'Submit' in rv.data
             assert "Hi,\n\nHere is your verification code:" in outbox[0].body
-            verification_code = outbox[0].body[28:40]
-            rv = self.app.post('/verification', data=dict(verification_code=verification_code, OTP=verification_code,
+            verification_code = outbox[0].body[37:43]
+            rv = self.app.post('/verification', data=dict(OTP=verification_code,
                                                           account_email='test1@gmail.com',
                                                           verification_type='Register'), follow_redirects=True)
             assert b'Sign in' in rv.data
@@ -73,8 +73,8 @@ class FlaskrTestCase(unittest.TestCase):
             assert b'verification code' in rv.data
             assert b'Submit' in rv.data
             assert "Hi,\n\nHere is your verification code:" in outbox[0].body
-            verification_code = outbox[0].body[28:40]
-            rv = self.app.post('/verification', data=dict(verification_code=verification_code, OTP=verification_code,
+            verification_code = outbox[0].body[37:43]
+            rv = self.app.post('/verification', data=dict(OTP=verification_code,
                                                           account_email='test2@gmail.com',
                                                           verification_type='Register'), follow_redirects=True)
             assert b'Sign in' in rv.data

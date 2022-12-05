@@ -550,16 +550,15 @@ def user_account():
         return redirect(url_for('HomePage'))
     cur2 = db.execute('SELECT * FROM recipes WHERE user_id=?', [user])
     created_recipes = cur2.fetchall()
-    return render_template('user_account.html', user=user, created_recipes=created_recipes)
-    # author_followed = db.execute('SELECT * FROM save_author WHERE user = ?',[session['user_id']])
-    # author_followed = author_followed.fetchall()
-    # if user != session['user_id']:
-    #     follow_author = db.execute('SELECT * FROM save_author WHERE user = ? and author = ?', [session['user_id'], user])
-    #     follow_author = follow_author.fetchone()
-    #     author_followed = db.execute('SELECT * FROM save_author WHERE user = ?', [user])
-    #     author_followed = author_followed.fetchall()
-    #     return render_template('user_account.html', user=user, created_recipes=created_recipes, follow_author=follow_author, author_followed=author_followed)
-    # return render_template('user_account.html', user=user, created_recipes=created_recipes,author_followed=author_followed)
+    author_followed = db.execute('SELECT * FROM save_author WHERE user = ?',[session['user_id']])
+    author_followed = author_followed.fetchall()
+    if user != session['user_id']:
+        follow_author = db.execute('SELECT * FROM save_author WHERE user = ? and author = ?', [session['user_id'], user])
+        follow_author = follow_author.fetchone()
+        author_followed = db.execute('SELECT * FROM save_author WHERE user = ?', [user])
+        author_followed = author_followed.fetchall()
+        return render_template('user_account.html', user=user, created_recipes=created_recipes, follow_author=follow_author, author_followed=author_followed)
+    return render_template('user_account.html', user=user, created_recipes=created_recipes,author_followed=author_followed)
 
 
 @app.route('/notifications', methods=['GET'])
