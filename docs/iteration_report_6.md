@@ -63,7 +63,7 @@ One Important Thing Learned
 ----------------
 1. Shufan learned how to use icons with for post methods (inside a button, and use a form to specify the method as 'post')
 2. Diana learned to trust herself
-3. Khanh learned time management, and leadership (IT'S A DICTATORSHIP)
+3. Khanh learned time management, and leadership.
 
 
 Week 7 and 8
