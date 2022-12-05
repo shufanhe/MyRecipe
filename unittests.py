@@ -330,7 +330,7 @@ class FlaskrTestCase(unittest.TestCase):
 
         self.logout()
 
-    def test_recipes(self):
+    def test_post_like_review(self):
         # Register the user to login
         self.creating_user_one()
 
@@ -354,7 +354,7 @@ class FlaskrTestCase(unittest.TestCase):
         assert b'test_title' in rv.data
         assert b'test_category' in rv.data
         assert b'test_content' in rv.data
-        assert b'Like' in rv.data
+        assert b'like' in rv.data
         assert b'review' in rv.data
         assert b'delete' in rv.data
         assert b'edit' in rv.data
@@ -368,7 +368,7 @@ class FlaskrTestCase(unittest.TestCase):
         assert b'test_title' in rv.data
         assert b'test_category' in rv.data
         assert b'test_content' in rv.data
-        assert b'Unlike' in rv.data
+        assert b'unlike' in rv.data
         assert b'review' in rv.data
         assert b'delete' in rv.data
         assert b'edit' in rv.data
@@ -382,7 +382,7 @@ class FlaskrTestCase(unittest.TestCase):
         assert b'test_title' in rv.data
         assert b'test_category' in rv.data
         assert b'test_content' in rv.data
-        assert b'Like' in rv.data
+        assert b'like' in rv.data
         assert b'review' in rv.data
         assert b'delete' in rv.data
         assert b'edit' in rv.data
@@ -401,12 +401,132 @@ class FlaskrTestCase(unittest.TestCase):
         assert b'test_title' in rv.data
         assert b'test_category' in rv.data
         assert b'test_content' in rv.data
-        assert b'Like' in rv.data
+        assert b'like' in rv.data
         assert b'review' in rv.data
         assert b'test_review' in rv.data
 
+        # edit review
+        rv = self.app.get('/view_recipe?recipe_id=1')
+        assert b'test_title' in rv.data
+        assert b'test_category' in rv.data
+        assert b'test_content' in rv.data
+        assert b'like' in rv.data
+        assert b'edit' in rv.data
+        assert b'delete' in rv.data
+        assert b'review' in rv.data
+        assert b'test_review' in rv.data
+
+        rv = self.app.get('/edit_review?recipe_id=1')
+        assert b'test_review' in rv.data
+        assert b'Update' in rv.data
+
+        # post edited review
+        rv = self.app.post('/post_review_edit', data=dict(
+            review='edited review',
+            recipe_id='1'
+        ), follow_redirects=True)
+
+        assert b'Review Was Successfully Updated!' in rv.data
+        assert b'test_title' in rv.data
+        assert b'test_category' in rv.data
+        assert b'test_content' in rv.data
+        assert b'like' in rv.data
+        assert b'edit' in rv.data
+        assert b'delete' in rv.data
+        assert b'review' in rv.data
+        assert b'test_review' not in rv.data
+        assert b'edited review' in rv.data
+
+        # delete review
+        rv = self.app.post('/delete_review', data=dict(
+            recipe_id='1'
+        ), follow_redirects=True)
+        assert b'Review was successfully deleted!' in rv.data
+        assert b'edited review' not in rv.data
+        assert b'test_title' in rv.data
+        assert b'test_category' in rv.data
+        assert b'test_content' in rv.data
+        assert b'like' in rv.data
+        assert b'edit' in rv.data
+        assert b'delete' in rv.data
+        assert b'review' in rv.data
+
         # logout
         self.logout()
+
+    '''def test_notifications(self):
+        # Register user 1
+        self.creating_user_one()
+
+        # user 1 posts a recipe and logs out
+        rv = self.app.get('/create_recipe')
+        assert b'title' in rv.data
+        assert b'category' in rv.data
+        assert b'content' in rv.data
+        assert b'Post' in rv.data
+
+        rv = self.app.post('/post_recipe',
+                           data=dict(title='test_title', category='test_category', content='test_content'),
+                           follow_redirects=True)
+        assert b'New recipe successfully posted!' in rv.data
+        assert b'MyRecipe' in rv.data
+        assert b'Recipe of the Day' in rv.data
+
+        rv = self.app.get('/view_recipe?recipe_id=1')
+        assert b'test_title' in rv.data
+        assert b'test_category' in rv.data
+        assert b'test_content' in rv.data
+
+        self.logout()
+
+        # user 2 likes and reviews that recipe user 1 created
+        self.creating_user_two()
+
+        rv = self.app.get('/view_recipe?recipe_id=1')
+        assert b'test_title' in rv.data
+        assert b'test_category' in rv.data
+        assert b'test_content' in rv.data
+        assert b'save' in rv.data
+
+        # review recipe
+        rv = self.app.get('/review_recipe?review_me=1')
+        assert b'Enter your review here:' in rv.data
+        assert b'Post' in rv.data
+        rv = self.app.post('/post_review', data=dict(
+            review='test_review',
+            review_me='1'
+        ), follow_redirects=True)
+        assert b'test_title' in rv.data
+        assert b'test_category' in rv.data
+        assert b'test_content' in rv.data
+        assert b'Like' in rv.data
+        assert b'0' in rv.data
+        assert b'review' in rv.data
+        assert b'test_review' in rv.data
+
+        # like recipe
+        rv = self.app.post('/like_recipe', data=dict(
+            action='like',
+            like_me=1
+        ), follow_redirects=True)
+        assert b'test_title' in rv.data
+        assert b'test_category' in rv.data
+        assert b'test_content' in rv.data
+        assert b'Unlike' in rv.data
+        assert b'1' in rv.data
+        assert b'review' in rv.data
+        assert b'delete' in rv.data
+        assert b'edit' in rv.data
+
+        self.logout()
+
+        # user 1 logs in again
+        self.login('test1', 'testing1234')
+        rv = self.app.get('/notifications')
+        #assert b'test2 liked your post' in rv.data
+        #assert b'test2 reviewed your post' in rv.data
+        self.logout()
+'''
 
     def test_delete_edit(self):
         """ Tests delete function by adding a post and then making sure it is not shown after deleted. """

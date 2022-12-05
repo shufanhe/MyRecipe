@@ -2,6 +2,7 @@ drop table if exists recipes;
 drop table if exists user;
 drop table if exists reviews;
 drop table if exists like_recipe;
+drop table if exists notifications;
 drop table if exists save_recipe;
 drop table if exists save_author;
 
@@ -26,18 +27,19 @@ create table recipes (
   FOREIGN KEY(user_id) REFERENCES user(id) ON UPDATE CASCADE ON DELETE CASCADE
 );
 
+
 CREATE TABLE reviews (
     recipe_id INTEGER NOT NULL,
     user_id INTEGER NOT NULL,
     review TEXT,
-    FOREIGN KEY(recipe_id) REFERENCES recipes(id) ON UPDATE CASCADE ON DELETE RESTRICT,
+    FOREIGN KEY(recipe_id) REFERENCES recipes(id) ON UPDATE CASCADE ON DELETE CASCADE,
     FOREIGN KEY(user_id) REFERENCES user(id) ON UPDATE CASCADE ON DELETE RESTRICT
 );
 
 CREATE TABLE like_recipe (
     recipe_id INTEGER NOT NULL,
     user_id INTEGER NOT NULL,
-    FOREIGN KEY(recipe_id) REFERENCES recipes(id) ON UPDATE CASCADE ON DELETE RESTRICT,
+    FOREIGN KEY(recipe_id) REFERENCES recipes(id) ON UPDATE CASCADE ON DELETE CASCADE,
     FOREIGN KEY(user_id) REFERENCES user(id) ON UPDATE CASCADE ON DELETE RESTRICT
 );
 
@@ -51,15 +53,16 @@ CREATE TABLE if not exists save_recipe (
     recipe_id INTEGER NOT NULL
 );
 
-CREATE TABLE if not exists notifications (
+CREATE TABLE notifications (
     to_user TEXT NOT NULL,
     from_user TEXT NOT NULL,
     action_type TEXT NOT NULL,
+    action_date TEXT NOT NULL,
     action_time TEXT NOT NULL,
     recipe_id INTEGER NOT NULL,
-    FOREIGN KEY(to_user) REFERENCES user(username) ON UPDATE CASCADE ON DELETE RESTRICT,
+    FOREIGN KEY(to_user) REFERENCES user(username) ON UPDATE CASCADE ON DELETE CASCADE,
     FOREIGN KEY(from_user) REFERENCES user(username) ON UPDATE CASCADE ON DELETE RESTRICT,
-    FOREIGN KEY(recipe_id) REFERENCES recipes(id) ON UPDATE CASCADE ON DELETE RESTRICT
+    FOREIGN KEY(recipe_id) REFERENCES recipes(id) ON UPDATE CASCADE ON DELETE CASCADE
 );
 
 CREATE TABLE save_author (
