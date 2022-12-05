@@ -26,7 +26,6 @@ Completed Work
    - Improved notifications: Users can click on embedded links to see the profile of the person that liked/reviewed their post and the post itself. If a post is deleted and the user tries to click on it, user is redirected back to notifications and flashed a warning message. Changed format of datetime, got rid of the decimals and seconds and seperated date and time into two attributes.
    - Fixed homepage slideshow cover
 2. Khanh:
-   - Implemented upload images for recipes and profile pictures
    - Worked on frontend for user account page
    - Implemented following other users, the following list will be shown in the user account
 
@@ -38,14 +37,15 @@ Still Needs Completion
    - Incorporate a separate table for ingredients in the database 
    - Unit tests for edit/delete reviews, and notifications.
 2. Khanh:
-   - Unit tests 
-   - Allow users to change their profile pictures, name and emails.
+   - More comprehensive unit tests
+   - Allow users to change their profile pictures, name and emails
 3. Diana: Tags need to be completed, figured out a way to get the input from the user. Need to work on getting the recipes to show up with the respective diet tag. Once, I am able to implement this, I think categories will be implemented similarly and get that done. Cards on categories are still not aligning as they should, working on being able to align them.
 
 Troubles/Issues/Roadblocks
 ----------------
-1. Shufan - Figuring out dependencies among tables, for example if a recipe is deleted what happends to the notification related to it, and where will people be redirected to if they try to click on a recipe that is deleted (notification about the recipe remains even if recipe itself is deleted, people will get a warning message saying that the recipe has been deleted)
+1. Shufan - Figuring out dependencies among tables, for example if a recipe is deleted what happens to the notification related to it, and where will people be redirected to if they try to click on a recipe that is deleted (notification about the recipe remains even if recipe itself is deleted, people will get a warning message saying that the recipe has been deleted)
 2. Diana - Schema/database, working with queries for tags was a little challenging since I do not have enough experience.
+3. Khanh - Saving images is having a problem of whether saving locally or in database, this will be put in next week when I research more
 
 
 Adjustments to Overall Design

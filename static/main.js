@@ -17,5 +17,24 @@ function setupEvents() {
 
 document.addEventListener('DOMContentLoaded', setupEvents);
 
+const image_input = document.querySelector("#image-input");
 
+image_input.addEventListener("change", function() {
+  const reader = new FileReader();
+  reader.addEventListener("load", () => {
+    const uploaded_image = reader.result;
+    document.querySelector("#display-image").style.backgroundImage = `url(${uploaded_image})`;
+  });
+  reader.readAsDataURL(this.files[0]);
+});
+
+let save_recipe = async function(title, category, content){
+    const data = JSON.stringify({title : title, category: category, content: content});
+    return fetch("/save_recipe", {
+        method: 'POST',
+        headers: {"Content-Type": "application/json"},
+        redirect: 'follow',
+        body: data
+    });
+}
 

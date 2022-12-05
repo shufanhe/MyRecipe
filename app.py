@@ -78,7 +78,7 @@ def adminUser():
     password = 'verysecurepassword'
     email = 'food@gmail.com'
     db.execute('INSERT INTO user (username, password, email,verified,OTP_code) VALUES (?,?,?,?,?)',
-               (user, generate_password_hash(password), email, 'verified',0))
+               (user, generate_password_hash(password), email, 'verified', 0))
     db.commit()
 
 
@@ -153,7 +153,7 @@ def view_recipe():
     # route if user clicked on a recipe (not through recipe of the day)
     else:
         cur2 = db.execute('SELECT COUNT(1) FROM recipes WHERE id=?',
-                         [request.args.get('recipe_id')])
+                          [request.args.get('recipe_id')])
         whether_exist = cur2.fetchone()[0]
         if whether_exist == 0:
             flash('The recipe has been deleted.')
@@ -166,7 +166,7 @@ def view_recipe():
                              [request.args.get('recipe_id')])
             reviews = rev.fetchall()
             return render_template('ViewRecipe.html', recipe=recipe, reviews=reviews, liked=whether_liked,
-                               current_user=current_user)
+                                   current_user=current_user)
 
 
 @app.route('/like_recipe', methods=['POST'])
@@ -325,7 +325,7 @@ def register():
         error = 'Please enter your password correctly.'
     if error is None:
         # Check username and email to see if they are already registered
-        user = db.execute('SELECT * FROM user WHERE username = ? and email != ?', [username,email])
+        user = db.execute('SELECT * FROM user WHERE username = ? and email != ?', [username, email])
         user = user.fetchall()
         check_email = db.execute('SELECT * FROM user where email = ? and username != ?', [email, username])
         check_email = check_email.fetchall()
@@ -340,7 +340,8 @@ def register():
             flash('Please check your email for verification code')
             verification_type = "Register"
             db.execute("INSERT INTO user (username,password,email,verified,OTP_code) VALUES (?,?,?,?,?)",
-                       (username, generate_password_hash(password), email.lower(), 'unverified',generate_password_hash(str(OTP))))
+                       (username, generate_password_hash(password), email.lower(), 'unverified',
+                        generate_password_hash(str(OTP))))
             db.commit()
             return render_template('verificationOTP.html', verification_code=OTP, account_email=email,
                                    verification_type=verification_type)
@@ -353,15 +354,15 @@ def register():
                 mail.send(msg)
                 flash('Please check your email for verification code again')
                 verification_type = "Register"
-                db.execute('UPDATE user SET OTP_code = ? WHERE email = ?',(generate_password_hash(str(OTP)), email))
+                db.execute('UPDATE user SET OTP_code = ? WHERE email = ?', (generate_password_hash(str(OTP)), email))
                 db.commit()
-                return render_template('verificationOTP.html', account_email=email,verification_type=verification_type)
+                return render_template('verificationOTP.html', account_email=email, verification_type=verification_type)
             else:
                 error = f"User {username} and {email} are already registered"
         else:
             if len(check_email) != 0:
                 error = f"{email} is already registered"
-            elif len(user) != 0 :
+            elif len(user) != 0:
                 error = f"User {username} is already registered"
     flash(error)
     return render_template('register.html')
@@ -441,7 +442,7 @@ def reset_password():
 @app.route('/verificationPage', methods=['GET'])
 def verificationPage():
     verification_type = request.args.get('verification_type')
-    return render_template('verificationPage.html',verification_type=verification_type)
+    return render_template('verificationPage.html', verification_type=verification_type)
 
 
 @app.route('/verification', methods=['POST'])
@@ -459,7 +460,7 @@ def verification():
     else:
         if verification_type == 'Register':
             db = get_db()
-            db.execute('UPDATE user SET verified = ? WHERE email = ?',['verified', account_email])
+            db.execute('UPDATE user SET verified = ? WHERE email = ?', ['verified', account_email])
             db.commit()
             flash('Your account has been verified. You can log in now')
             return redirect(url_for('loginPage'))
@@ -484,7 +485,7 @@ def sendingOTP():
     flash('Please check your email for OTP code')
     db.execute('UPDATE user SET OTP_code = ? WHERE email = ?', [generate_password_hash(str(OTP)), email])
     db.commit()
-    return render_template('verificationOTP.html', account_email=email,verification_type=verification_type)
+    return render_template('verificationOTP.html', account_email=email, verification_type=verification_type)
 
 
 @app.route('/logout')
@@ -563,15 +564,20 @@ def user_account():
         return redirect(url_for('HomePage'))
     cur2 = db.execute('SELECT * FROM recipes WHERE user_id=?', [user])
     created_recipes = cur2.fetchall()
-    author_followed = db.execute('SELECT * FROM save_author WHERE user = ?',[session['user_id']])
+    author_followed = db.execute('SELECT * FROM save_author WHERE user = ?', [session['user_id']])
     author_followed = author_followed.fetchall()
+    user_info = db.execute('SELECT * FROM user WHERE username = ?', [user])
+    user_info = user_info.fetchone()
     if user != session['user_id']:
-        follow_author = db.execute('SELECT * FROM save_author WHERE user = ? and author = ?', [session['user_id'], user])
+        follow_author = db.execute('SELECT * FROM save_author WHERE user = ? and author = ?',
+                                   [session['user_id'], user])
         follow_author = follow_author.fetchone()
         author_followed = db.execute('SELECT * FROM save_author WHERE user = ?', [user])
         author_followed = author_followed.fetchall()
-        return render_template('user_account.html', user=user, created_recipes=created_recipes, follow_author=follow_author, author_followed=author_followed)
-    return render_template('user_account.html', user=user, created_recipes=created_recipes,author_followed=author_followed)
+        return render_template('user_account.html', user=user, created_recipes=created_recipes,
+                               follow_author=follow_author, author_followed=author_followed)
+    return render_template('user_account.html', user=user, created_recipes=created_recipes,
+                           author_followed=author_followed, user_info=user_info)
 
 
 @app.route('/notifications', methods=['GET'])
