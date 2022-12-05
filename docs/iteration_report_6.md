@@ -65,12 +65,14 @@ One Important Thing Learned
 2. Diana learned to trust herself
 3. Khanh learned time management, and leadership (IT'S A DICTATORSHIP)
 
-Week 7
+
+Week 7 and 8
 ----------------
 Tasks:
 1. Shufan:
    - Update homepage layout so it is responsive in different sizes of screen.
    - Tasks that still need completion from last week.
+   - Add alt text for everything, make sure things are accessible.
 
 2. Khanh:
    - Improve uploading image in post recipe.
@@ -79,26 +81,3 @@ Tasks:
 3. Diana
    - Finish tasks from last week.
 
-Assigning:
-------------------
-1. Shufan:
-   - Incorporate a separate table for ingredients in the database 
-   - Front-end for view recipe
-   - Unit tests for edit/delete reviews, and notifications.
-   - Upload/set recipes of the day through admin account.
-   - Keep trying to implement JavaScript for like/review
-2. Khanh:
-   - Upload images for recipes
-   - Allow users to change name and emails.
-   - Check edge-cases to make more comprehensive unit-tests.
-3. Diana:
-   - Finish implementing user preferences.
-   - Restrict creator to only select from the given categories when they create a recipe.
-   - Front-end for pages.
-   - Add more unit-tests.
-
-Week 8
-----------------
-Tasks:
-1. Refining application.
-2. Finish anything we have not completed.
