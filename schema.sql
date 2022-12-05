@@ -11,7 +11,8 @@ CREATE TABLE user (
     username TEXT NOT NULL,
     password TEXT NOT NULL,
     email TEXT NOT NULL,
-    verified TEXT NOT NULL
+    verified TEXT NOT NULL,
+    OTP_code TEXT NOT NULL
 );
 
 create table recipes (

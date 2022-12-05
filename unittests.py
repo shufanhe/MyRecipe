@@ -31,7 +31,7 @@ class FlaskrTestCase(unittest.TestCase):
 
     def resetpassword(self, email, password):
         return self.app.post('/resetpassword',
-                             data=dict(account_email=email, password=password, RetypePassword=password),
+                             data=dict(account_email=email, Password=password, RetypePassword=password),
                              follow_redirects=True)
 
     def searchResults(self, searchinput):
@@ -45,8 +45,8 @@ class FlaskrTestCase(unittest.TestCase):
             assert b'verification code' in rv.data
             assert b'Submit' in rv.data
             assert "Hi,\n\nHere is your verification code:" in outbox[0].body
-            verification_code = outbox[0].body[28:40]
-            rv = self.app.post('/verification', data=dict(verification_code=verification_code, OTP=verification_code,
+            verification_code = outbox[0].body[37:43]
+            rv = self.app.post('/verification', data=dict(OTP=verification_code,
                                                           account_email='test1@gmail.com',
                                                           verification_type='Register'), follow_redirects=True)
             assert b'Sign in' in rv.data
@@ -73,8 +73,8 @@ class FlaskrTestCase(unittest.TestCase):
             assert b'verification code' in rv.data
             assert b'Submit' in rv.data
             assert "Hi,\n\nHere is your verification code:" in outbox[0].body
-            verification_code = outbox[0].body[28:40]
-            rv = self.app.post('/verification', data=dict(verification_code=verification_code, OTP=verification_code,
+            verification_code = outbox[0].body[37:43]
+            rv = self.app.post('/verification', data=dict(OTP=verification_code,
                                                           account_email='test2@gmail.com',
                                                           verification_type='Register'), follow_redirects=True)
             assert b'Sign in' in rv.data
@@ -226,7 +226,7 @@ class FlaskrTestCase(unittest.TestCase):
         assert b'Forgot Your Password' in rv.data
 
         rv = self.app.get('/verificationPage')
-        assert b'Reset Your Password' in rv.data
+        assert b'Enter Your Email' in rv.data
         assert b'Email' in rv.data
         assert b'Submit' in rv.data
 

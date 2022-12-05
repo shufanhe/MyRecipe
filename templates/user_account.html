@@ -1,81 +1,99 @@
 {% extends "layout.html" %}
 {% block body %}
-    <main>
-        <div class="container-user">
-            <div class="row">
-                <div class="col-3">
-                    <div>
-                        <a>
-                            {#planned to have a clickable image where user can click and change their profile picture#}
-                            <img style="height:auto;" width="138" height="137" class="avatar avatar-user width-full border color-bg-default" src="../static/profile_picture.png" alt="profile picture">
-                        </a>
-                    </div>
-                    <div>
-                        <h1 class="vcard-names">
-                            <span> {{ user }}</span>
-                        </h1>
-                    </div>
-                    <div>
-{#                        {% if session.user_id != user %}#}
-{#                            <a>Click to follow the author </a>#}
-{#                            {% if follow_author == None %}#}
-{#                                <form action="{{ url_for('save_author') }}" method="post" class="save-author">#}
-{#                                    <button type="submit" class="btn btn-outline-dark">Follow</button>#}
-{#                                    <input type="hidden" name="author" value={{ user }}>#}
-{#                                    <input type="hidden" name="action" value='follow'>#}
-{#                                </form>#}
-{#                            {% elif follow_author != None %}#}
-{#                                <form action="{{ url_for('save_author') }}" method="post" class="save-author">#}
-{#                                    <button type="submit" class="btn btn-outline-dark">Unfollow</button>#}
-{#                                    <input type="hidden" name="author" value={{ user }}>#}
-{#                                    <input type="hidden" name="action" value='unfollow'>#}
-{#                                </form>#}
-{#                            {% endif %}#}
-{#                        {% endif %}#}
-                    </div>
-                </div>
-                <div class="col">
-                    <div class="position-relative">
-                        <div class="Box mt-4">
-                            <ul class="created-recipes" id="created_recipes">
-                                {% for recipe in created_recipes %}
-                                    <div class="container">
-                                        <div class="text-center">
-                                            <div class="card" style="width: 18rem;">
-                                                <img src="..." class="card-img" alt="...">
-                                                <div class="card-body">
-                                                    <a> {{ recipe.title }}</a>
-                                                </div>
-                                                <div class="card-footer">
-                                                    <form action="{{ url_for ('view_recipe')}}" method="get" class="view_recipe">
-                                                        <input type="hidden" name="recipe_id" value={{ recipe.id }}>
-                                                        <button type="submit" style="margin-left:100px" class="btn btn-sm">Details</button>
-                                                    </form>
-                                                </div>
-                                            </div>
-                                        </div>
+<div class="card-body">
+    <div class="container">
+        <div class="row">
+            <div class="col-8">
+                <strong>Name:</strong>
+                {{ user }}<br/>
+                <strong>Email:</strong>
+                {{ user_info.email }}
+                <br/>
+                <strong>About Author:</strong>
+                <br/>
+                <a href="" class="btn btn-secondary btn-sm">Update Profile</a>
+
+                <a href="" class="btn btn-danger btn-sm">Delete</a>
+                <br/>
+                {% if session.user_id != user %}
+                    {% if follow_author == None %}
+                        <a>Click to follow the author </a>
+                        <form action="{{ url_for('save_author') }}" method="post" class="save-author">
+                            <button type="submit" class="btn btn-secondary btn-sm">Follow</button>
+                            <input type="hidden" name="author" value={{ user }}>
+                            <input type="hidden" name="action" value='follow'>
+                        </form>
+                    {% elif follow_author != None %}
+                        <form action="{{ url_for('save_author') }}" method="post" class="save-author">
+                            <button type="submit" class="btn btn-secondary btn-sm">Unfollow</button>
+                            <input type="hidden" name="author" value={{ user }}>
+                            <input type="hidden" name="action" value='unfollow'>
+                        </form>
+                    {% endif %}
+                {% endif %}
+            </div>
+            <div class="col-4">
+                <img src="{{ url_for('static', filename='profile_picture.png')}}" width="200" alt="profile picture">
+                <input type="file" id="image-input" accept="image/jpeg, image/png, image/jpg">
+            </div>
+        </div>
+    </div>
+    <div class="accordion" id="accordionOne">
+        <div class="accordion-item">
+            <h2 class="accordion-header" id="headingOne">
+                <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+                    Created Recipe
+                </button>
+            </h2>
+            <div id="collapseOne" class="accordion-collapse collapse show" aria-labelledby="headingOne" data-bs-parent="#accordionExample">
+                <div class="accordion-body">
+                    {% for recipe in created_recipes %}
+                        <div class="container">
+                            <div class="text-center">
+                                <div class="card" style="width: 18rem;">
+                                    <img src="..." class="card-img" alt="...">
+                                    <div class="card-body">
+                                        <a> {{ recipe.title }}</a>
+                                        <a> {{ recipe.category }}</a>
+                                        <a> {{ recipe.content }}</a>
                                     </div>
-                                {% else %}
-                                <div>
-                                    Add your created Recipe in here!
+                                    <div class="card-footer">
+                                        <form action="{{ url_for ('view_recipe')}}" method="get" class="view_recipe">
+                                            <input type="hidden" name="recipe_id" value={{ recipe.id }}>
+                                            <button type="submit" style="margin-left:100px" class="btn btn-sm">Details</button>
+                                        </form>
+                                     </div>
                                 </div>
-                                {% endfor %}
-                            </ul>
+                            </div>
                         </div>
-{#                        <div class="mt-4">#}
-{#                            <ul class="created-recipes" id="created_recipes">#}
-{#                                {% for author in author_followed %}#}
-{#                                    <a href="{{ url_for('user_account', author = author.author) }}"> {{ author.author }}</a>#}
-{#                                {% else %}#}
-{#                                <div>#}
-{#                                    Add your favorite author!#}
-{#                                </div>#}
-{#                                {% endfor %}#}
-{#                            </ul>#}
-{#                        </div>#}
+                    {% else %}
+                    <div>
+                        Add your created Recipe in here!
                     </div>
+                    {% endfor %}
                 </div>
             </div>
         </div>
-    </main>
+        <div class="accordion-item">
+            <h2 class="accordion-header" id="headingTwo">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
+                    Author
+                </button>
+            </h2>
+            <div id="collapseTwo" class="accordion-collapse collapse" aria-labelledby="headingTwo" data-bs-parent="#accordionExample">
+                <div class="accordion-body">
+                    <ul class="created-recipes" id="created_recipes">
+                        {% for author in author_followed %}
+                            <a href="{{ url_for('user_account', author = author.author) }}"> {{ author.author }}</a>
+                        {% else %}
+                        <div>
+                            Add your favorite author!
+                        </div>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 {% endblock %}
