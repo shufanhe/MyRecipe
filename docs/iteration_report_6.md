@@ -25,7 +25,7 @@ Completed Work
 
 2. Khanh:
 
-3. Diana:
+3. Diana: No tasks completed, still working on tags and front-end.
 
 
 Still Needs Completion
@@ -34,19 +34,19 @@ Still Needs Completion
 
 2. Khanh:
 
-3. Diana:
+3. Diana: Tags need to be completed, figured out a way to get the input from the user. Need to work on getting the recipes to show up with the respective diet tag. Once, I am able to implement this, I think categories will be implemented similarly and get that done. Cards on categories are still not aligning as they should, working on being able to align them.
 
 
 Troubles/Issues/Roadblocks
 ----------------
 1. Had some troubles with bootstrap, formating the cards that we are using for recipes. Formating things in the correct position. Sizing of pictures and icons.
-2. Diana - Schema/database. Adding tags is something new to me specifically adding it to our database and joining things together. I need to get extra help to work on this.
+2. Diana - Schema/database, working with queries for tags was a little challenging since I do not have enough experience.
 3. Shufan tried to work on uploading image for recipes but didn't end up working, did not have enough time so prioritized the assigned tasks.
 
 
 Adjustments to Overall Design
 ----------------
-1. Potential follow feature that Khanh wants to implement.
+1. Trying to make sure slideshow and recipe of the day work on homepage.
 
 Helpful Tools & Approaches
 ----------------
