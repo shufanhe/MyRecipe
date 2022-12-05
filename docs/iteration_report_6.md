@@ -3,7 +3,7 @@
 Tasks Assigned
 ----------------
 1. Shufan:
-   - Incorporate a seperate table for ingredients in the database 
+   - Incorporate a separate table for ingredients in the database 
    - Front-end for view recipe
    - Unit tests for edit/delete reviews, and notifications.
    - Upload/set recipes of the day through admin account.
