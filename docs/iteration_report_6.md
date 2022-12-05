@@ -29,7 +29,7 @@ Completed Work
    - Worked on frontend for user account page
    - Implemented following other users, the following list will be shown in the user account
 
-3. Diana: No tasks completed, still working on tags and front-end.
+3. Diana: Updated format of cards. It used to show all of the recipe on the card, now only shows the title. This is neater so user can see the cards better as it was recommended after testing day.
 
 Still Needs Completion
 ----------------
@@ -63,7 +63,7 @@ One Important Thing Learned
 ----------------
 1. Shufan learned how to use icons with for post methods (inside a button, and use a form to specify the method as 'post')
 2. Diana learned to trust herself
-3. Khanh learned time management, and leadership (IT'S A DICTATORSHIP)
+3. Khanh learned time management, and leadership.
 
 
 Week 7 and 8
