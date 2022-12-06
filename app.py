@@ -575,7 +575,7 @@ def user_account():
         author_followed = db.execute('SELECT * FROM save_author WHERE user = ?', [user])
         author_followed = author_followed.fetchall()
         return render_template('user_account.html', user=user, created_recipes=created_recipes,
-                               follow_author=follow_author, author_followed=author_followed)
+                               follow_author=follow_author, author_followed=author_followed, user_info=user_info)
     return render_template('user_account.html', user=user, created_recipes=created_recipes,
                            author_followed=author_followed, user_info=user_info)
 
