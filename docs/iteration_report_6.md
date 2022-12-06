@@ -29,7 +29,8 @@ Completed Work
    - Worked on frontend for user account page
    - Implemented following other users, the following list will be shown in the user account
 
-3. Diana: Updated format of cards. It used to show all of the recipe on the card, now only shows the title. This is neater so user can see the cards better as it was recommended after testing day.
+3. Diana:  
+   - Updated format of cards. It used to show all of the recipe on the card, now only shows the title. This is neater so user can see the cards better as it was recommended after testing day.
 
 Still Needs Completion
 ----------------
@@ -37,9 +38,13 @@ Still Needs Completion
    - Incorporate a separate table for ingredients in the database 
    - Unit tests for edit/delete reviews, and notifications.
 2. Khanh:
-   - More comprehensive unit tests
+   - More comprehensive unit tests where it tests the functionality of forms, buttons and actions instead of just verifying what shows up on the webpage
    - Allow users to change their profile pictures, name and emails
-3. Diana: Tags need to be completed, figured out a way to get the input from the user. Need to work on getting the recipes to show up with the respective diet tag. Once, I am able to implement this, I think categories will be implemented similarly and get that done. Cards on categories are still not aligning as they should, working on being able to align them.
+   - Update profile is currently a button and needs to be implemented
+   - Need to design the webpage more so it looks better when changing screens
+   - Let user upload images to the recipe and more interactive when creating recipe 
+3. Diana: 
+   - Tags need to be completed, figured out a way to get the input from the user. Need to work on getting the recipes to show up with the respective diet tag. Once, I am able to implement this, I think categories will be implemented similarly and get that done. Cards on categories are still not aligning as they should, working on being able to align them.
 
 Troubles/Issues/Roadblocks
 ----------------
@@ -63,7 +68,7 @@ One Important Thing Learned
 ----------------
 1. Shufan learned how to use icons with for post methods (inside a button, and use a form to specify the method as 'post')
 2. Diana learned to trust herself
-3. Khanh learned time management, and leadership.
+3. Khanh learned how to plan a project as well as add user stories, how tests should be done and cover what of the application and how to host application on different website. Also, how to use JavaScript efficiently
 
 
 Week 7 and 8
@@ -76,8 +81,9 @@ Tasks:
 
 2. Khanh:
    - Improve uploading image in post recipe.
-   - Improving search recipe so it does not show all results at once.
+   - Improving search recipe so it does not show all results at once
+   - User profile and creating recipe websites need to change their layouts so user can interact when posting recipe
 
 3. Diana
-   - Finish tasks from last week.
+   - Finish tasks from last week. 
 
