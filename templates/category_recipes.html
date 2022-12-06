@@ -5,10 +5,11 @@
 </div>
 
 <ul class="entries" id="entries">
-    {% for recipe in recipes %}
+
     <div class="container">
         <div class="row">
-            <div class="col-sm-6">
+          {% for recipe in recipes %}
+            <div class="col-4">
                 <div class="text-center">
                     <div class="card" style="width: 18rem;">
                         <img src="..." class="card-img" alt="...">
@@ -24,13 +25,12 @@
                     </div>
                 </div>
             </div>
-            <div class="w-100"></div>
-        </div>
-    </div>
 {% else %}
     <div>
     Nothing in here so far
     </div>
 {% endfor %}
+</div>
+</div>
 </ul>
 {% endblock %}
