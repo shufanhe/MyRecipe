@@ -104,8 +104,6 @@ class FlaskrTestCase(unittest.TestCase):
 
     def test_categories(self):
         """ Checks that categories work. """
-        """ Khanh helped me write unit-test since I need help writing them for all functions I wrote. """
-
         rv = self.app.get('/')
         assert b'MyRecipe' in rv.data
         assert b'Recipe of the Day' in rv.data
@@ -114,6 +112,7 @@ class FlaskrTestCase(unittest.TestCase):
         assert b'categories' in rv.data
 
         rv = self.app.get('/categories')
+        assert b'Recipe Categories' in rv.data
         assert b'30-Min Meals' in rv.data
         assert b'Chinese' in rv.data
         assert b'Mexican' in rv.data
@@ -202,7 +201,7 @@ class FlaskrTestCase(unittest.TestCase):
         rv = self.creating_user_one()
         rv = self.logout()
 
-        # try to test to register the account again with with the same email and different username
+        # try to test to register the account again with the same email and different username
         rv = self.register('different', 'test1@gmail.com', 'testing1234!')
         assert b'test1@gmail.com is already registered' in rv.data
 
@@ -212,7 +211,6 @@ class FlaskrTestCase(unittest.TestCase):
 
         # try to test to register the account again with the same email and username
         rv = self.register('test1', 'test1@gmail.com', 'testing1234!')
-        print(rv.data)
         assert b'User test1 and test1@gmail.com are already registered' in rv.data
 
     def test_reset_password(self):
