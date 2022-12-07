@@ -18,14 +18,13 @@
                     <br/>
                     {% if session.user_id != user %}
                         {% if follow_author == None %}
-                            <a>Click to follow the author </a>
-                            <form action="{{ url_for('save_author') }}" method="post" class="save-author">
+                            <form action="{{ url_for('follow_author') }}" method="post" class="save-author">
                                 <button type="submit" class="btn btn-secondary btn-sm">Follow</button>
                                 <input type="hidden" name="author" value={{ user }}>
                                 <input type="hidden" name="action" value='follow'>
                             </form>
                         {% elif follow_author != None %}
-                            <form action="{{ url_for('save_author') }}" method="post" class="save-author">
+                            <form action="{{ url_for('follow_author') }}" method="post" class="save-author">
                                 <button type="submit" class="btn btn-secondary btn-sm">Unfollow</button>
                                 <input type="hidden" name="author" value={{ user }}>
                                 <input type="hidden" name="action" value='unfollow'>

@@ -536,8 +536,8 @@ def saved_recipes():
     return render_template('saved_recipes.html', saved_recipes=saved)
 
 
-@app.route('/save_author', methods=['POST'])
-def save_author():
+@app.route('/follow_author', methods=['POST'])
+def follow_author():
     db = get_db()
     action = request.form['action']
     if action == 'follow':

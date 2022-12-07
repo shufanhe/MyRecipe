@@ -664,19 +664,27 @@ class FlaskrTestCase(unittest.TestCase):
         assert b'Instructions1' in rv.data
         assert b'like' in rv.data
         assert b'review' in rv.data
-        assert b'delete' not in rv.data
         assert b'edit' not in rv.data
         assert b'REVIEWS' in rv.data
         assert b'No reviews here so far!' in rv.data
 
         rv = self.app.get('/user_account', query_string=dict(author='test1'), follow_redirects=True)
-        print(rv.data)
         assert b'Name:' and b'test1' in rv.data
         assert b'Email:' and b'test1@gmail.com' in rv.data
         assert b'About Author:' in rv.data
         assert b'Update Profile' in rv.data
-        assert b'Delete' in rv.data
         assert b'follow' in rv.data
+        assert b'Created Recipe' in rv.data
+        assert b'Title1' in rv.data
+        assert b'Author' in rv.data
+        assert b'Add your favorite author!' in rv.data
+
+        rv = self.app.post('/follow_author', data=dict(action='follow', author='test1'), follow_redirects=True)
+        assert b'Name:' and b'test1' in rv.data
+        assert b'Email:' and b'test1@gmail.com' in rv.data
+        assert b'About Author:' in rv.data
+        assert b'Update Profile' in rv.data
+        assert b'Unfollow' in rv.data
         assert b'Created Recipe' in rv.data
         assert b'Title1' in rv.data
         assert b'Author' in rv.data
