@@ -110,8 +110,14 @@ def create_recipe():
     if session['user_id'] is None or session['user_id'] == 'admin':
         flash('You are not allowed to create a recipe')
         return redirect(url_for('HomePage'))
+
+    db = get_db()
+
+    cur = db.execute('SELECT tag_name, tag_id FROM tag_name ORDER BY tag_name')
+    diet_tag = cur.fetchall()
+
     # redirect to create recipe form
-    return render_template('CreateRecipe.html')
+    return render_template('CreateRecipe.html', tag_name=diet_tag)
 
 
 @app.route('/post_recipe', methods=['POST'])
@@ -124,10 +130,14 @@ def post_recipe():
     title = request.form['title']
     category = request.form['category']
     content = request.form['content']
+    tag_id = request.form['tag_id']
     date_today = str(date.today())
+
     # take user input and insert into the database
     db.execute('INSERT INTO recipes (user_id, title, category, content, posted_date) VALUES (?, ?, ?, ?, ?)',
                [user, title, category, content, date_today])
+    db.execute('INSERT INTO tags (tag_id, recipe_id) VALUES (?, last_insert_rowid())',
+               [tag_id])
     db.commit()
     flash('New recipe successfully posted!')
     return redirect(url_for('HomePage'))

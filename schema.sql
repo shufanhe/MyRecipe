@@ -5,6 +5,8 @@ drop table if exists like_recipe;
 drop table if exists notifications;
 drop table if exists save_recipe;
 drop table if exists save_author;
+drop table if exists tag_name;
+drop table if exists tags;
 
 CREATE TABLE user (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -76,4 +78,18 @@ CREATE TABLE if not exists calendar(
     recipe_id integer not null,
     cover varbinary not null,
     FOREIGN KEY(recipe_id) REFERENCES recipes(id) ON UPDATE CASCADE ON DELETE RESTRICT
+);
+
+CREATE TABLE if not exists tag_name(
+    tag_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    tag_name TEXT NOT NULL
+);
+
+INSERT INTO tag_name (tag_name) VALUES ('Vegan'), ('Vegetarian');
+
+CREATE TABLE if not exists tags(
+    recipe_id INTEGER NOT NULL,
+    tag_id INTEGER NOT NULL,
+    FOREIGN KEY(recipe_id) REFERENCES recipes(id),
+    FOREIGN KEY(tag_id) REFERENCES tag_name(tag_id)
 );
