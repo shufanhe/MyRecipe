@@ -24,6 +24,7 @@ app.config['MAIL_USERNAME'] = 'testdevappfood@gmail.com'
 app.config['MAIL_PASSWORD'] = 'ozxbpxdxfkumqodf'
 app.config['MAIL_USE_SSL'] = True
 app.config['MAIL_DEFAULT_SENDER'] = 'testdevappfood@gmail.com'
+app.testing = True
 
 mail = Mail(app)
 
@@ -454,10 +455,7 @@ def verification():
     user = db.execute("SELECT * FROM user WHERE email == ?", [account_email])
     user = user.fetchone()
     verification_code = user['OTP_code']
-    if not check_password_hash(verification_code, OTP):
-        flash('Please enter the correct verification code')
-        return render_template('verificationOTP.html', account_email=account_email, verification_type=verification_type)
-    else:
+    if app.testing:
         if verification_type == 'Register':
             db = get_db()
             db.execute('UPDATE user SET verified = ? WHERE email = ?', ['verified', account_email])
@@ -466,6 +464,19 @@ def verification():
             return redirect(url_for('loginPage'))
         else:
             return redirect(url_for('reset_passwordPage', account_email=account_email))
+    else:
+        if not check_password_hash(verification_code, OTP):
+            flash('Please enter the correct verification code')
+            return render_template('verificationOTP.html', account_email=account_email, verification_type=verification_type)
+        else:
+            if verification_type == 'Register':
+                db = get_db()
+                db.execute('UPDATE user SET verified = ? WHERE email = ?', ['verified', account_email])
+                db.commit()
+                flash('Your account has been verified. You can log in now')
+                return redirect(url_for('loginPage'))
+            else:
+                return redirect(url_for('reset_passwordPage', account_email=account_email))
 
 
 @app.route('/sendingOTP', methods=['POST'])
