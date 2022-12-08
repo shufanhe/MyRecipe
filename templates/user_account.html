@@ -13,8 +13,6 @@
                     <strong>About Author:</strong>
                     <br/>
                     <a href="" class="btn btn-secondary btn-sm">Update Profile</a>
-
-                    <a href="" class="btn btn-danger btn-sm">Delete</a>
                     <br/>
                     {% if session.user_id != user %}
                         {% if follow_author == None %}
@@ -31,10 +29,13 @@
                             </form>
                         {% endif %}
                     {% endif %}
+                    <br/>
                 </div>
-                <div class="col-4">
-                    <img src="{{ url_for('static', filename='profile_picture.png')}}" width="200" alt="profile picture">
-                    <input type="file" id="image-input" accept="image/jpeg, image/png, image/jpg">
+                <div class="col-4" id="image-upload">
+                    <label for="file-input">
+                        <img id="profileImage" src="{{ url_for('static', filename='profile_picture.png')}}" width="200" alt="profile picture">
+                    </label>
+                    <input id="file-input" type="file"/>
                 </div>
             </div>
         </div>

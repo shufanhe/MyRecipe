@@ -136,6 +136,9 @@ def post_recipe():
 
 @app.route('/view_recipe')
 def view_recipe():
+    if session['user_id'] is None:
+        flash('You are not allowed to view a recipe')
+        return redirect(url_for('HomePage'))
     db = get_db()
     current_user = session['user_id']
     cur = db.execute('SELECT COUNT(1) FROM like_recipe WHERE user_id=? AND recipe_id=?',
@@ -254,6 +257,9 @@ def delete_review():
 def edit_review():
     db = get_db()
     recipe_id = request.args.get('recipe_id')
+    if session['user_id'] is None:
+        flash('You need to login to edit review')
+        return redirect(url_for('view_recipe', recipe_id=recipe_id))
     cur = db.execute('SELECT * FROM reviews WHERE user_id=? AND recipe_id=?', [session['user_id'], recipe_id])
     review = cur.fetchone()
     return render_template('edit_review.html', review=review)
@@ -275,6 +281,9 @@ def view_category():
     """ Shows a list of recipes for whichever category was selected by user. """
     db = get_db()
     cats = request.args.get('category')
+    if cats is None:
+        flash('Please select a category')
+        return redirect(url_for('HomePage'))
     # Gets the category user selected.
     # Query stores the selected recipes by whichever category was selected into cur.
     cur = db.execute('SELECT * FROM recipes WHERE category = ? ORDER BY id DESC', [cats])
@@ -560,7 +569,8 @@ def follow_author():
     elif action == 'unfollow':
         user = request.form['author']
         current_user = session['user_id']
-        cur = db.execute('INSERT INTO save_author (author, user) VALUES (?,?)', [user, current_user])
+        db.execute('DELETE FROM save_author WHERE author = ? AND user = ?', (user, current_user))
+        db.commit()
         return redirect(url_for('user_account', author=user))
 
 
@@ -593,6 +603,9 @@ def user_account():
 
 @app.route('/notifications', methods=['GET'])
 def notifications():
+    if session['user_id'] is None:
+        flash('You need to login to see notifications')
+        return redirect(url_for('HomePage'))
     db = get_db()
     cur = db.execute('SELECT * FROM notifications WHERE to_user=?', [session['user_id']])
     my_notifications = cur.fetchall()
