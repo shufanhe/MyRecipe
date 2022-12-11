@@ -8,16 +8,20 @@ from werkzeug.security import check_password_hash, generate_password_hash
 from datetime import date
 from datetime import datetime
 
+from werkzeug.utils import secure_filename
+
 app = Flask(__name__)
 
 # Load default config and override config from an environment variable
+
+ALLOWED_EXTENSIONS = {'txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif'}
+
 app.config.update(dict(
     DATABASE=os.path.join(app.root_path, 'recipe.db'),
     DEBUG=True,
     SECRET_KEY='development key',
 ))
 app.config.from_envvar('FLASKR_SETTINGS', silent=True)
-
 app.config['MAIL_SERVER'] = 'smtp.gmail.com'
 app.config['MAIL_PORT'] = 465
 app.config['MAIL_USERNAME'] = 'testdevappfood@gmail.com'
@@ -25,6 +29,7 @@ app.config['MAIL_PASSWORD'] = 'ozxbpxdxfkumqodf'
 app.config['MAIL_USE_SSL'] = True
 app.config['MAIL_DEFAULT_SENDER'] = 'testdevappfood@gmail.com'
 app.testing = True
+app.config['UPLOAD_FOLDER'] = app.root_path + '/static'
 
 mail = Mail(app)
 
@@ -476,7 +481,8 @@ def verification():
     else:
         if not check_password_hash(verification_code, OTP):
             flash('Please enter the correct verification code')
-            return render_template('verificationOTP.html', account_email=account_email, verification_type=verification_type)
+            return render_template('verificationOTP.html', account_email=account_email,
+                                   verification_type=verification_type)
         else:
             if verification_type == 'Register':
                 db = get_db()
@@ -657,3 +663,17 @@ def edit_recipe():
     db.commit()
     flash('Recipe Was Successfully Updated!')
     return redirect(url_for('view_recipe', recipe_id=edit_id))
+
+
+def allowed_file(filename):
+    return '.' in filename and \
+           filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
+
+@app.route('/uploadImage', methods=['POST'])
+def uploadImage():
+    db = get_db()
+    file = request.files['file']
+    secured_filename = secure_filename(file.filename)
+    file.save(os.path.join(app.config['UPLOAD_FOLDER'], secured_filename))
+    return '1'

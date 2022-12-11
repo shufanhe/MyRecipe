@@ -13,6 +13,10 @@
                     <strong>About Author:</strong>
                     <br/>
                     <a href="" class="btn btn-secondary btn-sm">Update Profile</a>
+                    <form action="{{ url_for('uploadImage') }}" method="post" enctype="multipart/form-data">
+                        <input type=file name=file>
+                        <input type=submit value=Upload>
+                    </form>
                     <br/>
                     {% if session.user_id != user %}
                         {% if follow_author == None %}
@@ -31,11 +35,10 @@
                     {% endif %}
                     <br/>
                 </div>
-                <div class="col-4" id="image-upload">
-                    <label for="file-input">
+                <div class="col-4">
+                    <label for="image">
                         <img id="profileImage" src="{{ url_for('static', filename='profile_picture.png')}}" width="200" alt="profile picture">
                     </label>
-                    <input id="file-input" type="file"/>
                 </div>
             </div>
         </div>
