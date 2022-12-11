@@ -85,7 +85,12 @@ CREATE TABLE if not exists tag_name(
     tag_name TEXT NOT NULL
 );
 
-INSERT INTO tag_name (tag_name) VALUES ('Vegan'), ('Vegetarian');
+INSERT INTO tag_name (tag_name)
+VALUES ('Gluten Free'),
+       ('Dairy Free'),
+       ('Nut Free'),
+       ('Vegan'),
+       ('Vegetarian');
 
 CREATE TABLE if not exists tags(
     recipe_id INTEGER NOT NULL,

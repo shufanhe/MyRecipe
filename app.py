@@ -300,18 +300,22 @@ def view_category():
 @app.route('/search', methods=['POST'])
 def keyword_search():
     db = get_db()
-    tag_name = request.form.getlist('tag_name')
+    tag_name = request.form.getlist('tag_id')
+
     # search word, sentence
-    search_input = "%" + request.form['keyword_Search'] + "%"
+    if request.form['keyword_Search'] is None:
+        search_input = "%" + request.form['searchResults'] + "%"
+    else:
+        search_input = "%" + request.form['keyword_Search'] + "%"
 
     if tag_name:
-        for tag in tag_name:
-            tag_name = db.execute('SELECT * FROM recipes '
-                             'JOIN tags ON recipes.id=tags.recipe_id '
-                             'JOIN tag_name ON tags.tag_id=tag_name.tag_id WHERE tag_name.tag_name=?',
-                             [tag])
-            search = tag_name.fetchall()
+        get_tag_name = tag_name[0]
+        tag_name = db.execute('SELECT * FROM recipes '
+                         'JOIN tags ON recipes.id=tags.recipe_id '
+                         'JOIN tag_name ON tags.tag_id=tag_name.tag_id WHERE tag_name.tag_id=?', [get_tag_name])
+        search = tag_name.fetchall()
     else:
+
         # search in the database if there is anything like or similar to that
         cur = db.execute('SELECT * FROM recipes WHERE title LIKE ? OR category LIKE ? OR content LIKE ?',
                          (search_input, search_input, search_input))
@@ -319,8 +323,8 @@ def keyword_search():
 
     cur = db.execute('SELECT tag_name, tag_id FROM tag_name ORDER BY tag_name')
     diet_tag = cur.fetchall()
-
-    return render_template('SearchResults.html', recipes=search, diet_tag=diet_tag)
+    return render_template('SearchResults.html', recipes=search, diet_tag=diet_tag,
+                           searchResults=request.form['keyword_Search'])
 
 
 @app.route('/registerPage', methods=['GET'])
