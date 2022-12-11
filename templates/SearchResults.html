@@ -4,29 +4,44 @@
     <label for="keyword_Search" class="form-label">Keyword
             <input type="text" size="30" name="keyword_Search" class="form-control">
     </label>
+
+    <label for="dietRestr">Choose a Dietary Restriction:</label>
+    <select name="tag_id" id="dietRestr">
+        <option value="">No Restriction</option>
+        {% for tag in diet_tag %}
+            <option value={{tag.tag_id}}>{{tag.tag_name}}</option>
+        {% endfor %}
+    </select>
+    <input type="submit" value="Submit">
 </form>
+
+
 <ul class="entries" id="entries">
-  {% for recipe in recipes %}
     <div class="container">
-        <div class="text-center">
-            <div class="card" style="width: 18rem;">
-                <img src="..." class="card-img" alt="...">
-                <div class="card-body">
-                    <a> {{ recipe.title }}</a>
-                </div>
-                <div class="card-footer">
-                    <form action="{{ url_for ('view_recipe')}}" method="get" class="view_recipe">
-                        <input type="hidden" name="recipe_id" value={{ recipe.id }}>
-                        <button type="submit" style="margin-left:100px" class="btn btn-sm">Details</button>
-                    </form>
+        <div class="row">
+          {% for recipe in recipes %}
+            <div class="col-4">
+                <div class="text-center">
+                    <div class="card" style="width: 18rem;">
+                        <img src="..." class="card-img" alt="...">
+                        <div class="card-body">
+                            <a> {{ recipe.title }}</a>
+                        </div>
+                        <div class="card-footer">
+                            <form action="{{ url_for ('view_recipe')}}" method="get" class="view_recipe">
+                                <input type="hidden" name="recipe_id" value={{ recipe.id }}>
+                                <button type="submit" style="margin-left:100px" class="btn btn-sm">Details</button>
+                            </form>
+                        </div>
+                    </div>
                 </div>
             </div>
+          {% else %}
+              <div>
+                Nothing in here so far
+              </div>
+          {% endfor %}
         </div>
     </div>
-  {% else %}
-      <div>
-        Nothing in here so far
-      </div>
-  {% endfor %}
-  </ul>
+</ul>
 {% endblock %}

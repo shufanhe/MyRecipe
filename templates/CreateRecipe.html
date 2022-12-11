@@ -10,8 +10,8 @@
 
           <dt><label class="form-label">Dietary Restrictions:</label>
           {% for tag in tag_name %}
-            <input type="checkbox" id={{ tag.tag_name }} name="tag_id" value={{ tag.tag_id }}>
-            <label for={{ tag.tag_name }}>{{ tag.tag_name }}</label><br>
+            <input type="checkbox" id="tagName" name="tag_id" value={{ tag.tag_id }}>
+            <label for="tagName">{{ tag.tag_name }}</label><br>
           {% endfor %}
 
           <dt><label for="textareaInput" class="form-label">Text:</label>
