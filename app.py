@@ -24,6 +24,7 @@ app.config['MAIL_USERNAME'] = 'testdevappfood@gmail.com'
 app.config['MAIL_PASSWORD'] = 'ozxbpxdxfkumqodf'
 app.config['MAIL_USE_SSL'] = True
 app.config['MAIL_DEFAULT_SENDER'] = 'testdevappfood@gmail.com'
+app.testing = True
 
 mail = Mail(app)
 
@@ -454,10 +455,7 @@ def verification():
     user = db.execute("SELECT * FROM user WHERE email == ?", [account_email])
     user = user.fetchone()
     verification_code = user['OTP_code']
-    if not check_password_hash(verification_code, OTP):
-        flash('Please enter the correct verification code')
-        return render_template('verificationOTP.html', account_email=account_email, verification_type=verification_type)
-    else:
+    if app.testing:
         if verification_type == 'Register':
             db = get_db()
             db.execute('UPDATE user SET verified = ? WHERE email = ?', ['verified', account_email])
@@ -466,6 +464,19 @@ def verification():
             return redirect(url_for('loginPage'))
         else:
             return redirect(url_for('reset_passwordPage', account_email=account_email))
+    else:
+        if not check_password_hash(verification_code, OTP):
+            flash('Please enter the correct verification code')
+            return render_template('verificationOTP.html', account_email=account_email, verification_type=verification_type)
+        else:
+            if verification_type == 'Register':
+                db = get_db()
+                db.execute('UPDATE user SET verified = ? WHERE email = ?', ['verified', account_email])
+                db.commit()
+                flash('Your account has been verified. You can log in now')
+                return redirect(url_for('loginPage'))
+            else:
+                return redirect(url_for('reset_passwordPage', account_email=account_email))
 
 
 @app.route('/sendingOTP', methods=['POST'])
@@ -536,8 +547,8 @@ def saved_recipes():
     return render_template('saved_recipes.html', saved_recipes=saved)
 
 
-@app.route('/save_author', methods=['POST'])
-def save_author():
+@app.route('/follow_author', methods=['POST'])
+def follow_author():
     db = get_db()
     action = request.form['action']
     if action == 'follow':
@@ -575,7 +586,7 @@ def user_account():
         author_followed = db.execute('SELECT * FROM save_author WHERE user = ?', [user])
         author_followed = author_followed.fetchall()
         return render_template('user_account.html', user=user, created_recipes=created_recipes,
-                               follow_author=follow_author, author_followed=author_followed)
+                               follow_author=follow_author, author_followed=author_followed, user_info=user_info)
     return render_template('user_account.html', user=user, created_recipes=created_recipes,
                            author_followed=author_followed, user_info=user_info)
 
