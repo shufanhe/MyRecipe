@@ -104,8 +104,6 @@ class FlaskrTestCase(unittest.TestCase):
 
     def test_categories(self):
         """ Checks that categories work. """
-        """ Khanh helped me write unit-test since I need help writing them for all functions I wrote. """
-
         rv = self.app.get('/')
         assert b'MyRecipe' in rv.data
         assert b'Recipe of the Day' in rv.data
@@ -114,6 +112,7 @@ class FlaskrTestCase(unittest.TestCase):
         assert b'categories' in rv.data
 
         rv = self.app.get('/categories')
+        assert b'Recipe Categories' in rv.data
         assert b'30-Min Meals' in rv.data
         assert b'Chinese' in rv.data
         assert b'Mexican' in rv.data
@@ -175,6 +174,16 @@ class FlaskrTestCase(unittest.TestCase):
         self.creating_user_one()
         self.logout()
 
+        rv = self.app.get('/loginPage', follow_redirects=True)
+        assert b'Login' in rv.data
+        assert b'Sign in' in rv.data
+        assert b'Username or Email' in rv.data
+        assert b'Password' in rv.data
+        assert b'Forgot Your Password' in rv.data
+        assert b'New to Food Recipe?' in rv.data
+        assert b'Create an account' in rv.data
+        assert b'Need to verify your account?' in rv.data
+
         # Wrong password
         rv = self.login('test1', 'Wrongpassword!')
         assert b'Sign in' in rv.data
@@ -202,7 +211,7 @@ class FlaskrTestCase(unittest.TestCase):
         rv = self.creating_user_one()
         rv = self.logout()
 
-        # try to test to register the account again with with the same email and different username
+        # try to test to register the account again with the same email and different username
         rv = self.register('different', 'test1@gmail.com', 'testing1234!')
         assert b'test1@gmail.com is already registered' in rv.data
 
@@ -212,8 +221,50 @@ class FlaskrTestCase(unittest.TestCase):
 
         # try to test to register the account again with the same email and username
         rv = self.register('test1', 'test1@gmail.com', 'testing1234!')
-        print(rv.data)
         assert b'User test1 and test1@gmail.com are already registered' in rv.data
+
+    def test_verification_register(self):
+        rv = self.register('test1', 'test1@gmail.com', 'testing1234!')
+        rv = self.app.get('/loginPage', follow_redirects=True)
+        assert b'Sign in' in rv.data
+        assert b'Username or Email' in rv.data
+        assert b'Password' in rv.data
+        assert b'Forgot Your Password' in rv.data
+        assert b'New to Food Recipe?'
+        assert b'Create an account' in rv.data
+        assert b'Need to verify your account?' in rv.data
+
+        rv = self.login('test1', 'testing1234!')
+        assert b'Please verify your account' in rv.data
+
+        rv = self.app.get('/verificationPage', follow_redirects=True)
+        assert b'Enter Your Email' in rv.data
+        assert b'Email' in rv.data
+        assert b'Submit' in rv.data
+
+        with self.mail.record_messages() as outbox:
+            rv = self.app.post('/sendingOTP', data=dict(email='test1@gmail.com', verification_type='Verify'),
+                               follow_redirects=True)
+            assert b'Email Verification' in rv.data
+            assert b'Submit' in rv.data
+            assert "Hi,\n\nHere is your verification code:" in outbox[0].body
+            verification_code = outbox[0].body[37:43]
+            rv = self.app.post('/verification', data=dict(OTP=verification_code,
+                                                          account_email='test1@gmail.com',
+                                                          verification_type='Register'), follow_redirects=True)
+            assert b'Sign in' in rv.data
+            assert b'Username or Email' in rv.data
+            assert b'Password' in rv.data
+            assert b'Forgot Your Password' in rv.data
+            assert b'New to Food Recipe?'
+            assert b'Create an account' in rv.data
+
+            rv = self.login('test1', 'testing1234!')
+            assert b'MyRecipe' in rv.data
+            assert b'Recipe of the Day' in rv.data
+            assert b'Search' in rv.data
+            assert b'logout' in rv.data
+            assert b'account' in rv.data
 
     def test_reset_password(self):
         # register the account
@@ -243,7 +294,7 @@ class FlaskrTestCase(unittest.TestCase):
                                                           account_email='test1@gmail.com',
                                                           verification_type='ResetPassword'), follow_redirects=True)
 
-            rv = self.app.get('/resetpasswordPage', data=dict(account_email='test1@gmail.com'),
+            rv = self.app.get('/resetpasswordPage', query_string=dict(account_email='test1@gmail.com', verification_type='ResetPassword'),
                               follow_redirects=True)
             assert b'Reset Your Password' in rv.data
             assert b'Password' in rv.data
@@ -299,6 +350,11 @@ class FlaskrTestCase(unittest.TestCase):
         assert b'test_title' in rv.data
         assert b'test_content' in rv.data
         assert b'Category: test_category' in rv.data
+        assert b'Created by' and b'test1' in rv.data
+        assert b'edit' in rv.data
+        assert b'delete' in rv.data
+        assert b'REVIEWS' in rv.data
+        assert b'No reviews here so far' in rv.data
 
         self.logout()
 
@@ -346,12 +402,13 @@ class FlaskrTestCase(unittest.TestCase):
 
         rv = self.app.get('/view_recipe?recipe_id=1')
         assert b'test_title' in rv.data
-        assert b'test_category' in rv.data
         assert b'test_content' in rv.data
+        assert b'Category: test_category' in rv.data
+        assert b'Created by' and b'test1' in rv.data
         assert b'like' in rv.data
-        assert b'review' in rv.data
-        assert b'delete' in rv.data
         assert b'edit' in rv.data
+        assert b'delete' in rv.data
+        assert b'REVIEWS' in rv.data
         assert b'No reviews here so far!' in rv.data
 
         # like recipe
@@ -360,12 +417,14 @@ class FlaskrTestCase(unittest.TestCase):
             like_me=1
         ), follow_redirects=True)
         assert b'test_title' in rv.data
-        assert b'test_category' in rv.data
+        assert b'Category: test_category' in rv.data
+        assert b'Created by' and b'test1' in rv.data
         assert b'test_content' in rv.data
         assert b'unlike' in rv.data
         assert b'review' in rv.data
         assert b'delete' in rv.data
         assert b'edit' in rv.data
+        assert b'REVIEWS' in rv.data
         assert b'No reviews here so far!' in rv.data
 
         # unlike recipe
@@ -374,12 +433,14 @@ class FlaskrTestCase(unittest.TestCase):
             unlike_me=1
         ), follow_redirects=True)
         assert b'test_title' in rv.data
-        assert b'test_category' in rv.data
+        assert b'Category: test_category' in rv.data
+        assert b'Created by' and b'test1' in rv.data
         assert b'test_content' in rv.data
         assert b'like' in rv.data
         assert b'review' in rv.data
         assert b'delete' in rv.data
         assert b'edit' in rv.data
+        assert b'REVIEWS' in rv.data
         assert b'No reviews here so far!' in rv.data
 
         # go to review recipe page
@@ -393,21 +454,14 @@ class FlaskrTestCase(unittest.TestCase):
             review_me='1'
         ), follow_redirects=True)
         assert b'test_title' in rv.data
-        assert b'test_category' in rv.data
+        assert b'Category: test_category' in rv.data
+        assert b'Created by' and b'test1' in rv.data
         assert b'test_content' in rv.data
         assert b'like' in rv.data
         assert b'review' in rv.data
-        assert b'test_review' in rv.data
-
-        # edit review
-        rv = self.app.get('/view_recipe?recipe_id=1')
-        assert b'test_title' in rv.data
-        assert b'test_category' in rv.data
-        assert b'test_content' in rv.data
-        assert b'like' in rv.data
-        assert b'edit' in rv.data
         assert b'delete' in rv.data
-        assert b'review' in rv.data
+        assert b'edit' in rv.data
+        assert b'REVIEWS' in rv.data
         assert b'test_review' in rv.data
 
         rv = self.app.get('/edit_review?recipe_id=1')
@@ -419,15 +473,15 @@ class FlaskrTestCase(unittest.TestCase):
             review='edited review',
             recipe_id='1'
         ), follow_redirects=True)
-
-        assert b'Review Was Successfully Updated!' in rv.data
         assert b'test_title' in rv.data
-        assert b'test_category' in rv.data
+        assert b'Category: test_category' in rv.data
+        assert b'Created by' and b'test1' in rv.data
         assert b'test_content' in rv.data
         assert b'like' in rv.data
-        assert b'edit' in rv.data
-        assert b'delete' in rv.data
         assert b'review' in rv.data
+        assert b'delete' in rv.data
+        assert b'edit' in rv.data
+        assert b'REVIEWS' in rv.data
         assert b'test_review' not in rv.data
         assert b'edited review' in rv.data
 
@@ -435,15 +489,16 @@ class FlaskrTestCase(unittest.TestCase):
         rv = self.app.post('/delete_review', data=dict(
             recipe_id='1'
         ), follow_redirects=True)
-        assert b'Review was successfully deleted!' in rv.data
-        assert b'edited review' not in rv.data
         assert b'test_title' in rv.data
-        assert b'test_category' in rv.data
+        assert b'Category: test_category' in rv.data
+        assert b'Created by' and b'test1' in rv.data
         assert b'test_content' in rv.data
         assert b'like' in rv.data
-        assert b'edit' in rv.data
-        assert b'delete' in rv.data
         assert b'review' in rv.data
+        assert b'delete' in rv.data
+        assert b'edit' in rv.data
+        assert b'REVIEWS' in rv.data
+        assert b'No reviews here so far!' in rv.data
 
         # logout
         self.logout()
@@ -585,6 +640,56 @@ class FlaskrTestCase(unittest.TestCase):
         assert b'Recipe of the Day' in rv.data
 
         self.logout()
+
+    def test_seeing_other_user(self):
+        self.creating_user_one()
+        rv = self.app.post('/post_recipe', data=dict(
+            title='Title1',
+            category='Mexican',
+            content='Instructions1'
+        ), follow_redirects=True)
+
+        assert b'New recipe successfully posted!' in rv.data
+        assert b'MyRecipe' in rv.data
+        assert b'Recipe of the Day' in rv.data
+
+        self.logout()
+
+        self.creating_user_two()
+
+        rv = self.app.get('/view_recipe?recipe_id=1')
+        assert b'Title1' in rv.data
+        assert b'Category: Mexican' in rv.data
+        assert b'Created by' and b'test1' in rv.data
+        assert b'Instructions1' in rv.data
+        assert b'like' in rv.data
+        assert b'review' in rv.data
+        assert b'edit' not in rv.data
+        assert b'REVIEWS' in rv.data
+        assert b'No reviews here so far!' in rv.data
+
+        rv = self.app.get('/user_account', query_string=dict(author='test1'), follow_redirects=True)
+        assert b'Name:' and b'test1' in rv.data
+        assert b'Email:' and b'test1@gmail.com' in rv.data
+        assert b'About Author:' in rv.data
+        assert b'Update Profile' in rv.data
+        assert b'follow' in rv.data
+        assert b'Created Recipe' in rv.data
+        assert b'Title1' in rv.data
+        assert b'Author' in rv.data
+        assert b'Add your favorite author!' in rv.data
+
+        rv = self.app.post('/follow_author', data=dict(action='follow', author='test1'), follow_redirects=True)
+        assert b'Name:' and b'test1' in rv.data
+        assert b'Email:' and b'test1@gmail.com' in rv.data
+        assert b'About Author:' in rv.data
+        assert b'Update Profile' in rv.data
+        assert b'Unfollow' in rv.data
+        assert b'Created Recipe' in rv.data
+        assert b'Title1' in rv.data
+        assert b'Author' in rv.data
+        assert b'Add your favorite author!' in rv.data
+
 
 
 if __name__ == '__main__':
