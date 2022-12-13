@@ -4,6 +4,10 @@
 
         <form action="{{ url_for('view_recipe') }}" id="view_recipe">
             <h1>{{recipe.title}}</h1>
+            <p>Dietary Restrictions:
+            {% for tag in tag_recipes %}
+                {{tag.tag_name}}
+            {% endfor %}</p>
             <p>Category: {{recipe.category}}</p>
             <p>Created by <a href="{{ url_for('user_account', author = recipe.user_id) }}">{{recipe.user_id}}</a></p>
             <p class="fs-5">{{recipe.content}}</p>
