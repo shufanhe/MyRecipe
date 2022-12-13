@@ -111,8 +111,14 @@ def create_recipe():
     if session['user_id'] is None or session['user_id'] == 'admin':
         flash('You are not allowed to create a recipe')
         return redirect(url_for('HomePage'))
+
+    db = get_db()
+
+    cur = db.execute('SELECT tag_name, tag_id FROM tag_name ORDER BY tag_name')
+    diet_tag = cur.fetchall()
+
     # redirect to create recipe form
-    return render_template('CreateRecipe.html')
+    return render_template('CreateRecipe.html', tag_name=diet_tag)
 
 
 @app.route('/post_recipe', methods=['POST'])
@@ -125,10 +131,16 @@ def post_recipe():
     title = request.form['title']
     category = request.form['category']
     content = request.form['content']
+    tag_id = request.form.getlist('tag_id')
     date_today = str(date.today())
+
     # take user input and insert into the database
-    db.execute('INSERT INTO recipes (user_id, title, category, content, posted_date) VALUES (?, ?, ?, ?, ?)',
+    cur = db.execute('INSERT INTO recipes (user_id, title, category, content, posted_date) VALUES (?, ?, ?, ?, ?)',
                [user, title, category, content, date_today])
+    new_recipe_id = cur.lastrowid
+    for tag in tag_id:
+        db.execute('INSERT INTO tags (tag_id, recipe_id) VALUES (?, ?)',
+                   [tag, new_recipe_id])
     db.commit()
     flash('New recipe successfully posted!')
     return redirect(url_for('HomePage'))
@@ -169,8 +181,11 @@ def view_recipe():
             rev = db.execute('SELECT recipe_id, user_id, review FROM reviews WHERE recipe_id=?',
                              [request.args.get('recipe_id')])
             reviews = rev.fetchall()
+            tag_recipe = db.execute('SELECT tag_name.tag_name FROM recipes JOIN tags ON recipes.id=tags.recipe_id JOIN tag_name ON tags.tag_id=tag_name.tag_id WHERE recipes.id=?',
+                                    [request.args.get('recipe_id')])
+            tag_recipes = tag_recipe.fetchall()
             return render_template('ViewRecipe.html', recipe=recipe, reviews=reviews, liked=whether_liked,
-                                   current_user=current_user)
+                                   current_user=current_user, tag_recipes=tag_recipes)
 
 
 @app.route('/like_recipe', methods=['POST'])
@@ -295,14 +310,30 @@ def view_category():
 @app.route('/search', methods=['POST'])
 def keyword_search():
     db = get_db()
-    # search word, sentence
-    search_input = "%" + request.form['keyword_Search'] + "%"
+    tag_name = request.form.getlist('tag_id')
 
-    # search in the database if there is anything like or similar to that
-    cur = db.execute('SELECT * FROM recipes WHERE title LIKE ? OR category LIKE ? OR content LIKE ?',
-                     (search_input, search_input, search_input))
-    search = cur.fetchall()
-    return render_template('SearchResults.html', recipes=search)
+    # search word, sentence
+    if request.form['keyword_Search'] is None:
+        search_input = "%" + request.form['searchResults'] + "%"
+    else:
+        search_input = "%" + request.form['keyword_Search'] + "%"
+
+    if tag_name:
+        get_tag_name = tag_name[0]
+        tag_name = db.execute('SELECT * FROM recipes '
+                              'JOIN tags ON recipes.id=tags.recipe_id '
+                              'JOIN tag_name ON tags.tag_id=tag_name.tag_id WHERE tag_name.tag_id=?', [get_tag_name])
+        search = tag_name.fetchall()
+    else:
+        # search in the database if there is anything like or similar to that
+        cur = db.execute('SELECT * FROM recipes WHERE title LIKE ? OR category LIKE ? OR content LIKE ?',
+                         (search_input, search_input, search_input))
+        search = cur.fetchall()
+
+    cur = db.execute('SELECT tag_name, tag_id FROM tag_name ORDER BY tag_name')
+    diet_tag = cur.fetchall()
+    return render_template('SearchResults.html', recipes=search, diet_tag=diet_tag,
+                           searchResults=request.form['keyword_Search'])
 
 
 @app.route('/registerPage', methods=['GET'])
