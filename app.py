@@ -311,11 +311,10 @@ def keyword_search():
     if tag_name:
         get_tag_name = tag_name[0]
         tag_name = db.execute('SELECT * FROM recipes '
-                         'JOIN tags ON recipes.id=tags.recipe_id '
-                         'JOIN tag_name ON tags.tag_id=tag_name.tag_id WHERE tag_name.tag_id=?', [get_tag_name])
+                              'JOIN tags ON recipes.id=tags.recipe_id '
+                              'JOIN tag_name ON tags.tag_id=tag_name.tag_id WHERE tag_name.tag_id=?', [get_tag_name])
         search = tag_name.fetchall()
     else:
-
         # search in the database if there is anything like or similar to that
         cur = db.execute('SELECT * FROM recipes WHERE title LIKE ? OR category LIKE ? OR content LIKE ?',
                          (search_input, search_input, search_input))
