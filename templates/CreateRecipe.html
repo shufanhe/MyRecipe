@@ -7,14 +7,12 @@
               <dd><input type="text" class="form-control" id="titleInput" name="title" required>
           <dt><label for="categoryInput" class="form-label">Category:</label>
               <dd><input type="text" size="30" class="form-control" id="categoryInput" name="category" required>
-
           <dt><label class="form-label">Dietary Restrictions:</label>
           <br>
           {% for tag in tag_name %}
             <input type="checkbox" id="tagName" name="tag_id" value={{ tag.tag_id }}>
             <label for="tagName">{{ tag.tag_name }}</label><br>
           {% endfor %}
-
           <dt><label for="textareaInput" class="form-label">Text:</label>
               <dd><textarea name="content" class="form-control" id="textareaInput" rows="5" cols="40" required></textarea>
           <dt><button type="submit" class="btn btn-dark mb-3">Post</button>
