@@ -69,7 +69,19 @@ label {
     margin-right: auto;
     margin-left: auto;
 }
-/*#image-upload > input*/
-/*{*/
-/*    display: none;*/
-/*}*/
+#display-image{
+  width: 400px;
+  height: 225px;
+  border: 1px solid black;
+  background-position: center;
+  background-size: cover;
+}
+.carousel-inner > div img {
+    width: 450px;
+    height: 350px;
+}
+.navbar > div img {
+    width: 250px;
+    height: 100px;
+    object-fit: scale-down;
+}
