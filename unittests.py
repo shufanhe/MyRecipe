@@ -672,7 +672,6 @@ class FlaskrTestCase(unittest.TestCase):
         assert b'Name:' and b'test1' in rv.data
         assert b'Email:' and b'test1@gmail.com' in rv.data
         assert b'About Author:' in rv.data
-        assert b'Update Profile' in rv.data
         assert b'follow' in rv.data
         assert b'Created Recipe' in rv.data
         assert b'Title1' in rv.data
@@ -683,7 +682,6 @@ class FlaskrTestCase(unittest.TestCase):
         assert b'Name:' and b'test1' in rv.data
         assert b'Email:' and b'test1@gmail.com' in rv.data
         assert b'About Author:' in rv.data
-        assert b'Update Profile' in rv.data
         assert b'Unfollow' in rv.data
         assert b'Created Recipe' in rv.data
         assert b'Title1' in rv.data

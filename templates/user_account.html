@@ -11,17 +11,20 @@
                     {{ user_info.email }}
                     <br/>
                     <strong>About Author:</strong>
-{#                    {% if len(user_info.about) == 0 %}#}
-{#                        <p>Add something about yourself</p>#}
-{#                    {% else %}#}
-{#                        {{ user_info.about }}#}
-{#                    {% endif %}#}
+                    {% if user_summary == None %}
+                        <p class="user-summary">Add something about yourself</p>
+                    {% else %}
+                        {{ user_summary.summary }}
+                    {% endif %}
                     <br/>
-                    <a href="" class="btn btn-secondary btn-sm">Update Profile</a>
-                    <form action="{{ url_for('uploadImage') }}" method="post" enctype="multipart/form-data">
-                        <input type=file name=file>
-                        <input type=submit value=Upload>
-                    </form>
+                    {% if session.user_id == user %}
+                    <a href="{{ url_for('updateProfilePage') }}" class="btn btn-secondary btn-sm">Update Profile</a>
+                    <br/>
+                    {% endif %}
+                    {% if session.user_id == 'admin' %}
+                        <a href="" class="btn btn-danger btn-sm">Delete</a>
+                        <br/>
+                    {% endif %}
                     <br/>
                     {% if session.user_id != user %}
                         {% if follow_author == None %}

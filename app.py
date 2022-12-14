@@ -14,7 +14,7 @@ app = Flask(__name__)
 
 # Load default config and override config from an environment variable
 
-ALLOWED_EXTENSIONS = {'txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif'}
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg'}
 
 app.config.update(dict(
     DATABASE=os.path.join(app.root_path, 'recipe.db'),
@@ -85,6 +85,7 @@ def adminUser():
     email = 'food@gmail.com'
     db.execute('INSERT INTO user (username, password, email,verified,OTP_code) VALUES (?,?,?,?,?)',
                (user, generate_password_hash(password), email, 'verified', 0))
+    db.execute('INSERT INTO user_image (user_id, image) VALUES (?,?)', (user, 'profile_picture.png'))
     db.commit()
 
 
@@ -631,6 +632,8 @@ def user_account():
     user_info = user_info.fetchone()
     user_image = db.execute('SELECT * FROM user_image WHERE user_id = ?', [user])
     user_image = user_image.fetchone()
+    user_summary = db.execute('SELECT * FROM user_summary WHERE user_id = ?', [user])
+    user_summary = user_summary.fetchone()
     if user != session['user_id']:
         follow_author = db.execute('SELECT * FROM save_author WHERE user = ? and author = ?',
                                    [session['user_id'], user])
@@ -639,9 +642,10 @@ def user_account():
         author_followed = author_followed.fetchall()
         return render_template('user_account.html', user=user, created_recipes=created_recipes,
                                follow_author=follow_author, author_followed=author_followed, user_info=user_info,
-                               user_image=user_image)
+                               user_image=user_image, user_summary=user_summary)
     return render_template('user_account.html', user=user, created_recipes=created_recipes,
-                           author_followed=author_followed, user_info=user_info, user_image=user_image)
+                           author_followed=author_followed, user_info=user_info, user_image=user_image,
+                           user_summary=user_summary)
 
 
 @app.route('/notifications', methods=['GET'])
@@ -712,7 +716,6 @@ def uploadImage():
     db = get_db()
     file = request.files['file']
     if file and allowed_file(file.filename):
-
         new_file = str(session['user_id']) + '.' + file.filename.split('.')[1]
         secured_filename = secure_filename(new_file)
         file.save(os.path.join(app.config['UPLOAD_FOLDER'], secured_filename))
@@ -722,3 +725,44 @@ def uploadImage():
     else:
         flash("Unable to upload image!")
         return redirect(url_for('user_account'))
+
+
+@app.route('/updateProfilePage')
+def updateProfilePage():
+    db = get_db()
+    return render_template('updateProfilePage.html')
+
+
+@app.route('/updateProfile', methods=['POST'])
+def updateProfile():
+    if session['user_id'] is None or session['user_id'] == 'admin':
+        flash('You are not allowed to update the profile')
+        return redirect(url_for('user_account'))
+    db = get_db()
+    file = request.files['file']
+    name = request.form['name']
+    summary = request.form['summary']
+    if file.filename != '':
+        if allowed_file(file.filename):
+            new_file = str(session['user_id']) + '.' + file.filename.split('.')[1]
+            secured_filename = secure_filename(new_file)
+            file.save(os.path.join(app.config['UPLOAD_FOLDER'], secured_filename))
+            db.execute('UPDATE user_image SET image = ? WHERE user_id = ?', [secured_filename, session['user_id']])
+            db.commit()
+        else:
+            flash("Unable to upload image! Wrong file format.")
+            return redirect(url_for('updateProfilePage'))
+    if summary != '':
+        db.execute('UPDATE user_summary SET summary = ? WHERE user_id = ?', [summary, session['user_id']])
+    if name != session['user_id']:
+        db.execute('UPDATE user_image SET user_id = ? WHERE user_id = ?', [name, session['user_id']])
+        db.execute('UPDATE user SET username = ? WHERE username = ?', [name, session['user_id']])
+        db.execute('UPDATE save_author SET author = ? WHERE author = ?', [name, session['user_id']])
+        db.execute('UPDATE save_author SET user = ? WHERE user = ?', [name, session['user_id']])
+        db.execute('UPDATE save_recipe SET username = ? WHERE username = ?', [name, session['user_id']])
+        db.execute('UPDATE notifications SET from_user = ? WHERE from_user = ?', [name, session['user_id']])
+        db.execute('UPDATE notifications SET to_user = ? WHERE to_user = ?', [name, session['user_id']])
+        db.execute('UPDATE user_summary SET user_id = ? WHERE user_id = ?', [name, session['user_id']])
+        session['user_id'] = name
+    db.commit()
+    return redirect(url_for('user_account'))

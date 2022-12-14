@@ -85,3 +85,8 @@ label {
     height: 100px;
     object-fit: scale-down;
 }
+
+.user-summary {
+    display:inline-block;
+    height:auto;
+}
