@@ -35,7 +35,7 @@
             <img src="../static/upper_frame.png" class="img-fluid" alt="upper frame">
             <div class="text-center fs-3">
               <p>Recipe of the Day</p>
-              <a href="{{ url_for ('view_recipe', recipe_id=recipe.recipe_id)}}">
+              <a href="{{ url_for ('view_recipe', recipe_id=recipe.recipe_id, recipe='recipe_of_the_day')}}">
                   <img src="../static/closed_tray.png" class="img-fluid" alt="recipe_of_the_day" id="recipe_of_the_day">
               </a>
             </div>

@@ -141,7 +141,7 @@ def post_recipe():
 
     # take user input and insert into the database
     cur = db.execute('INSERT INTO recipes (user_id, title, category, content, posted_date) VALUES (?, ?, ?, ?, ?)',
-               [user, title, category, content, date_today])
+                     [user, title, category, content, date_today])
     new_recipe_id = cur.lastrowid
     for tag in tag_id:
         db.execute('INSERT INTO tags (tag_id, recipe_id) VALUES (?, ?)',
@@ -162,7 +162,7 @@ def view_recipe():
                      [session['user_id'], request.args.get('recipe_id')])
     whether_liked = cur.fetchone()[0]
     # route if the user clicked on recipe of the day, recipe should show up according to the date
-    if 'recipe_of_the_day' in request.args:
+    if request.args.get('recipe') == 'recipe_of_the_day':
         recipe_id_today = db.execute('SELECT recipe_id FROM calendar WHERE date_today=?', [date.today()])
         recipe_today = db.execute('SELECT title, category, content, likes, review FROM recipes WHERE id=?',
                                   [recipe_id_today])
@@ -186,8 +186,9 @@ def view_recipe():
             rev = db.execute('SELECT recipe_id, user_id, review FROM reviews WHERE recipe_id=?',
                              [request.args.get('recipe_id')])
             reviews = rev.fetchall()
-            tag_recipe = db.execute('SELECT tag_name.tag_name FROM recipes JOIN tags ON recipes.id=tags.recipe_id JOIN tag_name ON tags.tag_id=tag_name.tag_id WHERE recipes.id=?',
-                                    [request.args.get('recipe_id')])
+            tag_recipe = db.execute(
+                'SELECT tag_name.tag_name FROM recipes JOIN tags ON recipes.id=tags.recipe_id JOIN tag_name ON tags.tag_id=tag_name.tag_id WHERE recipes.id=?',
+                [request.args.get('recipe_id')])
             tag_recipes = tag_recipe.fetchall()
             return render_template('ViewRecipe.html', recipe=recipe, reviews=reviews, liked=whether_liked,
                                    current_user=current_user, tag_recipes=tag_recipes)
@@ -388,6 +389,7 @@ def register():
             db.execute("INSERT INTO user (username,password,email,verified,OTP_code) VALUES (?,?,?,?,?)",
                        (username, generate_password_hash(password), email.lower(), 'unverified',
                         generate_password_hash(str(OTP))))
+            db.execute("INSERT INTO user_image (user_id, image) VALUES (?,?)", (username, 'profile_picture.png'))
             db.commit()
             return render_template('verificationOTP.html', verification_code=OTP, account_email=email,
                                    verification_type=verification_type)
@@ -448,6 +450,7 @@ def login():
         session.clear()
         # login with session being username
         session['user_id'] = user['username']
+        session['image'] = 'default'
         return redirect(url_for('HomePage'))
     else:
         flash(error)
@@ -626,6 +629,8 @@ def user_account():
     author_followed = author_followed.fetchall()
     user_info = db.execute('SELECT * FROM user WHERE username = ?', [user])
     user_info = user_info.fetchone()
+    user_image = db.execute('SELECT * FROM user_image WHERE user_id = ?', [user])
+    user_image = user_image.fetchone()
     if user != session['user_id']:
         follow_author = db.execute('SELECT * FROM save_author WHERE user = ? and author = ?',
                                    [session['user_id'], user])
@@ -633,9 +638,10 @@ def user_account():
         author_followed = db.execute('SELECT * FROM save_author WHERE user = ?', [user])
         author_followed = author_followed.fetchall()
         return render_template('user_account.html', user=user, created_recipes=created_recipes,
-                               follow_author=follow_author, author_followed=author_followed, user_info=user_info)
+                               follow_author=follow_author, author_followed=author_followed, user_info=user_info,
+                               user_image=user_image)
     return render_template('user_account.html', user=user, created_recipes=created_recipes,
-                           author_followed=author_followed, user_info=user_info)
+                           author_followed=author_followed, user_info=user_info, user_image=user_image)
 
 
 @app.route('/notifications', methods=['GET'])
@@ -705,6 +711,14 @@ def allowed_file(filename):
 def uploadImage():
     db = get_db()
     file = request.files['file']
-    secured_filename = secure_filename(file.filename)
-    file.save(os.path.join(app.config['UPLOAD_FOLDER'], secured_filename))
-    return '1'
+    if file and allowed_file(file.filename):
+
+        new_file = str(session['user_id']) + '.' + file.filename.split('.')[1]
+        secured_filename = secure_filename(new_file)
+        file.save(os.path.join(app.config['UPLOAD_FOLDER'], secured_filename))
+        db.execute('UPDATE user_image SET image = ? WHERE user_id = ?', [secured_filename, session['user_id']])
+        db.commit()
+        return redirect(url_for('user_account'))
+    else:
+        flash("Unable to upload image!")
+        return redirect(url_for('user_account'))

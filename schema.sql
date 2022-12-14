@@ -1,4 +1,5 @@
 drop table if exists recipes;
+drop table if exists user_image;
 drop table if exists user;
 drop table if exists reviews;
 drop table if exists like_recipe;
@@ -15,6 +16,12 @@ CREATE TABLE user (
     email TEXT NOT NULL,
     verified TEXT NOT NULL,
     OTP_code TEXT NOT NULL
+);
+
+CREATE TABLE user_image (
+    user_id INTEGER NOT NULL,
+    image TEXT NOT NULL,
+    FOREIGN KEY (user_id) REFERENCES user(id)
 );
 
 create table recipes (

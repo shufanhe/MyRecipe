@@ -11,6 +11,11 @@
                     {{ user_info.email }}
                     <br/>
                     <strong>About Author:</strong>
+                    {% if len(user_info.about) == 0 %}
+                        <p>Add something about yourself</p>
+                    {% else %}
+                        {{ user_info.about }}
+                    {% endif %}
                     <br/>
                     <a href="" class="btn btn-secondary btn-sm">Update Profile</a>
                     <form action="{{ url_for('uploadImage') }}" method="post" enctype="multipart/form-data">
@@ -37,7 +42,7 @@
                 </div>
                 <div class="col-4">
                     <label for="image">
-                        <img id="profileImage" src="{{ url_for('static', filename='profile_picture.png')}}" width="200" alt="profile picture">
+                        <img src="{{ url_for('static', filename=user_image.image) }}" alt="profile image" class="img-thumbnail" width="200" height="200">
                     </label>
                 </div>
             </div>
