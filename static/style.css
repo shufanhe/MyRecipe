@@ -70,15 +70,15 @@ label {
     margin-left: auto;
 }
 #display-image{
-  width: 400px;
-  height: 225px;
+  width: 600px;
+  height: 300px;
   border: 1px solid black;
   background-position: center;
   background-size: cover;
 }
 .carousel-inner > div img {
-    width: 450px;
-    height: 350px;
+    width: 600px;
+    height: 700px;
 }
 .navbar > div img {
     width: 250px;
