@@ -14,7 +14,7 @@ app = Flask(__name__)
 
 # Load default config and override config from an environment variable
 
-ALLOWED_EXTENSIONS = {'txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif'}
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg'}
 
 app.config.update(dict(
     DATABASE=os.path.join(app.root_path, 'recipe.db'),
@@ -55,6 +55,7 @@ def initdb_command():
     init_db()
     # make a new admin user
     adminUser()
+    add_recipe()
     print('Initialized the database.')
 
 
@@ -85,24 +86,43 @@ def adminUser():
     email = 'food@gmail.com'
     db.execute('INSERT INTO user (username, password, email,verified,OTP_code) VALUES (?,?,?,?,?)',
                (user, generate_password_hash(password), email, 'verified', 0))
+    db.execute('INSERT INTO user_image (user_id, image) VALUES (?,?)', (user, 'profile_picture.png'))
     db.commit()
 
 
-def recipe():
+def add_recipe():
     db = get_db()
+    today = date.today()
+    title = "Spiral Vegetable Tart"
+    description = "Thin slices of carrots, zucchini, and yellow squash are rolled together into a spiral on top a " \
+                  "savory homemade crust to create a gorgeous and nutritious entree. Feel free to substitute or " \
+                  "include other vegetables that are in season, such as beets, butternut squash, parsnips, eggplant, " \
+                  "purple carrots, or even tomatoes. "
+    category = "Italian"
+    db.execute('INSERT INTO recipes (title, content, category, user_id,posted_date) VALUES (?,?,?,?,?)', (title, description, category, 'admin', today))
+    title = "Pasta with Roasted Vegetables"
+    description = "This is a great way to use up any leftover vegetables in your fridge. The vegetables are roasted "
+    category = "Italian"
+    db.execute('INSERT INTO recipes (title, content, category, user_id,posted_date) VALUES (?,?,?,?,?)', (title, description, category, 'admin', today))
+    title = "Marinated Cherry Tomato Salad"
+    description = "A simple vinaigrette dressing coats a generous helping of tomatoes and diced onions on top of a " \
+                  "bed of fresh lettuce to create a fast and delicious salad. Serve as a side salad or main course. "
+    category = "30-Min Meals"
+    db.execute('INSERT INTO recipes (title, content, category, user_id,posted_date) VALUES (?,?,?,?,?)', (title, description, category, 'admin', today))
+
+    db.execute('INSERT INTO calendar (date_today, recipe_id) VALUES (?,?)', (today.strftime('%m/%d/%Y'), 1))
+    db.commit()
 
 
 @app.route('/')
 def HomePage():
     db = get_db()
     # recipe of the day should show up according to the date, refering to the covers stored in calendar
-    cov = db.execute('SELECT cover FROM calendar WHERE date_today=?', [date.today()])
-    cover_today = cov.fetchone()
     id = db.execute('SELECT recipe_id FROM calendar WHERE date_today=?', [date.today()])
     id_today = id.fetchone()
     recipe = db.execute('SELECT title, category, content FROM recipes WHERE id=?', [id_today])
     recipe_today = recipe.fetchone()
-    return render_template('HomePage.html', cover=cover_today, recipe=recipe_today)
+    return render_template('HomePage.html', recipe=recipe_today)
 
 
 @app.route('/categories')
@@ -139,6 +159,10 @@ def post_recipe():
     tag_id = request.form.getlist('tag_id')
     date_today = str(date.today())
 
+    if 'file' in request.files:
+        file = request.files['file']
+    else:
+        file = ''
     # take user input and insert into the database
     cur = db.execute('INSERT INTO recipes (user_id, title, category, content, posted_date) VALUES (?, ?, ?, ?, ?)',
                      [user, title, category, content, date_today])
@@ -146,6 +170,16 @@ def post_recipe():
     for tag in tag_id:
         db.execute('INSERT INTO tags (tag_id, recipe_id) VALUES (?, ?)',
                    [tag, new_recipe_id])
+    if file != '':
+        if allowed_file(file.filename):
+            new_file = str(session['user_id']) + '_recipe.' + file.filename.split('.')[1]
+            secured_filename = secure_filename(new_file)
+            file.save(os.path.join(app.config['UPLOAD_FOLDER'], secured_filename))
+            db.execute('INSERT INTO recipe_image (image, recipe_id) VALUES (?,?)', [secured_filename, new_recipe_id])
+            db.commit()
+        else:
+            flash("Unable to upload image! Wrong file format.")
+            return redirect(url_for('create_recipe'))
     db.commit()
     flash('New recipe successfully posted!')
     return redirect(url_for('HomePage'))
@@ -153,47 +187,40 @@ def post_recipe():
 
 @app.route('/view_recipe')
 def view_recipe():
-    if session['user_id'] is None:
-        flash('You are not allowed to view a recipe')
-        return redirect(url_for('HomePage'))
     db = get_db()
     current_user = session['user_id']
     cur = db.execute('SELECT COUNT(1) FROM like_recipe WHERE user_id=? AND recipe_id=?',
                      [session['user_id'], request.args.get('recipe_id')])
     whether_liked = cur.fetchone()[0]
-    # route if the user clicked on recipe of the day, recipe should show up according to the date
+    recipe_id = request.args.get('recipe_id')
     if request.args.get('recipe') == 'recipe_of_the_day':
-        recipe_id_today = db.execute('SELECT recipe_id FROM calendar WHERE date_today=?', [date.today()])
-        recipe_today = db.execute('SELECT title, category, content, likes, review FROM recipes WHERE id=?',
-                                  [recipe_id_today])
-        rev = db.execute('SELECT likes, review FROM reviews WHERE recipe_id=?', [recipe_id_today])
-        recipe = recipe_today.fetchone()
-        reviews = rev.fetchall()
-        return render_template('ViewRecipe.html', recipe=recipe, reviews=reviews, liked=whether_liked,
-                               current_user=current_user)
-    # route if user clicked on a recipe (not through recipe of the day)
-    else:
-        cur2 = db.execute('SELECT COUNT(1) FROM recipes WHERE id=?',
-                          [request.args.get('recipe_id')])
-        whether_exist = cur2.fetchone()[0]
-        if whether_exist == 0:
-            flash('The recipe has been deleted.')
-            return redirect(url_for('notifications'))
-        else:
-            rec = db.execute('SELECT id, title, category, content, likes, user_id FROM recipes WHERE id=?',
-                             [request.args.get('recipe_id')])
-            recipe = rec.fetchone()
-            rev = db.execute('SELECT recipe_id, user_id, review FROM reviews WHERE recipe_id=?',
-                             [request.args.get('recipe_id')])
-            reviews = rev.fetchall()
-            tag_recipe = db.execute(
-                'SELECT tag_name.tag_name FROM recipes JOIN tags ON recipes.id=tags.recipe_id JOIN tag_name ON tags.tag_id=tag_name.tag_id WHERE recipes.id=?',
-                [request.args.get('recipe_id')])
-            tag_recipes = tag_recipe.fetchall()
-            return render_template('ViewRecipe.html', recipe=recipe, reviews=reviews, liked=whether_liked,
-                                   current_user=current_user, tag_recipes=tag_recipes)
+        today = date.today().strftime('%m/%d/%Y')
+        recipe_id_today = db.execute('SELECT recipe_id FROM calendar WHERE date_today=?', [today])
+        recipe_id = recipe_id_today.fetchone()[0]
 
+    cur2 = db.execute('SELECT * FROM recipes WHERE id=?',
+                      [recipe_id])
+    whether_exist = cur2.fetchone()[0]
+    if whether_exist == 0:
+        flash('The recipe has been deleted.')
+        return redirect(url_for('notifications'))
 
+    # route if the user clicked on recipe of the day, recipe should show up according to the date
+    rec = db.execute('SELECT id, title, category, content, likes, user_id FROM recipes WHERE id=?',
+                     [recipe_id])
+    recipe = rec.fetchone()
+    rev = db.execute('SELECT recipe_id, user_id, review FROM reviews WHERE recipe_id=?',
+                     [recipe_id])
+    reviews = rev.fetchall()
+    tag_recipe = db.execute(
+        'SELECT tag_name.tag_name FROM recipes JOIN tags ON recipes.id=tags.recipe_id JOIN tag_name ON tags.tag_id=tag_name.tag_id WHERE recipes.id=?',
+        [recipe_id])
+    tag_recipes = tag_recipe.fetchall()
+    recipe_image = db.execute('SELECT image FROM recipe_image WHERE recipe_id=?',
+                              [recipe_id])
+    recipe_images = recipe_image.fetchone()
+    return render_template('ViewRecipe.html', recipe=recipe, reviews=reviews, liked=whether_liked,
+                           current_user=current_user, tag_recipes=tag_recipes, recipe_images=recipe_images)
 @app.route('/like_recipe', methods=['POST'])
 def like_recipe():
     db = get_db()
@@ -631,6 +658,8 @@ def user_account():
     user_info = user_info.fetchone()
     user_image = db.execute('SELECT * FROM user_image WHERE user_id = ?', [user])
     user_image = user_image.fetchone()
+    user_summary = db.execute('SELECT * FROM user_summary WHERE user_id = ?', [user])
+    user_summary = user_summary.fetchone()
     if user != session['user_id']:
         follow_author = db.execute('SELECT * FROM save_author WHERE user = ? and author = ?',
                                    [session['user_id'], user])
@@ -639,9 +668,10 @@ def user_account():
         author_followed = author_followed.fetchall()
         return render_template('user_account.html', user=user, created_recipes=created_recipes,
                                follow_author=follow_author, author_followed=author_followed, user_info=user_info,
-                               user_image=user_image)
+                               user_image=user_image, user_summary=user_summary)
     return render_template('user_account.html', user=user, created_recipes=created_recipes,
-                           author_followed=author_followed, user_info=user_info, user_image=user_image)
+                           author_followed=author_followed, user_info=user_info, user_image=user_image,
+                           user_summary=user_summary)
 
 
 @app.route('/notifications', methods=['GET'])
@@ -712,7 +742,6 @@ def uploadImage():
     db = get_db()
     file = request.files['file']
     if file and allowed_file(file.filename):
-
         new_file = str(session['user_id']) + '.' + file.filename.split('.')[1]
         secured_filename = secure_filename(new_file)
         file.save(os.path.join(app.config['UPLOAD_FOLDER'], secured_filename))
@@ -722,3 +751,44 @@ def uploadImage():
     else:
         flash("Unable to upload image!")
         return redirect(url_for('user_account'))
+
+
+@app.route('/updateProfilePage')
+def updateProfilePage():
+    db = get_db()
+    return render_template('updateProfilePage.html')
+
+
+@app.route('/updateProfile', methods=['POST'])
+def updateProfile():
+    if session['user_id'] is None or session['user_id'] == 'admin':
+        flash('You are not allowed to update the profile')
+        return redirect(url_for('user_account'))
+    db = get_db()
+    file = request.files['file']
+    name = request.form['name']
+    summary = request.form['summary']
+    if file.filename != '':
+        if allowed_file(file.filename):
+            new_file = str(session['user_id']) + '.' + file.filename.split('.')[1]
+            secured_filename = secure_filename(new_file)
+            file.save(os.path.join(app.config['UPLOAD_FOLDER'], secured_filename))
+            db.execute('UPDATE user_image SET image = ? WHERE user_id = ?', [secured_filename, session['user_id']])
+            db.commit()
+        else:
+            flash("Unable to upload image! Wrong file format.")
+            return redirect(url_for('updateProfilePage'))
+    if summary != '':
+        db.execute('UPDATE user_summary SET summary = ? WHERE user_id = ?', [summary, session['user_id']])
+    if name != session['user_id']:
+        db.execute('UPDATE user_image SET user_id = ? WHERE user_id = ?', [name, session['user_id']])
+        db.execute('UPDATE user SET username = ? WHERE username = ?', [name, session['user_id']])
+        db.execute('UPDATE save_author SET author = ? WHERE author = ?', [name, session['user_id']])
+        db.execute('UPDATE save_author SET user = ? WHERE user = ?', [name, session['user_id']])
+        db.execute('UPDATE save_recipe SET username = ? WHERE username = ?', [name, session['user_id']])
+        db.execute('UPDATE notifications SET from_user = ? WHERE from_user = ?', [name, session['user_id']])
+        db.execute('UPDATE notifications SET to_user = ? WHERE to_user = ?', [name, session['user_id']])
+        db.execute('UPDATE user_summary SET user_id = ? WHERE user_id = ?', [name, session['user_id']])
+        session['user_id'] = name
+    db.commit()
+    return redirect(url_for('user_account'))

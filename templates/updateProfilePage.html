@@ -1,0 +1,17 @@
+{% extends "layout.html" %}
+{% block body %}
+<div class="container w-75">
+    <form action="{{ url_for('updateProfile') }}" method="post" class="updateProfile" enctype="multipart/form-data">
+      <dl>
+          <dt><label for="titleInput" class="form-label">Name:</label>
+              <dd><input type="text" class="form-control" id="titleInput" name="name" placeholder="Change your name!" required>
+          <dt><label for="textareaInput" class="form-label">Summary:</label>
+              <dd><textarea name="summary" class="form-control" id="textareaInput" rows="5" cols="40" placeholder="Write something about yourself!"></textarea>
+          <dt><label for="file" class="form-label">Change Your profile picture:</label>
+              <dd><input type=file name=file>
+          <dt><button type="submit" class="btn btn-dark mb-3" value=Upload>Update</button>
+          <dt><a href="{{ url_for('user_account') }}" class="btn btn-dark mb-3">Cancel</a>
+      </dl>
+    </form>
+</div>
+{% endblock %}

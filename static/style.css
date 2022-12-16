@@ -69,7 +69,24 @@ label {
     margin-right: auto;
     margin-left: auto;
 }
-/*#image-upload > input*/
-/*{*/
-/*    display: none;*/
-/*}*/
+#display-image{
+  width: 600px;
+  height: 300px;
+  border: 1px solid black;
+  background-position: center;
+  background-size: cover;
+}
+.carousel-inner > div img {
+    width: 600px;
+    height: 700px;
+}
+.navbar > div img {
+    width: 250px;
+    height: 100px;
+    object-fit: scale-down;
+}
+
+.user-summary {
+    display:inline-block;
+    height:auto;
+}

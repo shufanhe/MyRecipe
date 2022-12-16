@@ -1,5 +1,6 @@
 drop table if exists recipes;
 drop table if exists user_image;
+drop table if exists user_summary;
 drop table if exists user;
 drop table if exists reviews;
 drop table if exists like_recipe;
@@ -8,6 +9,7 @@ drop table if exists save_recipe;
 drop table if exists save_author;
 drop table if exists tag_name;
 drop table if exists tags;
+drop table if exists calendar;
 
 CREATE TABLE user (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -21,7 +23,13 @@ CREATE TABLE user (
 CREATE TABLE user_image (
     user_id INTEGER NOT NULL,
     image TEXT NOT NULL,
-    FOREIGN KEY (user_id) REFERENCES user(id)
+    FOREIGN KEY (user_id) REFERENCES user(username)
+);
+
+CREATE TABLE user_summary (
+    user_id INTEGER NOT NULL,
+    summary TEXT NOT NULL,
+    FOREIGN KEY (user_id) REFERENCES user(username) ON UPDATE CASCADE ON DELETE CASCADE
 );
 
 create table recipes (
@@ -32,8 +40,7 @@ create table recipes (
   content text not null,
   posted_date text not null,
   likes INTEGER DEFAULT 0 NOT NULL,
-  image blob,
-  FOREIGN KEY(user_id) REFERENCES user(id) ON UPDATE CASCADE ON DELETE CASCADE
+  FOREIGN KEY(user_id) REFERENCES user(id)
 );
 
 
@@ -42,14 +49,14 @@ CREATE TABLE reviews (
     user_id INTEGER NOT NULL,
     review TEXT,
     FOREIGN KEY(recipe_id) REFERENCES recipes(id) ON UPDATE CASCADE ON DELETE CASCADE,
-    FOREIGN KEY(user_id) REFERENCES user(id) ON UPDATE CASCADE ON DELETE RESTRICT
+    FOREIGN KEY(user_id) REFERENCES user(id)
 );
 
 CREATE TABLE like_recipe (
     recipe_id INTEGER NOT NULL,
     user_id INTEGER NOT NULL,
     FOREIGN KEY(recipe_id) REFERENCES recipes(id) ON UPDATE CASCADE ON DELETE CASCADE,
-    FOREIGN KEY(user_id) REFERENCES user(id) ON UPDATE CASCADE ON DELETE RESTRICT
+    FOREIGN KEY(user_id) REFERENCES user(id)
 );
 
 
@@ -83,8 +90,7 @@ CREATE TABLE save_author (
 CREATE TABLE if not exists calendar(
     date_today TEXT PRIMARY KEY,
     recipe_id integer not null,
-    cover varbinary not null,
-    FOREIGN KEY(recipe_id) REFERENCES recipes(id) ON UPDATE CASCADE ON DELETE RESTRICT
+    FOREIGN KEY(recipe_id) REFERENCES recipes(id)
 );
 
 CREATE TABLE if not exists tag_name(
@@ -104,4 +110,11 @@ CREATE TABLE if not exists tags(
     tag_id INTEGER NOT NULL,
     FOREIGN KEY(recipe_id) REFERENCES recipes(id),
     FOREIGN KEY(tag_id) REFERENCES tag_name(tag_id)
+);
+
+CREATE TABLE IF NOT EXISTS recipe_image (
+  recipe_id INTEGER NOT NULL,
+  image TEXT NOT NULL,
+  FOREIGN KEY(recipe_id) REFERENCES recipes(id)
+
 );
