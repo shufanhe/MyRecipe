@@ -4,7 +4,11 @@ import app
 import unittest
 import tempfile
 from flask_mail import Mail
-
+import unittest
+import tempfile
+from flask_mail import Mail
+from datetime import date
+from datetime import datetime
 
 class FlaskrTestCase(unittest.TestCase):
 
@@ -503,7 +507,7 @@ class FlaskrTestCase(unittest.TestCase):
         # logout
         self.logout()
 
-    '''def test_notifications(self):
+    def test_notifications(self):
         # Register user 1
         self.creating_user_one()
 
@@ -526,10 +530,6 @@ class FlaskrTestCase(unittest.TestCase):
         assert b'test_category' in rv.data
         assert b'test_content' in rv.data
 
-        self.logout()
-
-        # user 2 likes and reviews that recipe user 1 created
-        self.creating_user_two()
 
         rv = self.app.get('/view_recipe?recipe_id=1')
         assert b'test_title' in rv.data
@@ -548,7 +548,7 @@ class FlaskrTestCase(unittest.TestCase):
         assert b'test_title' in rv.data
         assert b'test_category' in rv.data
         assert b'test_content' in rv.data
-        assert b'Like' in rv.data
+        assert b'like' in rv.data
         assert b'0' in rv.data
         assert b'review' in rv.data
         assert b'test_review' in rv.data
@@ -561,21 +561,24 @@ class FlaskrTestCase(unittest.TestCase):
         assert b'test_title' in rv.data
         assert b'test_category' in rv.data
         assert b'test_content' in rv.data
-        assert b'Unlike' in rv.data
+        assert b'unlike' in rv.data
         assert b'1' in rv.data
         assert b'review' in rv.data
         assert b'delete' in rv.data
         assert b'edit' in rv.data
 
+
+        rv = self.app.get('/notifications')
+        assert b'<a href="/user_account?author=test1"> test1 </a>' in rv.data
+        assert b'liked your' in rv.data
+        assert b'<a href="/view_recipe?recipe_id=1">post</a>' in rv.data
+        assert b'on' in rv.data
+        assert str(date.today()).encode('ASCII') in rv.data
+        assert b'at' in rv.data
+        assert str(datetime.now().strftime("%H:%M")).encode('ASCII') in rv.data
+        assert b'reviewed your' in rv.data
         self.logout()
 
-        # user 1 logs in again
-        self.login('test1', 'testing1234')
-        rv = self.app.get('/notifications')
-        #assert b'test2 liked your post' in rv.data
-        #assert b'test2 reviewed your post' in rv.data
-        self.logout()
-'''
 
     def test_delete_edit(self):
         """ Tests delete function by adding a post and then making sure it is not shown after deleted. """
