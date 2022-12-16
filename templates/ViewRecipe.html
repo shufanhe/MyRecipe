@@ -8,7 +8,9 @@
                 {{tag.tag_name}}
             {% endfor %}</p>
             <p>Category: {{recipe.category}}</p>
+            {% if recipe.user_id != 'admin' %}
             <p>Created by <a href="{{ url_for('user_account', author = recipe.user_id) }}">{{recipe.user_id}}</a></p>
+            {% endif %}
             <p class="fs-5">{{recipe.content}}</p>
             <label for="image">
                 {% if recipe_images != None %}
