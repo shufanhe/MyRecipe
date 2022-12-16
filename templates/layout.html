@@ -65,8 +65,16 @@
                     </div>
                 </div>
               {% else %}
-                  <a class="blog-header-logo text-dark m-3" href="{{ url_for ('registerPage')}}">Register</a>
-                  <a class="blog-header-logo text-dark m-3" href="{{ url_for ('loginPage')}}">Login</a>
+                    <div class="col-3">
+                        <a href="{{ url_for ('registerPage') }}">
+                            <img src="../static/register.png" class="img-fluid" alt="register">
+                        </a>
+                    </div>
+                    <div class="col-2">
+                        <a href="{{ url_for ('loginPage') }}">
+                            <img src="../static/login.png" class="img-fluid" alt="login">
+                        </a>
+                    </div>
               {% endif %}
             </div>
           </div>

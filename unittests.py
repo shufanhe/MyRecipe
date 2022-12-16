@@ -98,8 +98,8 @@ class FlaskrTestCase(unittest.TestCase):
         assert b'MyRecipe' in rv.data
         assert b'Recipe of the Day' in rv.data
         assert b'Search' in rv.data
-        assert b'Login' in rv.data
-        assert b'Register' in rv.data
+        assert b'login' in rv.data
+        assert b'register' in rv.data
         return rv
 
     def test_categories(self):
@@ -169,13 +169,13 @@ class FlaskrTestCase(unittest.TestCase):
         assert b'Email' in rv.data
         assert b'Password' in rv.data
         assert b'Retype Password' in rv.data
-        assert b'Register' in rv.data
+        assert b'register' in rv.data
 
         self.creating_user_one()
         self.logout()
 
         rv = self.app.get('/loginPage', follow_redirects=True)
-        assert b'Login' in rv.data
+        assert b'login' in rv.data
         assert b'Sign in' in rv.data
         assert b'Username or Email' in rv.data
         assert b'Password' in rv.data
@@ -205,7 +205,7 @@ class FlaskrTestCase(unittest.TestCase):
         assert b'Email' in rv.data
         assert b'Password' in rv.data
         assert b'Retype Password' in rv.data
-        assert b'Register' in rv.data
+        assert b'register' in rv.data
 
         # register an account without verification
         rv = self.creating_user_one()
