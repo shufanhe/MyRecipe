@@ -28,7 +28,7 @@ app.config['MAIL_USERNAME'] = 'testdevappfood@gmail.com'
 app.config['MAIL_PASSWORD'] = 'ozxbpxdxfkumqodf'
 app.config['MAIL_USE_SSL'] = True
 app.config['MAIL_DEFAULT_SENDER'] = 'testdevappfood@gmail.com'
-app.testing = True
+#app.testing = True # This is to bypass the register/login for testing purpose
 app.config['UPLOAD_FOLDER'] = app.root_path + '/static'
 
 mail = Mail(app)
