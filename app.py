@@ -123,13 +123,11 @@ def add_recipe_of_the_day():
 def HomePage():
     db = get_db()
     # recipe of the day should show up according to the date, refering to the covers stored in calendar
-    cov = db.execute('SELECT cover FROM calendar WHERE date_today=?', [date.today()])
-    cover_today = cov.fetchone()
     id = db.execute('SELECT recipe_id FROM calendar WHERE date_today=?', [date.today()])
     id_today = id.fetchone()
     recipe = db.execute('SELECT title, category, content FROM recipes WHERE id=?', [id_today])
     recipe_today = recipe.fetchone()
-    return render_template('HomePage.html', cover=cover_today, recipe=recipe_today)
+    return render_template('HomePage.html', recipe=recipe_today)
 
 
 @app.route('/categories')
@@ -165,7 +163,11 @@ def post_recipe():
     content = request.form['content']
     tag_id = request.form.getlist('tag_id')
     date_today = str(date.today())
-    file = request.files['file']
+
+    if 'file' in request.files:
+        file = request.files['file']
+    else:
+        file = ''
     # take user input and insert into the database
     cur = db.execute('INSERT INTO recipes (user_id, title, category, content, posted_date) VALUES (?, ?, ?, ?, ?)',
                      [user, title, category, content, date_today])
@@ -173,7 +175,7 @@ def post_recipe():
     for tag in tag_id:
         db.execute('INSERT INTO tags (tag_id, recipe_id) VALUES (?, ?)',
                    [tag, new_recipe_id])
-    if file.filename != '':
+    if file != '':
         if allowed_file(file.filename):
             new_file = str(session['user_id']) + '_recipe.' + file.filename.split('.')[1]
             secured_filename = secure_filename(new_file)
