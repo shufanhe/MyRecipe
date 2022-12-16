@@ -9,6 +9,7 @@ drop table if exists save_recipe;
 drop table if exists save_author;
 drop table if exists tag_name;
 drop table if exists tags;
+drop table if exists calendar;
 
 CREATE TABLE user (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -39,7 +40,6 @@ create table recipes (
   content text not null,
   posted_date text not null,
   likes INTEGER DEFAULT 0 NOT NULL,
-  image blob,
   FOREIGN KEY(user_id) REFERENCES user(id)
 );
 

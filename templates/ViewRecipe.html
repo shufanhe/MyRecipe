@@ -11,7 +11,9 @@
             <p>Created by <a href="{{ url_for('user_account', author = recipe.user_id) }}">{{recipe.user_id}}</a></p>
             <p class="fs-5">{{recipe.content}}</p>
             <label for="image">
+                {% if recipe_images != None %}
                 <img src="{{ url_for('static', filename=recipe_images.image) }}" alt="recipe image" width="200" height="200">
+                {% endif %}
             </label>
         </form>
         <div class="btn-group">

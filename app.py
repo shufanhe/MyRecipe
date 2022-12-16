@@ -56,7 +56,6 @@ def initdb_command():
     # make a new admin user
     adminUser()
     add_recipe()
-    add_recipe_of_the_day()
     print('Initialized the database.')
 
 
@@ -93,29 +92,25 @@ def adminUser():
 
 def add_recipe():
     db = get_db()
+    today = date.today()
     title = "Spiral Vegetable Tart"
     description = "Thin slices of carrots, zucchini, and yellow squash are rolled together into a spiral on top a " \
                   "savory homemade crust to create a gorgeous and nutritious entree. Feel free to substitute or " \
                   "include other vegetables that are in season, such as beets, butternut squash, parsnips, eggplant, " \
                   "purple carrots, or even tomatoes. "
     category = "Italian"
-    db.execute('INSERT INTO recipe (title, description, category) VALUES (?,?,?)', (title, description, category))
+    db.execute('INSERT INTO recipes (title, content, category, user_id,posted_date) VALUES (?,?,?,?,?)', (title, description, category, 'admin', today))
     title = "Pasta with Roasted Vegetables"
     description = "This is a great way to use up any leftover vegetables in your fridge. The vegetables are roasted "
     category = "Italian"
-    db.execute('INSERT INTO recipe (title, description, category) VALUES (?,?,?)', (title, description, category))
+    db.execute('INSERT INTO recipes (title, content, category, user_id,posted_date) VALUES (?,?,?,?,?)', (title, description, category, 'admin', today))
     title = "Marinated Cherry Tomato Salad"
-    description = "A simple vinaigrette dressing coats a generous helping of tomatoes and diced onions on top of a bed of fresh lettuce to create a fast and delicious salad. Serve as a side salad or main course."
+    description = "A simple vinaigrette dressing coats a generous helping of tomatoes and diced onions on top of a " \
+                  "bed of fresh lettuce to create a fast and delicious salad. Serve as a side salad or main course. "
     category = "30-Min Meals"
-    db.execute('INSERT INTO recipe (title, description, category) VALUES (?,?,?)', (title, description, category))
-    db.commit()
+    db.execute('INSERT INTO recipes (title, content, category, user_id,posted_date) VALUES (?,?,?,?,?)', (title, description, category, 'admin', today))
 
-
-def add_recipe_of_the_day():
-    db = get_db()
-    today = date.today()
-    d1 = today.strftime("%d/%m/%Y")
-    db.execute('INSERT INTO calendar (date, recipe_id) VALUES (?,?)', (d1, 1))
+    db.execute('INSERT INTO calendar (date_today, recipe_id) VALUES (?,?)', (today.strftime('%m/%d/%Y'), 1))
     db.commit()
 
 
@@ -192,51 +187,40 @@ def post_recipe():
 
 @app.route('/view_recipe')
 def view_recipe():
-    if session['user_id'] is None:
-        flash('You are not allowed to view a recipe')
-        return redirect(url_for('HomePage'))
     db = get_db()
     current_user = session['user_id']
     cur = db.execute('SELECT COUNT(1) FROM like_recipe WHERE user_id=? AND recipe_id=?',
                      [session['user_id'], request.args.get('recipe_id')])
     whether_liked = cur.fetchone()[0]
+    recipe_id = request.args.get('recipe_id')
+    if request.args.get('recipe') == 'recipe_of_the_day':
+        today = date.today().strftime('%m/%d/%Y')
+        recipe_id_today = db.execute('SELECT recipe_id FROM calendar WHERE date_today=?', [today])
+        recipe_id = recipe_id_today.fetchone()[0]
+
+    cur2 = db.execute('SELECT * FROM recipes WHERE id=?',
+                      [recipe_id])
+    whether_exist = cur2.fetchone()[0]
+    if whether_exist == 0:
+        flash('The recipe has been deleted.')
+        return redirect(url_for('notifications'))
 
     # route if the user clicked on recipe of the day, recipe should show up according to the date
-    if request.args.get('recipe') == 'recipe_of_the_day':
-        recipe_id_today = db.execute('SELECT recipe_id FROM calendar WHERE date_today=?', [date.today()])
-        recipe_today = db.execute('SELECT title, category, content, likes, review FROM recipes WHERE id=?',
-                                  [recipe_id_today])
-        rev = db.execute('SELECT likes, review FROM reviews WHERE recipe_id=?', [recipe_id_today])
-        recipe = recipe_today.fetchone()
-        reviews = rev.fetchall()
-        return render_template('ViewRecipe.html', recipe=recipe, reviews=reviews, liked=whether_liked,
-                               current_user=current_user)
-    # route if user clicked on a recipe (not through recipe of the day)
-    else:
-        cur2 = db.execute('SELECT COUNT(1) FROM recipes WHERE id=?',
-                          [request.args.get('recipe_id')])
-        whether_exist = cur2.fetchone()[0]
-        if whether_exist == 0:
-            flash('The recipe has been deleted.')
-            return redirect(url_for('notifications'))
-        else:
-            rec = db.execute('SELECT id, title, category, content, likes, user_id FROM recipes WHERE id=?',
-                             [request.args.get('recipe_id')])
-            recipe = rec.fetchone()
-            rev = db.execute('SELECT recipe_id, user_id, review FROM reviews WHERE recipe_id=?',
-                             [request.args.get('recipe_id')])
-            reviews = rev.fetchall()
-            tag_recipe = db.execute(
-                'SELECT tag_name.tag_name FROM recipes JOIN tags ON recipes.id=tags.recipe_id JOIN tag_name ON tags.tag_id=tag_name.tag_id WHERE recipes.id=?',
-                [request.args.get('recipe_id')])
-            tag_recipes = tag_recipe.fetchall()
-            recipe_image = db.execute('SELECT image FROM recipe_image WHERE recipe_id=?',
-                                      [request.args.get('recipe_id')])
-            recipe_images = recipe_image.fetchone()
-            return render_template('ViewRecipe.html', recipe=recipe, reviews=reviews, liked=whether_liked,
-                                   current_user=current_user, tag_recipes=tag_recipes, recipe_images=recipe_images)
-
-
+    rec = db.execute('SELECT id, title, category, content, likes, user_id FROM recipes WHERE id=?',
+                     [recipe_id])
+    recipe = rec.fetchone()
+    rev = db.execute('SELECT recipe_id, user_id, review FROM reviews WHERE recipe_id=?',
+                     [recipe_id])
+    reviews = rev.fetchall()
+    tag_recipe = db.execute(
+        'SELECT tag_name.tag_name FROM recipes JOIN tags ON recipes.id=tags.recipe_id JOIN tag_name ON tags.tag_id=tag_name.tag_id WHERE recipes.id=?',
+        [recipe_id])
+    tag_recipes = tag_recipe.fetchall()
+    recipe_image = db.execute('SELECT image FROM recipe_image WHERE recipe_id=?',
+                              [recipe_id])
+    recipe_images = recipe_image.fetchone()
+    return render_template('ViewRecipe.html', recipe=recipe, reviews=reviews, liked=whether_liked,
+                           current_user=current_user, tag_recipes=tag_recipes, recipe_images=recipe_images)
 @app.route('/like_recipe', methods=['POST'])
 def like_recipe():
     db = get_db()
