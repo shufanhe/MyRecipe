@@ -1,7 +1,7 @@
 {% extends "layout.html" %}
 {% block body %}
   <div class="container w-75">
-    <form action="{{ url_for('post_recipe') }}" method="post" class="post-recipe">
+    <form action="{{ url_for('post_recipe') }}" method="post" class="post-recipe" enctype="multipart/form-data">
       <dl>
           <dt><label for="titleInput" class="form-label">Title:</label>
               <dd><input type="text" class="form-control" id="titleInput" name="title" required>
@@ -15,10 +15,9 @@
           {% endfor %}
           <dt><label for="textareaInput" class="form-label">Text:</label>
               <dd><textarea name="content" class="form-control" id="textareaInput" rows="5" cols="40" required></textarea>
-          <dt><button type="submit" class="btn btn-dark mb-3">Post</button>
-          <label for="recipe-image">
-                <input type="file" id="image-recipe" name="image-recipe" accept="image/png, image/jpeg">
-          </label>
+          <dt><label for="file" class="form-label">Upload Your Recipe Picture</label>
+              <dd><input type=file name=file>
+          <dt><button type="submit" class="btn btn-dark mb-3" value=Upload>Post</button>
       </dl>
     </form>
   </div>

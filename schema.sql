@@ -90,8 +90,7 @@ CREATE TABLE save_author (
 CREATE TABLE if not exists calendar(
     date_today TEXT PRIMARY KEY,
     recipe_id integer not null,
-    cover varbinary not null,
-    FOREIGN KEY(recipe_id) REFERENCES recipes(id) ON UPDATE CASCADE ON DELETE RESTRICT
+    FOREIGN KEY(recipe_id) REFERENCES recipes(id)
 );
 
 CREATE TABLE if not exists tag_name(
@@ -111,4 +110,11 @@ CREATE TABLE if not exists tags(
     tag_id INTEGER NOT NULL,
     FOREIGN KEY(recipe_id) REFERENCES recipes(id),
     FOREIGN KEY(tag_id) REFERENCES tag_name(tag_id)
+);
+
+CREATE TABLE IF NOT EXISTS recipe_image (
+  recipe_id INTEGER NOT NULL,
+  image TEXT NOT NULL,
+  FOREIGN KEY(recipe_id) REFERENCES recipes(id)
+
 );

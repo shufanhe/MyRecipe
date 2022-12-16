@@ -10,6 +10,9 @@
             <p>Category: {{recipe.category}}</p>
             <p>Created by <a href="{{ url_for('user_account', author = recipe.user_id) }}">{{recipe.user_id}}</a></p>
             <p class="fs-5">{{recipe.content}}</p>
+            <label for="image">
+                <img src="{{ url_for('static', filename=recipe_images.image) }}" alt="recipe image" width="200" height="200">
+            </label>
         </form>
         <div class="btn-group">
             {% if recipe.user_id != session.user_id %}

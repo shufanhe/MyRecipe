@@ -55,6 +55,8 @@ def initdb_command():
     init_db()
     # make a new admin user
     adminUser()
+    add_recipe()
+    add_recipe_of_the_day()
     print('Initialized the database.')
 
 
@@ -89,8 +91,32 @@ def adminUser():
     db.commit()
 
 
-def recipe():
+def add_recipe():
     db = get_db()
+    title = "Spiral Vegetable Tart"
+    description = "Thin slices of carrots, zucchini, and yellow squash are rolled together into a spiral on top a " \
+                  "savory homemade crust to create a gorgeous and nutritious entree. Feel free to substitute or " \
+                  "include other vegetables that are in season, such as beets, butternut squash, parsnips, eggplant, " \
+                  "purple carrots, or even tomatoes. "
+    category = "Italian"
+    db.execute('INSERT INTO recipe (title, description, category) VALUES (?,?,?)', (title, description, category))
+    title = "Pasta with Roasted Vegetables"
+    description = "This is a great way to use up any leftover vegetables in your fridge. The vegetables are roasted "
+    category = "Italian"
+    db.execute('INSERT INTO recipe (title, description, category) VALUES (?,?,?)', (title, description, category))
+    title = "Marinated Cherry Tomato Salad"
+    description = "A simple vinaigrette dressing coats a generous helping of tomatoes and diced onions on top of a bed of fresh lettuce to create a fast and delicious salad. Serve as a side salad or main course."
+    category = "30-Min Meals"
+    db.execute('INSERT INTO recipe (title, description, category) VALUES (?,?,?)', (title, description, category))
+    db.commit()
+
+
+def add_recipe_of_the_day():
+    db = get_db()
+    today = date.today()
+    d1 = today.strftime("%d/%m/%Y")
+    db.execute('INSERT INTO calendar (date, recipe_id) VALUES (?,?)', (d1, 1))
+    db.commit()
 
 
 @app.route('/')
@@ -139,7 +165,7 @@ def post_recipe():
     content = request.form['content']
     tag_id = request.form.getlist('tag_id')
     date_today = str(date.today())
-
+    file = request.files['file']
     # take user input and insert into the database
     cur = db.execute('INSERT INTO recipes (user_id, title, category, content, posted_date) VALUES (?, ?, ?, ?, ?)',
                      [user, title, category, content, date_today])
@@ -147,6 +173,16 @@ def post_recipe():
     for tag in tag_id:
         db.execute('INSERT INTO tags (tag_id, recipe_id) VALUES (?, ?)',
                    [tag, new_recipe_id])
+    if file.filename != '':
+        if allowed_file(file.filename):
+            new_file = str(session['user_id']) + '_recipe.' + file.filename.split('.')[1]
+            secured_filename = secure_filename(new_file)
+            file.save(os.path.join(app.config['UPLOAD_FOLDER'], secured_filename))
+            db.execute('INSERT INTO recipe_image (image, recipe_id) VALUES (?,?)', [secured_filename, new_recipe_id])
+            db.commit()
+        else:
+            flash("Unable to upload image! Wrong file format.")
+            return redirect(url_for('create_recipe'))
     db.commit()
     flash('New recipe successfully posted!')
     return redirect(url_for('HomePage'))
@@ -162,6 +198,7 @@ def view_recipe():
     cur = db.execute('SELECT COUNT(1) FROM like_recipe WHERE user_id=? AND recipe_id=?',
                      [session['user_id'], request.args.get('recipe_id')])
     whether_liked = cur.fetchone()[0]
+
     # route if the user clicked on recipe of the day, recipe should show up according to the date
     if request.args.get('recipe') == 'recipe_of_the_day':
         recipe_id_today = db.execute('SELECT recipe_id FROM calendar WHERE date_today=?', [date.today()])
@@ -191,8 +228,11 @@ def view_recipe():
                 'SELECT tag_name.tag_name FROM recipes JOIN tags ON recipes.id=tags.recipe_id JOIN tag_name ON tags.tag_id=tag_name.tag_id WHERE recipes.id=?',
                 [request.args.get('recipe_id')])
             tag_recipes = tag_recipe.fetchall()
+            recipe_image = db.execute('SELECT image FROM recipe_image WHERE recipe_id=?',
+                                      [request.args.get('recipe_id')])
+            recipe_images = recipe_image.fetchone()
             return render_template('ViewRecipe.html', recipe=recipe, reviews=reviews, liked=whether_liked,
-                                   current_user=current_user, tag_recipes=tag_recipes)
+                                   current_user=current_user, tag_recipes=tag_recipes, recipe_images=recipe_images)
 
 
 @app.route('/like_recipe', methods=['POST'])
